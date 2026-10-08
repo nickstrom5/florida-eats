@@ -8,8 +8,9 @@ website links.
 Update this file after a data refresh.
 
 ## Name (30 max)
-`Florida Eats: Restaurants` (25). Nick's pick, 2026-10-07. Home Screen: `FL Eats`. USPTO check still to do: "EAT LOCAL FLORIDA" is a
-registered mark for a restaurant guide website (different wording; worth a look before launch).
+`Florida Eats: Restaurants` (25). Nick's pick, 2026-10-07. Home Screen: `FL Eats`.
+USPTO lookup (tmsearch.uspto.gov, 2026-10-08; a lookup, not legal advice): no FLORIDA EATS mark, live or dead. Nearest live marks:
+EATS (Eats, LLC, serial 98881115; classes 30, 35, 43) and EAT LOCAL FLORIDA (serial 88317776; class 35, a restaurant guide website).
 
 ## Subtitle (30 max)
 `Cuban, Seafood & More` (21). Nick's pick.

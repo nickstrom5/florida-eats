@@ -1,10 +1,14 @@
-# Launch steps (each one needs Nick's explicit yes; none has been done)
+# Launch steps (each one needs Nick's explicit yes)
 
-## 0. Before anything public: the name
-"Florida Eats" is Nick's pick. Search USPTO (tmsearch.uspto.gov) for FLORIDA EATS in classes 9, 35, 39 and 43. "EAT LOCAL FLORIDA" is a
-registered mark for a restaurant guide website: different wording, but take a look before launch.
+Done 2026-10-08 with Nick's yes: the USPTO lookup (step 0), the public repo and Pages (step 1), the hub entry (step 3) and a signed
+archive (step 5, not uploaded). Still to do: the Cloudflare record (step 2, Nick), the App Store Connect record (step 4, Nick), the
+App Store export and TestFlight upload (step 5, after the record exists and Nick's yes).
 
-## 1. Public website repo + GitHub Pages
+## 0. Before anything public: the name (done 2026-10-08)
+"Florida Eats" is Nick's pick. tmsearch.uspto.gov shows no FLORIDA EATS mark, live or dead. Nearest live marks: EATS (serial 98881115)
+and EAT LOCAL FLORIDA (serial 88317776, a restaurant guide website). See `06-app-store-listing.md`.
+
+## 1. Public website repo + GitHub Pages (done 2026-10-08: https://github.com/nickstrom5/florida-eats, site live)
 Only `docs/`, the app source, scripts and playbook go public. `.gitignore` keeps out `data/` (DBPR files, research, the Google 2021
 snapshot), `site/` (the Google-derived leaderboard), build output, every `DerivedData*` folder and the generated Xcode project. Run `git status`
 before the first commit to confirm.
@@ -32,7 +36,7 @@ gh repo edit nickstrom5/florida-eats --homepage https://florida.eatsranked.com/
 The app's links (`FloridaEats/App/Links.swift`) stay github.io for build 1 (GitHub forwards them); switch them in the next update.
 Change the website line in `13-app-review-reply.md` too.
 
-## 3. eatsranked.com hub
+## 3. eatsranked.com hub (done 2026-10-08, eatsranked commit d75192b)
 `playbook/hub/`: the Florida entry and icon for `../eatsranked/`, with the steps.
 
 ## 4. App Store Connect (Nick creates the record in the web UI; the API can't)
@@ -47,6 +51,8 @@ Change the website line in `13-app-review-reply.md` too.
 - Promotional text: switch to the stone crab season line on Oct 15 (no review needed).
 
 ## 5. Archive and upload (public Xcode only)
+Archive built 2026-10-08: `build/FloridaEats.xcarchive`, DTXcodeBuild 27A266a, 1.0.0 (1), team 4C8TU6U7MQ (development-signed; the
+export below re-signs it for the App Store and registers the App ID `com.floridaeats.ios` if it isn't yet).
 ```bash
 cd fl-eats && xcodegen generate   # from the claudecode folder
 DEVELOPER_DIR="/Applications/Xcode 1.app/Contents/Developer" xcodebuild archive -project FloridaEats.xcodeproj -scheme FloridaEats \
