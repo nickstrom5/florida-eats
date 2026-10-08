@@ -1,0 +1,695 @@
+{
+ "generated": "2026-10-07",
+ "domain": "https://nickstrom5.github.io/florida-eats",
+ "restaurants": 52790,
+ "places_incl_hidden": 57566,
+ "towns": 581,
+ "counties": 67,
+ "dbpr_licensed": 49157,
+ "hand_checked_on_a_guide": 260,
+ "guide_cuban": 58,
+ "guide_stonecrab": 28,
+ "guide_grouper": 52,
+ "guide_keys": 32,
+ "guide_oyster": 69,
+ "guide_fishcamp": 41,
+ "guide_latin": 40,
+ "oldest": 17,
+ "honors": 217,
+ "michelin": {
+  "MICHELIN Recommended": 128,
+  "Bib Gourmand": 45,
+  "1 MICHELIN Star": 24,
+  "2 MICHELIN Stars": 2
+ },
+ "michelin_green_star": 5,
+ "james_beard": 39,
+ "americas_classics": 2,
+ "dbpr_results": 49128,
+ "dbpr_latest_group": {
+  "Met Inspection Standards": 44394,
+  "Follow-Up Inspection Required": 4718,
+  "Facility Temporarily Closed": 15,
+  "not grouped by DBPR": 1
+ },
+ "dbpr_latest_disposition": {
+  "Inspection Completed - No Further Action": 36803,
+  "Call Back - Complied": 7339,
+  "Administrative complaint recommended": 1942,
+  "Warning Issued": 1446,
+  "Call Back - Admin. complaint recommended": 981,
+  "Call Back - Extension given, pending": 328,
+  "Emergency Order Callback Complied": 252,
+  "Emergency Order Callback Time Extension": 21,
+  "Emergency Order Callback Not Complied": 7,
+  "Emergency order recommended": 6,
+  "Administrative determination recommended": 2,
+  "Insp. Completed - Warning Given, Pending": 1
+ },
+ "inspections_through": "2026-09-30",
+ "dbpr_fetched": "2026-10-07",
+ "inspections_since": "2023-07-01",
+ "emergency_closure_places": 763,
+ "closure_reports": [
+  "2025-12-29",
+  "2026-09-30"
+ ],
+ "city_pages": {
+  "Miami": {
+   "restaurants": 3436,
+   "listed": 66,
+   "cuban": 16,
+   "stonecrab": 3,
+   "grouper": 0,
+   "keys": 0,
+   "oyster": 2,
+   "fishcamp": 0,
+   "latin": 10,
+   "hon": 40,
+   "oldest": 0,
+   "dbpr_results": 3240,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 2971,
+    "Follow-Up Inspection Required": 268,
+    "Facility Temporarily Closed": 1
+   }
+  },
+  "Miami Beach": {
+   "restaurants": 726,
+   "listed": 18,
+   "cuban": 3,
+   "stonecrab": 1,
+   "grouper": 0,
+   "keys": 1,
+   "oyster": 0,
+   "fishcamp": 0,
+   "latin": 2,
+   "hon": 13,
+   "oldest": 1,
+   "dbpr_results": 661,
+   "dbpr_by_group": {
+    "Follow-Up Inspection Required": 68,
+    "Met Inspection Standards": 593
+   }
+  },
+  "Tampa": {
+   "restaurants": 2233,
+   "listed": 41,
+   "cuban": 9,
+   "stonecrab": 0,
+   "grouper": 0,
+   "keys": 0,
+   "oyster": 1,
+   "fishcamp": 0,
+   "latin": 3,
+   "hon": 28,
+   "oldest": 2,
+   "dbpr_results": 2037,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 1889,
+    "Follow-Up Inspection Required": 147,
+    "Facility Temporarily Closed": 1
+   }
+  },
+  "Orlando": {
+   "restaurants": 3540,
+   "listed": 55,
+   "cuban": 2,
+   "stonecrab": 0,
+   "grouper": 0,
+   "keys": 0,
+   "oyster": 1,
+   "fishcamp": 0,
+   "latin": 2,
+   "hon": 50,
+   "oldest": 1,
+   "dbpr_results": 3285,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 3117,
+    "Follow-Up Inspection Required": 168
+   }
+  },
+  "Jacksonville": {
+   "restaurants": 2204,
+   "listed": 13,
+   "cuban": 4,
+   "stonecrab": 0,
+   "grouper": 0,
+   "keys": 0,
+   "oyster": 1,
+   "fishcamp": 2,
+   "latin": 3,
+   "hon": 3,
+   "oldest": 1,
+   "dbpr_results": 2073,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 1628,
+    "Follow-Up Inspection Required": 440,
+    "Facility Temporarily Closed": 5
+   }
+  },
+  "St. Petersburg": {
+   "restaurants": 820,
+   "listed": 13,
+   "cuban": 1,
+   "stonecrab": 2,
+   "grouper": 2,
+   "keys": 0,
+   "oyster": 2,
+   "fishcamp": 2,
+   "latin": 0,
+   "hon": 6,
+   "oldest": 1,
+   "dbpr_results": 714,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 648,
+    "Follow-Up Inspection Required": 66
+   }
+  },
+  "Fort Lauderdale": {
+   "restaurants": 1039,
+   "listed": 9,
+   "cuban": 0,
+   "stonecrab": 1,
+   "grouper": 0,
+   "keys": 1,
+   "oyster": 1,
+   "fishcamp": 1,
+   "latin": 0,
+   "hon": 6,
+   "oldest": 1,
+   "dbpr_results": 956,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 871,
+    "Follow-Up Inspection Required": 85
+   }
+  },
+  "Key West": {
+   "restaurants": 382,
+   "listed": 13,
+   "cuban": 3,
+   "stonecrab": 0,
+   "grouper": 1,
+   "keys": 9,
+   "oyster": 4,
+   "fishcamp": 2,
+   "latin": 0,
+   "hon": 2,
+   "oldest": 1,
+   "dbpr_results": 315,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 298,
+    "Follow-Up Inspection Required": 17
+   }
+  },
+  "Sarasota": {
+   "restaurants": 854,
+   "listed": 8,
+   "cuban": 1,
+   "stonecrab": 0,
+   "grouper": 1,
+   "keys": 0,
+   "oyster": 3,
+   "fishcamp": 1,
+   "latin": 0,
+   "hon": 3,
+   "oldest": 1,
+   "dbpr_results": 773,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 702,
+    "Follow-Up Inspection Required": 71
+   }
+  },
+  "Naples": {
+   "restaurants": 878,
+   "listed": 6,
+   "cuban": 1,
+   "stonecrab": 2,
+   "grouper": 3,
+   "keys": 0,
+   "oyster": 1,
+   "fishcamp": 0,
+   "latin": 0,
+   "hon": 2,
+   "oldest": 0,
+   "dbpr_results": 834,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 783,
+    "Follow-Up Inspection Required": 51
+   }
+  },
+  "Pensacola": {
+   "restaurants": 696,
+   "listed": 5,
+   "cuban": 0,
+   "stonecrab": 0,
+   "grouper": 0,
+   "keys": 0,
+   "oyster": 4,
+   "fishcamp": 0,
+   "latin": 0,
+   "hon": 1,
+   "oldest": 0,
+   "dbpr_results": 637,
+   "dbpr_by_group": {
+    "Follow-Up Inspection Required": 30,
+    "Met Inspection Standards": 607
+   }
+  },
+  "St. Augustine": {
+   "restaurants": 543,
+   "listed": 14,
+   "cuban": 3,
+   "stonecrab": 0,
+   "grouper": 0,
+   "keys": 0,
+   "oyster": 4,
+   "fishcamp": 2,
+   "latin": 3,
+   "hon": 4,
+   "oldest": 0,
+   "dbpr_results": 502,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 434,
+    "Follow-Up Inspection Required": 68
+   }
+  },
+  "West Palm Beach": {
+   "restaurants": 663,
+   "listed": 7,
+   "cuban": 1,
+   "stonecrab": 0,
+   "grouper": 0,
+   "keys": 0,
+   "oyster": 0,
+   "fishcamp": 0,
+   "latin": 0,
+   "hon": 6,
+   "oldest": 0,
+   "dbpr_results": 629,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 536,
+    "Follow-Up Inspection Required": 93
+   }
+  },
+  "Apalachicola": {
+   "restaurants": 23,
+   "listed": 6,
+   "cuban": 1,
+   "stonecrab": 0,
+   "grouper": 1,
+   "keys": 0,
+   "oyster": 4,
+   "fishcamp": 1,
+   "latin": 1,
+   "hon": 0,
+   "oldest": 0,
+   "dbpr_results": 17,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 15,
+    "Follow-Up Inspection Required": 2
+   }
+  },
+  "Kissimmee": {
+   "restaurants": 795,
+   "listed": 9,
+   "cuban": 2,
+   "stonecrab": 0,
+   "grouper": 0,
+   "keys": 0,
+   "oyster": 0,
+   "fishcamp": 0,
+   "latin": 8,
+   "hon": 0,
+   "oldest": 0,
+   "dbpr_results": 760,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 723,
+    "Follow-Up Inspection Required": 37
+   }
+  },
+  "Coral Gables": {
+   "restaurants": 261,
+   "listed": 8,
+   "cuban": 2,
+   "stonecrab": 0,
+   "grouper": 0,
+   "keys": 0,
+   "oyster": 0,
+   "fishcamp": 0,
+   "latin": 0,
+   "hon": 7,
+   "oldest": 0,
+   "dbpr_results": 246,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 229,
+    "Follow-Up Inspection Required": 17
+   }
+  },
+  "Key Largo": {
+   "restaurants": 84,
+   "listed": 7,
+   "cuban": 0,
+   "stonecrab": 2,
+   "grouper": 0,
+   "keys": 7,
+   "oyster": 0,
+   "fishcamp": 0,
+   "latin": 0,
+   "hon": 0,
+   "oldest": 0,
+   "dbpr_results": 80,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 76,
+    "Follow-Up Inspection Required": 4
+   }
+  },
+  "Winter Park": {
+   "restaurants": 265,
+   "listed": 7,
+   "cuban": 1,
+   "stonecrab": 0,
+   "grouper": 0,
+   "keys": 0,
+   "oyster": 0,
+   "fishcamp": 0,
+   "latin": 0,
+   "hon": 6,
+   "oldest": 0,
+   "dbpr_results": 248,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 238,
+    "Follow-Up Inspection Required": 10
+   }
+  },
+  "Destin": {
+   "restaurants": 197,
+   "listed": 6,
+   "cuban": 0,
+   "stonecrab": 0,
+   "grouper": 4,
+   "keys": 0,
+   "oyster": 2,
+   "fishcamp": 1,
+   "latin": 0,
+   "hon": 1,
+   "oldest": 0,
+   "dbpr_results": 180,
+   "dbpr_by_group": {
+    "Met Inspection Standards": 170,
+    "Follow-Up Inspection Required": 10
+   }
+  }
+ },
+ "cities_without_a_page": {
+  "Tallahassee": 4,
+  "Gainesville": 1,
+  "Fort Myers": 2,
+  "Clearwater": 3,
+  "Daytona Beach": 0,
+  "Islamorada": 3
+ },
+ "noindex_pages": [],
+ "web_app_data_bytes": {
+  "data/core.json": {
+   "raw": 4740633,
+   "gzip": 968929
+  },
+  "data/detail-alachua.json": {
+   "raw": 201556,
+   "gzip": 36943
+  },
+  "data/detail-baker.json": {
+   "raw": 10736,
+   "gzip": 2418
+  },
+  "data/detail-bay.json": {
+   "raw": 195280,
+   "gzip": 35012
+  },
+  "data/detail-bradford.json": {
+   "raw": 11219,
+   "gzip": 2560
+  },
+  "data/detail-brevard.json": {
+   "raw": 476556,
+   "gzip": 85947
+  },
+  "data/detail-broward.json": {
+   "raw": 1529755,
+   "gzip": 275202
+  },
+  "data/detail-calhoun.json": {
+   "raw": 4714,
+   "gzip": 1158
+  },
+  "data/detail-charlotte.json": {
+   "raw": 138885,
+   "gzip": 24418
+  },
+  "data/detail-citrus.json": {
+   "raw": 94109,
+   "gzip": 16990
+  },
+  "data/detail-clay.json": {
+   "raw": 115201,
+   "gzip": 22079
+  },
+  "data/detail-collier.json": {
+   "raw": 335895,
+   "gzip": 60015
+  },
+  "data/detail-columbia.json": {
+   "raw": 42214,
+   "gzip": 8141
+  },
+  "data/detail-desoto.json": {
+   "raw": 15284,
+   "gzip": 3236
+  },
+  "data/detail-dixie.json": {
+   "raw": 6791,
+   "gzip": 1660
+  },
+  "data/detail-duval.json": {
+   "raw": 779063,
+   "gzip": 143880
+  },
+  "data/detail-escambia.json": {
+   "raw": 230542,
+   "gzip": 37251
+  },
+  "data/detail-flagler.json": {
+   "raw": 78973,
+   "gzip": 14952
+  },
+  "data/detail-franklin.json": {
+   "raw": 15308,
+   "gzip": 3794
+  },
+  "data/detail-gadsden.json": {
+   "raw": 16756,
+   "gzip": 3165
+  },
+  "data/detail-gilchrist.json": {
+   "raw": 5441,
+   "gzip": 1442
+  },
+  "data/detail-glades.json": {
+   "raw": 2506,
+   "gzip": 635
+  },
+  "data/detail-gulf.json": {
+   "raw": 15170,
+   "gzip": 3116
+  },
+  "data/detail-hamilton.json": {
+   "raw": 2486,
+   "gzip": 685
+  },
+  "data/detail-hardee.json": {
+   "raw": 11757,
+   "gzip": 2554
+  },
+  "data/detail-hendry.json": {
+   "raw": 21016,
+   "gzip": 4056
+  },
+  "data/detail-hernando.json": {
+   "raw": 115968,
+   "gzip": 20273
+  },
+  "data/detail-highlands.json": {
+   "raw": 65225,
+   "gzip": 12009
+  },
+  "data/detail-hillsborough.json": {
+   "raw": 1013209,
+   "gzip": 184827
+  },
+  "data/detail-holmes.json": {
+   "raw": 5785,
+   "gzip": 1261
+  },
+  "data/detail-indian-river.json": {
+   "raw": 120051,
+   "gzip": 22231
+  },
+  "data/detail-jackson.json": {
+   "raw": 24669,
+   "gzip": 4501
+  },
+  "data/detail-jefferson.json": {
+   "raw": 5608,
+   "gzip": 1347
+  },
+  "data/detail-lafayette.json": {
+   "raw": 1630,
+   "gzip": 538
+  },
+  "data/detail-lake.json": {
+   "raw": 245303,
+   "gzip": 45775
+  },
+  "data/detail-lee.json": {
+   "raw": 586611,
+   "gzip": 103410
+  },
+  "data/detail-leon.json": {
+   "raw": 213585,
+   "gzip": 37395
+  },
+  "data/detail-levy.json": {
+   "raw": 25426,
+   "gzip": 5251
+  },
+  "data/detail-liberty.json": {
+   "raw": 459,
+   "gzip": 209
+  },
+  "data/detail-madison.json": {
+   "raw": 5269,
+   "gzip": 1190
+  },
+  "data/detail-manatee.json": {
+   "raw": 289404,
+   "gzip": 52345
+  },
+  "data/detail-marion.json": {
+   "raw": 201078,
+   "gzip": 37456
+  },
+  "data/detail-martin.json": {
+   "raw": 145433,
+   "gzip": 26166
+  },
+  "data/detail-miami-dade.json": {
+   "raw": 2166203,
+   "gzip": 391959
+  },
+  "data/detail-monroe.json": {
+   "raw": 200470,
+   "gzip": 37587
+  },
+  "data/detail-nassau.json": {
+   "raw": 74549,
+   "gzip": 14285
+  },
+  "data/detail-okaloosa.json": {
+   "raw": 200921,
+   "gzip": 32215
+  },
+  "data/detail-okeechobee.json": {
+   "raw": 25852,
+   "gzip": 5072
+  },
+  "data/detail-orange.json": {
+   "raw": 1412723,
+   "gzip": 248639
+  },
+  "data/detail-osceola.json": {
+   "raw": 297076,
+   "gzip": 53060
+  },
+  "data/detail-palm-beach.json": {
+   "raw": 1144687,
+   "gzip": 206178
+  },
+  "data/detail-pasco.json": {
+   "raw": 333246,
+   "gzip": 59362
+  },
+  "data/detail-pinellas.json": {
+   "raw": 864533,
+   "gzip": 161800
+  },
+  "data/detail-polk.json": {
+   "raw": 387435,
+   "gzip": 64839
+  },
+  "data/detail-putnam.json": {
+   "raw": 36535,
+   "gzip": 7353
+  },
+  "data/detail-santa-rosa.json": {
+   "raw": 88029,
+   "gzip": 14215
+  },
+  "data/detail-sarasota.json": {
+   "raw": 377387,
+   "gzip": 68438
+  },
+  "data/detail-seminole.json": {
+   "raw": 334400,
+   "gzip": 61656
+  },
+  "data/detail-st-johns.json": {
+   "raw": 258896,
+   "gzip": 48306
+  },
+  "data/detail-st-lucie.json": {
+   "raw": 193023,
+   "gzip": 34762
+  },
+  "data/detail-sumter.json": {
+   "raw": 72386,
+   "gzip": 13510
+  },
+  "data/detail-suwannee.json": {
+   "raw": 20281,
+   "gzip": 4060
+  },
+  "data/detail-taylor.json": {
+   "raw": 9340,
+   "gzip": 1988
+  },
+  "data/detail-union.json": {
+   "raw": 2816,
+   "gzip": 821
+  },
+  "data/detail-volusia.json": {
+   "raw": 456749,
+   "gzip": 86405
+  },
+  "data/detail-wakulla.json": {
+   "raw": 17023,
+   "gzip": 4134
+  },
+  "data/detail-walton.json": {
+   "raw": 122746,
+   "gzip": 20159
+  },
+  "data/detail-washington.json": {
+   "raw": 12336,
+   "gzip": 2324
+  },
+  "data/fl_shapes.json": {
+   "raw": 293505,
+   "gzip": 67943
+  },
+  "data/ids.json": {
+   "raw": 791851,
+   "gzip": 417393
+  }
+ }
+}

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en" data-base="/florida-eats">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-BgJmbaINEQUFu7virxVOdfOaikMdCK8nl/GiBpr6iOc='; style-src 'sha256-Mnsxv+HXUWIqF26sZ7va49SqEF84pzvvTFR5EJkb7A4='; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Florida Eats: Cuban, Seafood &amp; Restaurant Guide App</title>
+<meta name="description" content="Free iPhone and iPad guide to 52,790 Florida restaurants, with hand-checked Cuban sandwiches, stone crabs, oyster bars and DBPR inspection results.">
+<link rel="canonical" href="https://nickstrom5.github.io/florida-eats/">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="theme-color" content="#006d77">
+<!-- Smart App Banner: once the App Store Connect record exists, replace APP_ID with the numeric Apple ID and uncomment.
+<meta name="apple-itunes-app" content="app-id=APP_ID">
+-->
+<meta property="og:title" content="Florida Eats: Cuban, Seafood &amp; Restaurant Guide App">
+<meta property="og:description" content="Free iPhone and iPad guide to 52,790 Florida restaurants, with hand-checked Cuban sandwiches, stone crabs, oyster bars and DBPR inspection results.">
+<meta property="og:url" content="https://nickstrom5.github.io/florida-eats/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Florida Eats">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://nickstrom5.github.io/florida-eats/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Florida Eats: Cuban, seafood &amp; more. Florida restaurants, with hand-checked Cuban sandwiches, stone crabs, oyster bars and the state&#x27;s oldest places.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Florida Eats: Cuban, Seafood &amp; Restaurant Guide App">
+<meta name="twitter:description" content="Free iPhone and iPad guide to 52,790 Florida restaurants, with hand-checked Cuban sandwiches, stone crabs, oyster bars and DBPR inspection results.">
+<meta name="twitter:image" content="https://nickstrom5.github.io/florida-eats/og.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3CclipPath id='lg-r'%3E%3Crect width='64' height='64' rx='14'/%3E%3C/clipPath%3E%3CclipPath id='lg-f'%3E%3Cpath d='M-.02-.18C.18-.19.37-.12.42-.015C.40.012.35-.02.31-.035C.21-.05.10-.03.02-.005Z'/%3E%3Cpath d='M-.06.18C.15.23.37.15.42.035C.41.012.35.035.31.05C.21.07.10.06.02.045Z'/%3E%3C/clipPath%3E%3CclipPath id='lg-p'%3E%3Cellipse cx='-.14' cy='0' rx='.26' ry='.2'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23lg-r)'%3E%3Crect width='64' height='64' fill='%23006D77'/%3E%3Cg transform='matrix(1 0 0 -1 0 64)'%3E%3Cpath d='M0 0V8.96C10.24 13.44 21.76 13.44 32 8.96C42.24 4.48 53.76 4.48 64 8.96V0Z' fill='%230B7F89'/%3E%3Cg transform='translate(33.92 33.92) rotate(40.107) scale(65.28)'%3E%3Ccircle cx='-.4' cy='0' r='.1' fill='%23C4401A'/%3E%3Cg clip-path='url(%23lg-f)'%3E%3Crect x='-1' y='-1' width='2' height='2' fill='%23E8572A'/%3E%3Crect x='.25' y='-1' width='1' height='2' fill='%2317191A'/%3E%3C/g%3E%3Cg clip-path='url(%23lg-p)'%3E%3Crect x='-1' y='-1' width='2' height='2' fill='%23E8572A'/%3E%3Cpath d='M-.45-.08C-.24-.15 0-.15.16-.1V-.3H-.45Z' fill='%23F7E4C8'/%3E%3C/g%3E%3Cg fill='%23C4401A'%3E%3Ccircle cx='-.2' cy='.09' r='.024'/%3E%3Ccircle cx='-.07' cy='.11' r='.018'/%3E%3Ccircle cx='-.27' cy='.01' r='.016'/%3E%3Ccircle cx='.02' cy='.05' r='.015'/%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="32x32" href="/florida-eats/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/florida-eats/apple-touch-icon.png">
+<link rel="manifest" href="/florida-eats/site.webmanifest">
+<style>
+  :root {
+    --bg: #fbf5ea; --surface: #fff; --surface2: #f3ecdf; --rule: #e6dccb;
+    --ink: #0b3c49; --ink2: #24505c; --muted: #56676c;
+    --accent: #006d77; --accent2: #0b7f89; --on-accent: #fff; --orange: #f28c28; --lime: #b5d46a; --soft: #fde3c8; --limesoft: #e3efc4;
+    --focus: #006d77;
+    --radius: 16px;
+    --display: "Avenir Next Condensed", "HelveticaNeue-CondensedBold", "Arial Narrow", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0b1f26; --surface: #10303a; --surface2: #163b46; --rule: #24505c; --ink: #eaf4f4; --ink2: #cfe2e4; --muted: #a8c2c6; --accent: #7fd3da; --accent2: #9fdfe4; --on-accent: #0b1f26; --focus: #f28c28; }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent); text-underline-offset: 2px; }
+  a:focus-visible, summary:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+  .skip { position: absolute; left: -9999px; top: 0; background: var(--orange); color: #0b3c49; padding: 10px 14px; font-weight: 700; z-index: 10; }
+  .skip:focus { left: 8px; top: 8px; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+  header.site { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0; border-bottom: 4px solid var(--orange); box-shadow: 0 4px 0 var(--lime); }
+  .logo { display: flex; align-items: center; gap: 10px; font: 800 22px/1 var(--display); text-transform: uppercase; letter-spacing: .01em; color: var(--accent); text-decoration: none; }
+  .logo svg { flex: 0 0 auto; border-radius: 7px; }
+  header.site nav { display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: flex-end; }
+  header.site nav a { color: var(--ink2); text-decoration: none; font-size: 15px; }
+  header.site nav a:hover { color: var(--accent); text-decoration: underline; }
+  h1, h2 { font-family: var(--display); font-weight: 800; color: var(--accent); letter-spacing: -.005em; }
+  h1 { font-size: clamp(34px, 7.5vw, 54px); line-height: 1.04; margin: 0 0 16px; text-transform: uppercase; overflow-wrap: break-word; }
+  .kicker { font: 700 15px/1.4 -apple-system, system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+  h2 { font-size: 32px; line-height: 1.1; margin: 0 0 10px; }
+  h3 { font-size: 18px; margin: 0; line-height: 1.3; }
+  .lede { font-size: 19px; color: var(--ink2); margin: 0 0 26px; }
+  .hero { padding: 44px 0 28px; }
+  section { padding: 36px 0; border-top: 1px solid var(--rule); }
+  section.hero { border: 0; }
+  .sub { color: var(--ink2); margin: 0 0 22px; }
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; background: var(--orange); color: #0b3c49; font-weight: 700; padding: 14px 20px; border-radius: 14px; text-decoration: none; font-size: 17px; }
+  .btn-ghost { background: transparent; color: var(--accent); border: 2px solid var(--accent); }
+  .pill { font-size: 14px; color: var(--muted); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 28px 0 0; padding: 0; list-style: none; }
+  .stats li { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 14px; }
+  .stats b { display: block; font: 800 30px/1 var(--display); color: var(--accent); }
+  .stats span { font-size: 14px; color: var(--muted); }
+  .steps { display: grid; gap: 12px; list-style: none; margin: 0; padding: 0; }
+  .step { display: flex; gap: 14px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px; }
+  .step .n { flex: 0 0 32px; height: 32px; border-radius: 50%; background: var(--orange); color: #0b3c49; font-weight: 800; display: grid; place-items: center; }
+  .step p { margin: 4px 0 0; color: var(--ink2); }
+  .shots { display: flex; gap: 14px; overflow-x: auto; margin: 0 -20px; padding: 4px 20px 14px; scroll-snap-type: x proximity; list-style: none; }
+  .shots li { flex: 0 0 auto; width: 210px; scroll-snap-align: start; }
+  .shots img { display: block; width: 210px; height: auto; border-radius: 24px; border: 1px solid var(--rule); background: var(--surface2); }
+  .shots p { font-size: 14px; color: var(--muted); margin: 8px 2px 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .card { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px; }
+  .card p { margin: 6px 0 0; color: var(--ink2); }
+  a.card { display: block; text-decoration: none; color: var(--ink); }
+  a.card:hover h3 { text-decoration: underline; color: var(--accent); }
+  .cities { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 0; }
+  .cities a { display: inline-block; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--rule); background: var(--surface); text-decoration: none; color: var(--ink); font-size: 15px; }
+  .cities a:hover { border-color: var(--accent); }
+  .cities a[aria-current] { border-color: var(--accent); font-weight: 700; }
+  details { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 2px 18px; margin-bottom: 10px; }
+  summary { cursor: pointer; padding: 14px 0; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; color: var(--accent); font-weight: 800; }
+  details[open] summary::after { content: "\2013"; }
+  details p { margin: 0 0 16px; color: var(--ink2); }
+  .final { text-align: center; }
+  .final .cta-row { justify-content: center; }
+  nav.crumbs { font-size: 14px; color: var(--muted); padding: 16px 0 0; }
+  nav.crumbs ol { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  nav.crumbs li + li::before { content: "/"; margin-right: 6px; color: var(--rule); }
+  nav.crumbs a { color: var(--muted); }
+  .places { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .places li { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 14px 16px; min-width: 0; overflow-wrap: anywhere; scroll-margin-top: 12px; }
+  .places li:target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+  .places .where { margin: 2px 0 0; font-size: 15px; color: var(--muted); }
+  .places .facts { margin: 8px 0 0; font-size: 15px; color: var(--ink2); }
+  .places .facts b { color: var(--ink); font-weight: 600; }
+  .places .note { margin: 6px 0 0; font-size: 15px; color: var(--ink2); }
+  .places .fine { margin: 6px 0 0; }
+  .places .link { font-size: 14px; margin: 6px 0 0; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; background: var(--lime); color: #0b3c49; border-radius: 6px; padding: 1px 6px; margin: 0 4px 2px 0; }
+  .tag-mi { background: #0b3c49; color: #fff; }
+  .tag-jb { background: #006d77; color: #fff; }
+  .tag-plain { background: var(--soft); color: #0b3c49; }
+  .toc { columns: 2; padding-left: 20px; margin: 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+  .tbl { overflow-x: auto; }
+  .res { display: inline-block; font: 800 12px/1.4 -apple-system, system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; padding: 2px 6px; border-radius: 6px; }
+  .res-0 { background: #ddefe3; color: #0e5a2b; } .res-1 { background: #ffe9c2; color: #6b3a00; } .res-2 { background: #f9d5db; color: #7a0019; }
+  .groups { list-style: none; padding: 0; margin: 0 0 18px; display: grid; gap: 12px; }
+  .groups > li { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 14px 16px; }
+  .groups ul { margin: 8px 0 0; padding-left: 20px; color: var(--ink2); font-size: 15px; }
+  .groups .count { margin: 8px 0 0; font-weight: 600; }
+  .fine { font-size: 14px; color: var(--muted); }
+  .legal h2 { font-size: 26px; margin-top: 28px; }
+  .legal p, .legal li { color: var(--ink2); }
+  footer { padding: 32px 0 56px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--rule); margin-top: 20px; }
+  footer nav { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+  footer a { color: var(--muted); }
+  footer p { margin: 12px 0 0; }
+  @media (max-width: 600px) {
+    .grid2 { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .toc { columns: 1; }
+    header.site { flex-direction: column; align-items: flex-start; }
+    header.site nav { justify-content: flex-start; }
+    header.site nav a, footer nav a, nav.crumbs a { display: inline-block; padding: 10px 0; }
+    footer nav { gap: 0 18px; }
+    th, td { padding: 8px 4px; font-size: 14px; }
+    .tbl th, .tbl td { padding: 8px 3px; font-size: 13px; }
+    .res { font-size: 11px; letter-spacing: .02em; padding: 2px 4px; }
+    nav.crumbs ol { align-items: center; }
+  }
+</style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "MobileApplication",
+   "@id": "https://nickstrom5.github.io/florida-eats/#app",
+   "name": "Florida Eats: Restaurants",
+   "alternateName": [
+    "Florida Eats",
+    "FL Eats",
+    "Florida Eats: Cuban, Seafood \u0026 More"
+   ],
+   "description": "A free guide to 52,790 Florida restaurants, with hand-checked lists of Cuban sandwiches and cafecito, stone crabs, grouper and seafood shacks, Keys classics, oyster bars, fish camps, Latin and Caribbean food and the state's oldest places, 217 MICHELIN and James Beard honorees, and Florida DBPR's own inspection results. Sort by distance, open Apple Maps' live place card for hours and photos, and save places for your next trip.",
+   "url": "https://nickstrom5.github.io/florida-eats/",
+   "image": "https://nickstrom5.github.io/florida-eats/og.png",
+   "operatingSystem": "iOS, iPadOS",
+   "applicationCategory": "TravelApplication",
+   "applicationSubCategory": "Food \u0026 Drink",
+   "inLanguage": "en",
+   "publisher": {
+    "@id": "https://nickstrom5.github.io/florida-eats/#org"
+   }
+  },
+  {
+   "@type": "Organization",
+   "@id": "https://nickstrom5.github.io/florida-eats/#org",
+   "name": "Florida Eats",
+   "url": "https://nickstrom5.github.io/florida-eats/",
+   "logo": {
+    "@type": "ImageObject",
+    "url": "https://nickstrom5.github.io/florida-eats/icon-512.png",
+    "width": 512,
+    "height": 512
+   },
+   "email": "work-with-nick@gmail.com",
+   "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "customer support",
+    "email": "work-with-nick@gmail.com",
+    "availableLanguage": "en"
+   }
+  },
+  {
+   "@type": "WebSite",
+   "@id": "https://nickstrom5.github.io/florida-eats/#website",
+   "name": "Florida Eats",
+   "alternateName": [
+    "FL Eats",
+    "Florida Eats app"
+   ],
+   "url": "https://nickstrom5.github.io/florida-eats/",
+   "inLanguage": "en",
+   "publisher": {
+    "@id": "https://nickstrom5.github.io/florida-eats/#org"
+   }
+  }
+ ]
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "@id": "https://nickstrom5.github.io/florida-eats/#faq",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "Is Florida Eats free?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. The app is free, with no ads, no in-app purchases and no account. It's coming soon to the App Store; the web search works today."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Where do the lists come from?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "We checked the themed lists by hand in fall 2026: each place on the Cuban, stone crab, grouper, Keys, oyster bar, fish camp, Latin and oldest-places lists has a 2025 or 2026 source, such as its own website or menu, a dated local news story or an official tourism listing. The rest of the 52,790 restaurants come from the Florida Department of Business and Professional Regulation's list of current food service licenses (49,157 places) and Overture Maps' open place data, placed on the map with Overture's address points and the U.S. Census Bureau Geocoder."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Does the app show ratings and reviews?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Not its own. Tap a place and Apple Maps' own place card opens inside the app with Apple's current ratings, hours, photos and directions. Our lists are never ordered by ratings."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "What are the inspection results?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Florida's DBPR inspects licensed restaurants and publishes each visit's result. Florida doesn't grade restaurants (in DBPR's words, “establishments are not graded or rated”), and neither do we: the app shows DBPR's own result group for the latest visit (Met Inspection Standards, Follow-Up Inspection Required or Facility Temporarily Closed), DBPR's disposition and the date, with DBPR's violation counts. Records through September 30, 2026."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "When is stone crab season?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "October 15 to May 1, set by the Florida Fish and Wildlife Conservation Commission. Out of season, the places on our stone crab list are open; the claws just aren't on the menu."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Does it need my location?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Only if you want lists sorted by distance. Your location stays on your iPhone or iPad and is never sent to us. Everything else works without it. On the website, Near me uses your location only inside your browser."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "A place closed or is missing. How do I tell you?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Email work-with-nick@gmail.com with the name and town. Corrections go into the next update."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Is there an Android version?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Not yet. Florida Eats is for iPhone and iPad. If enough people ask at work-with-nick@gmail.com, it moves up the list."
+   }
+  }
+ ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+  <header class="site">
+    <a class="logo" href="/florida-eats/" aria-label="Florida Eats home"><svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true"><defs><clipPath id="lg-r"><rect width="64" height="64" rx="14"/></clipPath><clipPath id="lg-f"><path d="M-.02-.18C.18-.19.37-.12.42-.015C.40.012.35-.02.31-.035C.21-.05.10-.03.02-.005Z"/><path d="M-.06.18C.15.23.37.15.42.035C.41.012.35.035.31.05C.21.07.10.06.02.045Z"/></clipPath><clipPath id="lg-p"><ellipse cx="-.14" cy="0" rx=".26" ry=".2"/></clipPath></defs><g clip-path="url(#lg-r)"><rect width="64" height="64" fill="#006D77"/><g transform="matrix(1 0 0 -1 0 64)"><path d="M0 0V8.96C10.24 13.44 21.76 13.44 32 8.96C42.24 4.48 53.76 4.48 64 8.96V0Z" fill="#0B7F89"/><g transform="translate(33.92 33.92) rotate(40.107) scale(65.28)"><circle cx="-.4" cy="0" r=".1" fill="#C4401A"/><g clip-path="url(#lg-f)"><rect x="-1" y="-1" width="2" height="2" fill="#E8572A"/><rect x=".25" y="-1" width="1" height="2" fill="#17191A"/></g><g clip-path="url(#lg-p)"><rect x="-1" y="-1" width="2" height="2" fill="#E8572A"/><path d="M-.45-.08C-.24-.15 0-.15.16-.1V-.3H-.45Z" fill="#F7E4C8"/></g><g fill="#C4401A"><circle cx="-.2" cy=".09" r=".024"/><circle cx="-.07" cy=".11" r=".018"/><circle cx="-.27" cy=".01" r=".016"/><circle cx=".02" cy=".05" r=".015"/></g></g></g></g></svg>Florida Eats</a>
+    <nav aria-label="Main">
+      <a href="/florida-eats/florida-cuban-sandwiches-cafecito.html">Cuban</a>
+      <a href="/florida-eats/florida-stone-crab.html">Stone crab</a>
+      <a href="/florida-eats/florida-oyster-bars.html">Oysters</a>
+      <a href="/florida-eats/cities/">Cities</a>
+      <a href="/florida-eats/explore/">Search</a>
+    </nav>
+  </header>
+  <main id="main">
+  <section class="hero">
+    <p class="kicker">Florida Eats: Cuban, seafood & more for iPhone and iPad</p>
+    <h1>Florida's restaurants, from cafecito to stone crab</h1>
+    <p class="lede">Florida Eats is a free Florida restaurant guide. Find a coffee window pouring cafecito near you, stone crab claws in season, a grouper sandwich on the dock and an oyster bar on the Panhandle, from hand-checked lists, the MICHELIN Guide and James Beard honorees and the state's own inspection records, plus 52,790 restaurants, cafés, bars and bakeries in 581 towns.</p>
+    <div class="cta-row"><a class="btn store-btn" href="mailto:work-with-nick@gmail.com?subject=Florida%20Eats%20early%20access&amp;body=Send%20me%20the%20TestFlight%20link."><span class="store-label">Get early access</span></a><a class="btn btn-ghost" href="/florida-eats/explore/">Search on the web</a><span class="pill store-note">Free. No ads, no account. Coming soon to the App Store.</span></div>
+    <ul class="stats" aria-label="What's in the app">
+      <li><b>260</b><span>hand-checked places</span></li>
+      <li><b>217</b><span>MICHELIN &amp; James Beard</span></li>
+      <li><b>49,128</b><span>with DBPR inspection results</span></li>
+      <li><b>52,790</b><span>restaurants</span></li>
+    </ul>
+  </section>
+
+  <section id="what">
+    <h2>A Florida guide that knows what's in season</h2>
+    <p class="sub">General restaurant apps rank by star ratings and can't tell you which window pours the colada. Florida Eats starts from what people here look for: a Cuban sandwich and a cafecito, stone crab claws from October to May, a grouper sandwich, key lime pie, an oyster bar, an Old Florida fish camp and the Latin and Caribbean kitchens beyond Cuban. The hand-checked lists were checked in fall 2026 against 2025–26 sources. Licensed places show Florida DBPR's own latest inspection result, never a grade of ours. For ratings, hours and photos, each place opens Apple Maps' own live card.</p>
+  </section>
+
+  <section id="how">
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li class="step"><div class="n" aria-hidden="true">1</div><div><h3>Pick a guide.</h3><p>Cuban &amp; Cafecito, Stone Crabs, Grouper &amp; Seafood Shacks, Keys Classics, Oyster Bars, Fish Camps, Latin &amp; Caribbean, MICHELIN &amp; James Beard, Oldest Places, Inspections, or search 52,790 restaurants by name, town, street or dish.</p></div></li>
+      <li class="step"><div class="n" aria-hidden="true">2</div><div><h3>See what's near you.</h3><p>Sort by distance, filter by town or cuisine, or browse the map.</p></div></li>
+      <li class="step"><div class="n" aria-hidden="true">3</div><div><h3>Go.</h3><p>Open Apple Maps' place card for live hours and photos, call, get directions, or save it for your next trip.</p></div></li>
+    </ol>
+  </section>
+
+  <section id="guides">
+    <h2>Florida food guides</h2>
+    <p class="sub">The app's lists, readable on the web.</p>
+    <div class="grid2">
+      <a class="card" href="/florida-eats/florida-cuban-sandwiches-cafecito.html"><h3>Cuban sandwiches &amp; cafecito</h3><p>58 hand-checked places, from Calle Ocho to Ybor City.</p></a><a class="card" href="/florida-eats/florida-stone-crab.html"><h3>Stone crabs</h3><p>28 hand-checked places, in season Oct 15 – May 1.</p></a><a class="card" href="/florida-eats/florida-grouper-sandwiches-seafood-shacks.html"><h3>Grouper &amp; seafood shacks</h3><p>52 hand-checked places on the docks and beaches.</p></a><a class="card" href="/florida-eats/florida-keys-key-lime-pie-conch.html"><h3>Keys classics</h3><p>32 hand-checked places for key lime pie and conch.</p></a><a class="card" href="/florida-eats/florida-oyster-bars.html"><h3>Oyster bars</h3><p>69 hand-checked places, raw, steamed and baked.</p></a><a class="card" href="/florida-eats/florida-fish-camps-smoked-fish.html"><h3>Fish camps &amp; smoked fish</h3><p>41 hand-checked places on rivers, lakes and the coast.</p></a><a class="card" href="/florida-eats/florida-latin-caribbean-restaurants.html"><h3>Latin &amp; Caribbean</h3><p>40 hand-checked places: Haitian, Venezuelan, Colombian and more.</p></a>
+      <a class="card" href="/florida-eats/florida-oldest-restaurants.html"><h3>Florida's oldest restaurants</h3><p>17 places open at the same address since 1960 or earlier.</p></a>
+      <a class="card" href="/florida-eats/florida-michelin-james-beard.html"><h3>MICHELIN &amp; James Beard</h3><p>217 honored Florida restaurants.</p></a>
+      <a class="card" href="/florida-eats/florida-restaurant-inspections.html"><h3>Restaurant inspections, explained</h3><p>DBPR's three result groups and the latest results for 49,128 places, records through September 30, 2026.</p></a>
+    </div>
+  </section>
+
+  <section id="cities">
+    <h2>Cuban food, seafood and more by city</h2>
+    <p class="sub">The guides for Florida's biggest cities and most-visited towns. <a href="/florida-eats/cities/">See what each city page has</a>.</p>
+    <ul class="cities"><li><a href="/florida-eats/cities/miami.html">Miami</a></li><li><a href="/florida-eats/cities/miami-beach.html">Miami Beach</a></li><li><a href="/florida-eats/cities/tampa.html">Tampa</a></li><li><a href="/florida-eats/cities/orlando.html">Orlando</a></li><li><a href="/florida-eats/cities/jacksonville.html">Jacksonville</a></li><li><a href="/florida-eats/cities/st-petersburg.html">St. Petersburg</a></li><li><a href="/florida-eats/cities/fort-lauderdale.html">Fort Lauderdale</a></li><li><a href="/florida-eats/cities/key-west.html">Key West</a></li><li><a href="/florida-eats/cities/sarasota.html">Sarasota</a></li><li><a href="/florida-eats/cities/naples.html">Naples</a></li><li><a href="/florida-eats/cities/pensacola.html">Pensacola</a></li><li><a href="/florida-eats/cities/st-augustine.html">St. Augustine</a></li><li><a href="/florida-eats/cities/west-palm-beach.html">West Palm Beach</a></li><li><a href="/florida-eats/cities/apalachicola.html">Apalachicola</a></li><li><a href="/florida-eats/cities/kissimmee.html">Kissimmee</a></li><li><a href="/florida-eats/cities/coral-gables.html">Coral Gables</a></li><li><a href="/florida-eats/cities/key-largo.html">Key Largo</a></li><li><a href="/florida-eats/cities/winter-park.html">Winter Park</a></li><li><a href="/florida-eats/cities/destin.html">Destin</a></li></ul>
+  </section>
+
+  <section id="pricing">
+    <h2>Free, and staying that way</h2>
+    <p class="sub">No ads, no subscription, no in-app purchases, no account. The whole guide is built into the app, so lists open instantly and work with a weak signal on the water.</p>
+  </section>
+
+  <section id="privacy">
+    <h2>Your plans are your business</h2>
+    <p class="sub">Florida Eats collects nothing. If you allow location, it only sorts lists by distance on your device. Saved places stay on your device. This website sets no cookies and runs no trackers. <a href="/florida-eats/privacy.html">Read the privacy policy</a>.</p>
+  </section>
+
+  <section id="faq">
+    <h2>Questions</h2>
+    <details><summary>Is Florida Eats free?</summary><p>Yes. The app is free, with no ads, no in-app purchases and no account. It&#x27;s coming soon to the App Store; the web search works today.</p></details><details><summary>Where do the lists come from?</summary><p>We checked the themed lists by hand in fall 2026: each place on the Cuban, stone crab, grouper, Keys, oyster bar, fish camp, Latin and oldest-places lists has a 2025 or 2026 source, such as its own website or menu, a dated local news story or an official tourism listing. The rest of the 52,790 restaurants come from the Florida Department of Business and Professional Regulation&#x27;s list of current food service licenses (49,157 places) and Overture Maps&#x27; open place data, placed on the map with Overture&#x27;s address points and the U.S. Census Bureau Geocoder.</p></details><details><summary>Does the app show ratings and reviews?</summary><p>Not its own. Tap a place and Apple Maps&#x27; own place card opens inside the app with Apple&#x27;s current ratings, hours, photos and directions. Our lists are never ordered by ratings.</p></details><details><summary>What are the inspection results?</summary><p>Florida&#x27;s DBPR inspects licensed restaurants and publishes each visit&#x27;s result. Florida doesn&#x27;t grade restaurants (in DBPR&#x27;s words, “establishments are not graded or rated”), and neither do we: the app shows DBPR&#x27;s own result group for the latest visit (Met Inspection Standards, Follow-Up Inspection Required or Facility Temporarily Closed), DBPR&#x27;s disposition and the date, with DBPR&#x27;s violation counts. Records through September 30, 2026.</p></details><details><summary>When is stone crab season?</summary><p>October 15 to May 1, set by the Florida Fish and Wildlife Conservation Commission. Out of season, the places on our stone crab list are open; the claws just aren&#x27;t on the menu.</p></details><details><summary>Does it need my location?</summary><p>Only if you want lists sorted by distance. Your location stays on your iPhone or iPad and is never sent to us. Everything else works without it. On the website, Near me uses your location only inside your browser.</p></details><details><summary>A place closed or is missing. How do I tell you?</summary><p>Email work-with-nick@gmail.com with the name and town. Corrections go into the next update.</p></details><details><summary>Is there an Android version?</summary><p>Not yet. Florida Eats is for iPhone and iPad. If enough people ask at work-with-nick@gmail.com, it moves up the list.</p></details>
+  </section>
+
+  <section id="download" class="final">
+    <h2>Find your next cafecito</h2>
+    <p class="sub">Florida Eats is coming soon to the App Store for iPhone and iPad. Free.</p>
+    <div class="cta-row"><a class="btn store-btn" href="mailto:work-with-nick@gmail.com?subject=Florida%20Eats%20early%20access&amp;body=Send%20me%20the%20TestFlight%20link."><span class="store-label">Get early access</span></a></div>
+  </section>
+  </main>
+  <footer>
+    <nav aria-label="Footer">
+      <a href="/florida-eats/">Florida Eats app</a>
+      <a href="/florida-eats/explore/">Search Florida restaurants</a>
+      <a href="/florida-eats/florida-cuban-sandwiches-cafecito.html">Cuban sandwiches &amp; cafecito</a>
+      <a href="/florida-eats/florida-stone-crab.html">Stone crabs</a>
+      <a href="/florida-eats/florida-grouper-sandwiches-seafood-shacks.html">Grouper &amp; seafood shacks</a>
+      <a href="/florida-eats/florida-keys-key-lime-pie-conch.html">Keys classics</a>
+      <a href="/florida-eats/florida-oyster-bars.html">Oyster bars</a>
+      <a href="/florida-eats/florida-fish-camps-smoked-fish.html">Fish camps &amp; smoked fish</a>
+      <a href="/florida-eats/florida-latin-caribbean-restaurants.html">Latin &amp; Caribbean</a>
+      <a href="/florida-eats/florida-oldest-restaurants.html">Oldest restaurants</a>
+      <a href="/florida-eats/florida-michelin-james-beard.html">MICHELIN &amp; James Beard</a>
+      <a href="/florida-eats/florida-restaurant-inspections.html">Restaurant inspections</a>
+      <a href="/florida-eats/cities/">Cities and towns</a>
+      <a href="/florida-eats/privacy.html">Privacy policy</a>
+      <a href="/florida-eats/terms.html">Terms of use</a>
+      <a href="mailto:work-with-nick@gmail.com">Email us</a>
+    </nav>
+    <p>Place data: hand-checked research by Florida Eats (fall 2026); Florida Department of Business and Professional Regulation, Division of Hotels and Restaurants: food service licenses, inspections and emergency closure reports (public records, Chapter 119, Florida Statutes); Overture Maps Foundation places (CDLA Permissive 2.0) and addresses (open address sources under permissive licenses, docs.overturemaps.org/attribution); map outlines © OpenStreetMap contributors, Overture Maps Foundation (ODbL); U.S. Census Bureau Geocoder (public domain). Not affiliated with or endorsed by the State of Florida, DBPR, any restaurant or chain, Walt Disney World, Universal Orlando, the MICHELIN Guide or the James Beard Foundation. MICHELIN and the MICHELIN Guide are trademarks of Michelin; James Beard Foundation and James Beard Award are trademarks of the James Beard Foundation. Places open and close, so check before you go.</p>
+    <p>© 2026 Florida Eats.</p>
+  </footer>
+</div>
+<script>
+  // Once the App Store listing exists, paste its URL here (looks like https://apps.apple.com/app/id123456789).
+  // Every button switches from "Get early access" to "Download on the App Store" automatically (then use Apple's badge artwork,
+  // see store_button() in scripts/make-site.py). Also fill in the apple-itunes-app meta tag in <head> on every page, and put the
+  // MobileApplication "offers" back in the landing page's JSON-LD (re-run scripts/make-site.py after editing it there).
+  var APP_STORE_URL = "";
+  if (APP_STORE_URL) {
+    document.querySelectorAll(".store-btn").forEach(function (b) { b.href = APP_STORE_URL; b.rel = "noopener"; });
+    document.querySelectorAll(".store-label").forEach(function (l) { l.textContent = "Download on the App Store"; });
+    document.querySelectorAll(".store-note").forEach(function (n) { n.textContent = "Free for iPhone and iPad."; });
+  }
+</script>
+</body>
+</html>
