@@ -1,9 +1,10 @@
 // Florida Eats web app: the iPhone app's guides, search, filters, map and place details, in the browser.
-// Ported from co-eats/scripts/explore.js; keep its guide rules in step with FloridaEats/Models/Guide.swift and its search with
-// FloridaEats/Models/Search.swift. Same data as the app, split by scripts/make-site.py into data/core.json (list, search and map
-// columns), data/ids.json (each place's stable id, fetched right after the list renders: saved places and #p= links wait for it) and
-// data/detail-<county>.json (phones, websites, notes, licenses, DBPR inspection histories, closures), fetched per county when a place
-// there is opened. No cookies, no trackers; saved places and the last guide live in this browser's localStorage only
+// Keep its guide rules in step with FloridaEats/Models/Guide.swift and its search with FloridaEats/Models/Search.swift.
+// Same data as the app, split by scripts/make-site.py into data/core.json (list, search and map columns), data/ids.json (each place's
+// stable id, fetched at the first tap, key, scroll or hover, so a visit that only looks doesn't download it; saved places and #p= links
+// wait for it) and data/detail-<county>.json (phones, websites, notes, licenses, DBPR inspection histories, closures), fetched per
+// county when a place there is opened. Every data file carries the version of the core.json it was built with (core.json "ver",
+// detail "_v", ids "v"): files from another build are fetched again, and never mixed in, because ids and details are keyed by row. No cookies, no trackers; saved places and the last guide live in this browser's localStorage only
 // (keys start with fleats-: other state sites share the nickstrom5.github.io origin).
 // The page runs under a strict Content-Security-Policy (hash-pinned inline script and style): never add inline event handlers or
 // inline style attributes to the HTML built here; set properties from code instead.
@@ -217,16 +218,34 @@
     const filters = [st.town && `in ${st.town}`, st.cuisine && st.cuisine, st.chains && "no chains"].filter(Boolean);
     $("#ex-count").textContent = `${current.length.toLocaleString()} ${current.length === 1 ? "place" : "places"} · ${SORT_LABEL[o]}` + (filters.length ? ` · ${filters.join(", ")}` : "");
     $("#ex-clear").hidden = !filters.length;
-    $("#ex-locate").hidden = Boolean(here);
+    // Near me stays: each tap asks for a fresh fix (people move), and it's how to retry after a timeout
     if (view === "list") renderList(o); else drawMap();
     saveHash();
+  }
+
+  // typing searches only the open guide (the page opens on Cuban & Cafecito): when that finds little, the same words across every
+  // restaurant, with the same filters, so a famous place outside the guide isn't a dead end
+  const FEW = 5;
+  function elsewhereCount() {
+    const q = parse(st.q);
+    if (st.g === "all" || qEmpty(q) || current.length >= FEW) return 0;
+    let n = 0;
+    for (const p of P) if (allows(p) && matches(p, q)) n++;
+    return n > current.length ? n : 0;
+  }
+  const allButton = (n) => `<button type="button" class="ex-small" id="ex-all">Search all restaurants (${esc(n.toLocaleString())} ${n === 1 ? "match" : "matches"})</button>`;
+  function wireAll() {
+    const b = $("#ex-all");
+    if (b) b.onclick = () => { st.g = "all"; st.sort = ""; shown = 100; render(); const r = $(".ex-row"); if (r) r.focus(); };
   }
 
   function renderList(o) {
     const ol = $("#ex-list");
     const g = GUIDES[st.g];
+    const elsewhere = elsewhereCount();
     if (!current.length) {
-      ol.innerHTML = `<li class="ex-empty">${st.g === "saved" && !idsReady ? "Loading your saved places…" : st.g === "saved" ? "Nothing saved yet. Open a place and tap Save to keep it here, in this browser." : "No places match. Try fewer words or clear the filters."}</li>`;
+      ol.innerHTML = `<li class="ex-empty">${st.g === "saved" && !idsReady ? "Loading your saved places…" : st.g === "saved" && idsFailed && saved.size ? "Your saved places couldn't load: you may be offline, or the site was just updated. Reload the page to try again." : elsewhere ? `Nothing in ${esc(g.title)} matches that. ${allButton(elsewhere)}` : st.g === "saved" ? "Nothing saved yet. Open a place and tap Save to keep it here, in this browser." : "No places match. Try fewer words or clear the filters."}</li>`;
+      wireAll();
       $("#ex-more").hidden = true;
       return;
     }
@@ -236,14 +255,15 @@
       const where = st.g === "inspections" ? [p.a, p.c].filter(Boolean).join(", ") : [p.c, p.cu].filter(Boolean).join(" · ");
       const big = st.g === "inspections" && m && o !== "nearest" ? `<span class="ex-res ex-res-${resCls(p.ig)}">${esc(m[0])}</span>` : m ? `<b>${esc(m[0])}</b>` : "";
       return `<li><button class="ex-row" data-i="${esc(p.i)}">${rank}<span class="ex-main"><b>${esc(p.n)}</b><span class="ex-town">${esc(where)}</span><span class="ex-chips">${chips(p, 4)}</span></span>${m ? `<span class="ex-metric">${big}<small>${esc(m[1])}</small></span>` : ""}</button></li>`;
-    }).join("");
+    }).join("") + (elsewhere ? `<li class="ex-empty">Only ${esc(current.length)} in ${esc(g.title)}. ${allButton(elsewhere)}</li>` : "");
+    wireAll();
     const left = current.length - shown;
     $("#ex-more").hidden = left <= 0;
     $("#ex-more").textContent = `Show more (${left.toLocaleString()} left)`;
   }
 
   // ---------------------------------------------------------------- place panel
-  const TIER = { 2: "Licensed by the state", 1: "Confirmed listing", 0: "Listing only" };
+  const TIER = { 2: "Licensed by the state", 1: "High-confidence listing", 0: "Listing only" };   // "High-confidence", not "confirmed" (Nick, 2026-10-13)
   const CAFE_KINDS = ["Coffee & Café", "Bakery & Sweets", "Healthy & Vegan"];
 
   // how often listings like this one matched a current DBPR license statewide (pipeline/calibrate.py); the app's matchRate
@@ -271,15 +291,16 @@
 
   const kv = (k, v) => (v == null || v === "" ? "" : `<div class="ex-kv"><span>${esc(k)}</span><b>${esc(v)}</b></div>`);
   const section = (t, body) => `<section class="ex-sec"><h3>${esc(t)}</h3>${body}</section>`;
-  const phone = matchMedia("(max-width: 600px)");
   let listAtPush = null;   // the list's URL state when a place was opened with pushState (Back then closes the panel)
 
-  // on phones the panel is a bottom sheet over the page: a modal dialog, with everything behind it inert
+  // the open place is a modal dialog at every width (a bottom sheet on phones, a side sheet on wider screens, which would otherwise
+  // cover Near me and the List/Map buttons): everything behind it is inert, and a click on the dimmed backdrop closes it
   function panelMode() {
-    const panel = $("#ex-panel"), open = !panel.hidden, modal = open && phone.matches;
+    const panel = $("#ex-panel"), modal = !panel.hidden;
     if (modal) { panel.setAttribute("role", "dialog"); panel.setAttribute("aria-modal", "true"); }
     else { panel.removeAttribute("role"); panel.removeAttribute("aria-modal"); }
-    const behind = [...document.querySelectorAll("body > .skip, .wrap > header, .wrap > nav, .wrap > footer, #main > *")].filter((el) => el !== panel);
+    $("#ex-backdrop").hidden = !modal;
+    const behind = [...document.querySelectorAll("body > .skip, .wrap > header, .wrap > nav, .wrap > footer, #main > *")].filter((el) => el !== panel && el.id !== "ex-backdrop");
     behind.forEach((el) => { el.inert = modal; });
   }
 
@@ -292,6 +313,8 @@
     const g = i.g === 0 || i.g === 1 || i.g === 2 ? i.g : null;
     const hist = Array.isArray(i.h) ? i.h.filter(Array.isArray) : [];
     let h = `<p class="ex-result"><span class="ex-res ex-res-${resCls(g)}">${esc(groupLabel(g))}</span> Latest visit ${esc(fmtDate(i.d))}</p>`;
+    // closed at the latest visit, but DBPR's closure report already shows the reopening
+    if (g === 2 && typeof i.ro === "string" && i.ro) h += `<p>Reopened ${esc(fmtDate(i.ro))}, per DBPR's closure report.</p>`;
     const dp = disp(i.dp), ty = vtype(i.t);
     if (dp || ty) h += `<p>${dp ? `“${esc(dp)}”` : ""}${dp && ty ? " · " : ""}${esc(ty)}</p>`;
     if (i.rd && num(i.hp) != null) h += `<p>Latest routine inspection ${esc(fmtDate(i.rd))}: ${esc(i.hp)} high-priority, ${esc(i.im ?? 0)} intermediate and ${esc(i.bs ?? 0)} basic violations (DBPR's counts).</p>`;
@@ -306,11 +329,19 @@
   }
 
   function openPlace(p, push = true) {
-    if (p.id == null) { loadIds().then(() => { if (p.id != null) openPlace(p, push); }); return; }
     const panel = $("#ex-panel");
     const wasOpen = !panel.hidden;
-    st.p = p.id;
-    const loaded = DETAIL_LOADED.has(p.co);
+    // the place opens at once; its id (for Save, the #p= link and the Back step) follows when ids.json arrives, which the first tap
+    // only starts, so a tap never waits on it. If ids.json can't load (offline, or a build changed under us), the place stays open
+    // without Save and without a link.
+    const waiting = p.id == null && !idsReady;
+    if (waiting && (push || !wasOpen)) loadIds().then(() => { if (!panel.hidden && panel.dataset.i === String(p.i)) openPlace(p, push); });
+    const noId = p.id == null, pid = p.id ?? "";
+    // a re-render (the county's details just arrived) replaces the panel's buttons: remember where keyboard focus was, to put it back
+    const focused = wasOpen && panel.contains(document.activeElement) ? document.activeElement : null;
+    const refocus = focused && (focused.id ? `#${focused.id}` : focused.textContent.trim());
+    st.p = pid;
+    const loaded = DETAIL_LOADED.has(p.co), failed = DETAIL_FAILED.has(p.co);
     const d = DETAIL.get(p.i) || {};
     const la = num(p.la), lo = num(p.lo);
     const addr = [p.a, [p.c, p.z].filter(Boolean).join(" ")].filter(Boolean).join(", ");
@@ -332,7 +363,7 @@
           <a href="${esc(dirs)}" rel="noopener" target="_blank">Directions</a>
           ${tel ? `<a href="tel:${esc(tel)}">Call</a>` : ""}
           ${site ? `<a href="${esc(site)}" rel="noopener nofollow" target="_blank">Website</a>` : ""}
-          <button id="ex-save" aria-pressed="${saved.has(p.id)}">${saved.has(p.id) ? "Saved" : "Save"}</button>
+          ${waiting ? '<button id="ex-save" aria-pressed="false" disabled>Save</button>' : noId ? "" : `<button id="ex-save" aria-pressed="${saved.has(pid)}">${saved.has(pid) ? "Saved" : "Save"}</button>`}
         </div>
       </div>`;
     if (!loaded) html += `<p class="ex-fine">Loading details…</p>`;
@@ -347,7 +378,8 @@
       html += section("Honors", `<ul>${lines.map((l) => `<li>${esc(l)}</li>`).join("")}</ul><p class="ex-fine">Honors are facts, not ratings. MICHELIN and the MICHELIN Guide are trademarks of Michelin; James Beard Foundation and James Beard Award are trademarks of the James Beard Foundation.</p>`);
     }
     html += inspectionSection(p, d);
-    if (loaded) {
+    if (failed) html += `<p class="ex-fine">This place's details (license, inspections, phone, website) didn't load: you may be offline, or the site was just updated. Reload the page to try again.</p>`;
+    else if (loaded) {
       html += section("Official records", kv("DBPR food service license", d.lic || "— (no current license matched)")
         + `<p class="ex-fine">${d.lic ? `From the Florida Department of Business and Professional Regulation's list of current food service licenses (public records, downloaded ${esc(fmtDate(META.fetched))}).` : "No current DBPR license matched this place. Coffee shops, bakeries, juice bars and grocery counters are often licensed by the Florida Department of Agriculture instead, and a place can be licensed under another name, so a missing license means unknown, not unlicensed."}</p>`);
     }
@@ -357,38 +389,47 @@
     const store_url = safeUrl(window.APP_STORE_URL);   // set in the page footer script once the App Store listing exists
     html += store_url
       ? `<p class="ex-app">Save it on your phone: <a href="${esc(store_url)}" rel="noopener">get the free iPhone app</a></p>`
-      : `<p class="ex-app">The iPhone app is coming soon. <a href="${BASE}/#download">Get early access</a></p>`;
+      : `<p class="ex-app">The iPhone app is coming soon. <a href="${BASE}/#download">Ask for early access</a></p>`;
     panel.innerHTML = html;
-    panel.dataset.id = p.id;
+    panel.dataset.id = pid;
+    panel.dataset.i = String(p.i);
     panel.hidden = false;
     document.body.classList.add("ex-open");
     panelMode();
     $("#ex-close").onclick = () => closePlace();
-    $("#ex-save").onclick = (e) => {
+    if (!noId) $("#ex-save").onclick = (e) => {
       if (saved.has(p.id)) saved.delete(p.id); else saved.add(p.id);
       store.set("saved", [...saved]);
       e.target.textContent = saved.has(p.id) ? "Saved" : "Save";
       e.target.setAttribute("aria-pressed", String(saved.has(p.id)));
       if (st.g === "saved") render();
     };
-    if (!wasOpen || panel.dataset.shown !== p.id) panel.scrollTop = 0;
-    panel.dataset.shown = p.id;
-    if (push || !wasOpen) $("#ex-close").focus();
-    if (push) {
-      if (wasOpen) saveHash();            // one Back step per panel, not per place looked at
-      else { listAtPush = listHash(); saveHash(true); }
+    const samePlace = wasOpen && panel.dataset.shown === String(p.i);   // a re-render: details or the id just arrived
+    if (!samePlace) panel.scrollTop = 0;
+    panel.dataset.shown = String(p.i);
+    if (!samePlace) $("#ex-close").focus();
+    else if (refocus) {
+      const same = refocus.startsWith("#") ? panel.querySelector(refocus)
+        : [...panel.querySelectorAll("a, button")].find((el) => el.textContent.trim() === refocus);
+      (same || $("#ex-close")).focus();
     }
-    if (!loaded) loadDetail(p.co).then(() => { if (st.p === p.id && !$("#ex-panel").hidden) openPlace(p, false); });
+    if (push && !noId) {
+      if (panel.dataset.pushed) saveHash();   // one Back step per panel, not per place looked at
+      else { listAtPush = listHash(); saveHash(true); panel.dataset.pushed = "1"; }
+    }
+    if (!loaded) loadDetail(p.co).then(() => { if (panel.dataset.i === String(p.i) && !panel.hidden) openPlace(p, false); });
   }
 
   // fromHistory: the Back button (or a hash link) already moved the URL, so don't touch history again
   function closePlace(fromHistory = false) {
-    const was = st.p;
     st.p = "";
     const panel = $("#ex-panel");
+    const wasI = panel.dataset.i;   // the row the panel belonged to: focus goes back there
     panel.hidden = true;
     delete panel.dataset.id;
+    delete panel.dataset.i;
     delete panel.dataset.shown;
+    delete panel.dataset.pushed;
     document.body.classList.remove("ex-open");
     panelMode();
     if (!fromHistory) {
@@ -397,7 +438,7 @@
       else saveHash();
     }
     listAtPush = null;
-    const row = was && document.querySelector(`.ex-row[data-i="${P.findIndex((p) => p.id === was)}"]`);
+    const row = wasI && document.querySelector(`.ex-row[data-i="${Number(wasI)}"]`);
     if (row) row.focus();
   }
 
@@ -518,30 +559,51 @@
 
   // ---------------------------------------------------------------- data, URL state, controls
   let SOURCES = [], DETAIL_FILES = [];
-  async function fetchJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(r.status + " " + url); return r.json(); }
-  const DETAIL = new Map(), DETAIL_LOADED = new Set(), detailPromises = new Map();
+  async function fetchJSON(url, opts) { const r = await fetch(url, opts); if (!r.ok) throw new Error(r.status + " " + url); return r.json(); }
+  // the build this page's data comes from: the page names it (so a cached core.json from an older build isn't used), core.json confirms it
+  const PAGE_VER = ($("#ex-app") && $("#ex-app").dataset.ver) || "";
+  let DV = "";
+  const vq = (v) => (v ? "?v=" + encodeURIComponent(v) : "");
+  // a data file from another build (a cache that outlived a deploy) is fetched once more, then refused: its rows wouldn't line up
+  async function fetchCurrent(url, verOf) {
+    let d = await fetchJSON(url + vq(DV));
+    if (DV && verOf(d) !== DV) d = await fetchJSON(url + vq(DV), { cache: "reload" });
+    if (DV && verOf(d) !== DV) throw new Error("another build: " + url);
+    return d;
+  }
+  const DETAIL = new Map(), DETAIL_LOADED = new Set(), DETAIL_FAILED = new Set(), detailPromises = new Map();
   // a county's detail file (phones, websites, notes, licenses, inspections) is fetched only once someone reaches for a place there
   function loadDetail(co) {
-    if (!Number.isInteger(co) || co < 0 || co >= DETAIL_FILES.length) { DETAIL_LOADED.add(co); return Promise.resolve(); }
+    // a county with no extras has no file (null in dfiles): nothing to fetch
+    if (!Number.isInteger(co) || co < 0 || co >= DETAIL_FILES.length || !DETAIL_FILES[co]) { DETAIL_LOADED.add(co); return Promise.resolve(); }
     if (!detailPromises.has(co)) {
-      detailPromises.set(co, fetchJSON(`${BASE}/data/detail-${encodeURIComponent(DETAIL_FILES[co])}.json`).then((d) => {
+      detailPromises.set(co, fetchCurrent(`${BASE}/data/detail-${encodeURIComponent(DETAIL_FILES[co])}.json`, (d) => d && d._v).then((d) => {
         if (d && typeof d === "object") for (const k of Object.keys(d)) { const i = Number(k); if (Number.isInteger(i) && d[k] && typeof d[k] === "object") DETAIL.set(i, d[k]); }
-      }).catch(() => { /* offline, or a county with no extras: the panel shows what core.json has */ }).finally(() => DETAIL_LOADED.add(co)));
+      }).catch(() => { DETAIL_FAILED.add(co); /* offline or another build: the panel says so, and asks for a reload */ })
+        .finally(() => DETAIL_LOADED.add(co)));
     }
     return detailPromises.get(co);
   }
 
   // ids.json: one stable id per place, in core order (saved places, #p= links and the panel's history entry use them)
-  let idsPromise = null, idsReady = false;
+  let idsPromise = null, idsReady = false, idsFailed = false;
   function loadIds() {
-    idsPromise ||= fetchJSON(`${BASE}/data/ids.json`).then((ids) => {
-      if (Array.isArray(ids) && ids.length === P.length) ids.forEach((x, i) => { P[i].id = String(x); });
-    }).catch(() => { /* offline: saving and sharing wait for a reload */ }).finally(() => { idsReady = true; });
+    idsPromise ||= fetchCurrent(`${BASE}/data/ids.json`, (d) => d && d.v).then((d) => {
+      const ids = d && typeof d.ids === "string" ? d.ids.split(",") : [];   // one comma-separated string: smaller than a JSON array
+      if (ids.length !== P.length) throw new Error("ids.json doesn't match core.json");
+      ids.forEach((x, i) => { P[i].id = x; });
+    }).catch(() => { idsFailed = true; /* offline or another build: saving and links wait for a reload, and the page says so */ })
+      .finally(() => { idsReady = true; });
     return idsPromise;
   }
 
   async function load() {
-    const d = await fetchJSON(`${BASE}/data/core.json`);
+    let d = await fetchJSON(`${BASE}/data/core.json${vq(PAGE_VER)}`);
+    // a core.json with no version predates versioning (a cache that ignored ?v=): its rows would meet this build's ids and county
+    // files unchecked, so fetch it once more past the cache, then stop with the reload message rather than mix two builds
+    if (PAGE_VER && typeof d.ver !== "string") d = await fetchJSON(`${BASE}/data/core.json${vq(PAGE_VER)}`, { cache: "reload" });
+    if (PAGE_VER && typeof d.ver !== "string") throw new Error("core.json from before versioning");
+    DV = typeof d.ver === "string" ? d.ver : "";
     GENERATED = d.generated; CAL = d.calibration || {}; SOURCES = d.srcs || []; DETAIL_FILES = d.dfiles || [];
     if (Array.isArray(d.groups) && d.groups.length === 3) GROUPS = d.groups;
     META = { through: d.inspections_through, fetched: d.dbpr_fetched, since: d.ins_since, dispositions: d.dispositions || [], itypes: d.itypes || [] };
@@ -616,8 +678,11 @@
       st.sort = GUIDES[st.g].sorts.includes("nearest") ? "nearest" : st.sort;
       if (view === "map" && inFL) centerOn(here);
       shown = 100; render();
-    }, () => { $("#ex-locmsg").textContent = "Location is off for this site. Allow it in your browser settings to sort by distance."; },
-    { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 });
+    }, (err) => {
+      $("#ex-locmsg").textContent = err && err.code === 1 ? "Location is off for this site. Allow it in your browser settings to sort by distance."
+        : "Couldn't get a location fix just now. Tap Near me to try again.";
+    },
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 });   // a fresh fix on every tap, never one from minutes ago
   }
 
   function setView(v) {
@@ -626,7 +691,8 @@
     $("#ex-listwrap").hidden = v !== "list";
     $("#ex-mapwrap").hidden = v !== "map";
     render();
-    if (v === "map" && phone.matches) $("#ex-mapwrap").scrollIntoView({ block: "nearest" });   // on phones the map starts below the fold
+    // the map often starts below the fold (on phones, and on laptop-height screens): bring it into view
+    if (v === "map" && $("#ex-mapwrap").getBoundingClientRect().top > innerHeight * 0.5) $("#ex-mapwrap").scrollIntoView({ block: "nearest" });
   }
 
   // the URL moved under us: Back/Forward (popstate) or a link to another #hash (hashchange). Both can fire for one step.
@@ -637,8 +703,21 @@
     if (st.p && !idsReady) { loadIds().then(fromURL); return; }
     const p = st.p && P.find((x) => x.id === st.p);
     const panel = $("#ex-panel");
-    if (p) { if (panel.hidden || panel.dataset.id !== p.id) openPlace(p, false); }
-    else if (!panel.hidden) closePlace(true);
+    if (p) {
+      if (panel.hidden || panel.dataset.id !== p.id) {
+        openPlace(p, false);
+        // Forward to a place opened earlier: its entry was pushed after the list's, so closing it steps back, as after a tap
+        if (history.state && history.state.fleats === "place") { listAtPush = listHash(); panel.dataset.pushed = "1"; }
+      }
+    }
+    else { if (!panel.hidden) closePlace(true); linkMissing(); }
+  }
+
+  // a #p= link whose place isn't here: ids.json didn't load, or the place has left the list since the link was made
+  function linkMissing() {
+    if (!st.p) return;
+    $("#ex-locmsg").textContent = idsFailed ? "The place in this link couldn't load: you may be offline, or the site was just updated. Reload the page to try again."
+      : "The place in this link isn't on the list anymore (it may have closed or moved).";
   }
 
   function controls() {
@@ -655,11 +734,15 @@
     document.querySelectorAll(".ex-view button").forEach((b) => b.onclick = () => setView(b.dataset.v));
     $("#ex-list").addEventListener("click", (e) => { const b = e.target.closest(".ex-row"); if (b && P[+b.dataset.i]) openPlace(P[+b.dataset.i]); });
     // warm the region file of the row under the pointer (or keyboard focus), so the panel opens with its details
-    for (const ev of ["pointerover", "focusin"]) $("#ex-list").addEventListener(ev, (e) => { const b = e.target.closest && e.target.closest(".ex-row"); if (b && P[+b.dataset.i]) loadDetail(P[+b.dataset.i].co); });
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && st.p) closePlace(); });
+    for (const ev of ["pointerover", "focusin"]) $("#ex-list").addEventListener(ev, (e) => { const b = e.target.closest && e.target.closest(".ex-row"); if (b && P[+b.dataset.i]) { loadIds(); loadDetail(P[+b.dataset.i].co); } });
+    // the ids (a few hundred KB) wait for the first sign of use, so a visit that only looks doesn't download them
+    const WARM = ["pointerdown", "keydown", "wheel", "scroll", "touchstart"];
+    const warmIds = () => { WARM.forEach((ev) => removeEventListener(ev, warmIds, true)); loadIds(); };
+    WARM.forEach((ev) => addEventListener(ev, warmIds, { capture: true, passive: true }));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#ex-panel").hidden) closePlace(); });
     window.addEventListener("popstate", fromURL);
     window.addEventListener("hashchange", fromURL);
-    phone.addEventListener?.("change", panelMode);
+    $("#ex-backdrop").addEventListener("click", () => { if (st.p || !$("#ex-panel").hidden) closePlace(); });
     mapEvents();
   }
   function syncInputs() {
@@ -678,6 +761,7 @@
       await loadIds();
       const open = P.find((p) => p.id === st.p);
       if (open) { await loadDetail(open.co); openPlace(open, false); }
-    } else setTimeout(loadIds, 600);
+      else linkMissing();
+    }
   })();
 })();

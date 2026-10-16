@@ -323,7 +323,8 @@ final class SmokeUITests: XCTestCase {
         app.terminate()
         let start = Date()
         app.launch()
-        let ready = isPad ? app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'places ·' OR label CONTAINS 'Cuban, seafood & more'")).firstMatch
+        // [c]: the home header is set in capitals ("CUBAN, SEAFOOD & MORE")
+        let ready = isPad ? app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'places ·' OR label CONTAINS[c] 'Cuban, seafood & more'")).firstMatch
                           : text(containing: "Cuban, seafood & more")
         XCTAssertTrue(ready.waitForExistence(timeout: 30), "home didn't appear")
         let secs = Date().timeIntervalSince(start)

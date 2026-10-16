@@ -110,7 +110,9 @@ for j, u in U.iterrows():
                 # a shared town name isn't a shared business name, and "fish" and "tea" are two businesses
                 shared = (real_share(o.st.iat[i], ust) or _close_words(o.st.iat[i] - town_words(), ust - town_words())) and \
                     not all(kind_conflict(o.k.iat[i], k) for k in ukeys)
-                if (s_ >= 88) or (shared and s_ >= 60) or (d_ <= 25 and s_ >= 75):
+                # names must agree: "Le Bon Coin" isn't HALIMES COIN LAUNDRY, and a listing next to a cinema isn't its concession
+                same_ = any(official.same_business(o.k.iat[i], k) for k in ukeys)
+                if (s_ >= 88 and same_) or (shared and same_ and s_ >= 75):
                     pairs.append((s_ - d_ / 10, i, j))
 akey_u = collections.defaultdict(list)
 for j, a_, z_ in zip(U.index, U.addr, U.zip):
@@ -123,8 +125,12 @@ for i, a_, z_, c_ in zip(V.index, V.street, V.zip.fillna("").astype(str).str[:5]
     if n_ and s_ and c_ not in CAFE:
         akey_v[(n_, s_, z_)].append(i)
 for k_, js in akey_u.items():
+    # the only license and the only listing at an address are one place only if their names agree: without a name check this put
+    # Church's Chicken's license on a Subway and Kabooki Sushi's on a Jet's Pizza (1,161 of 1,576 pairs shared no word)
     if len(js) == 1 and len(akey_v.get(k_, [])) == 1 and not k_[1].startswith(("US ", "SR ", "CR ")):
-        pairs.append((50.0, akey_v[k_][0], js[0]))
+        i_, j_ = akey_v[k_][0], js[0]
+        if any(official.same_business(o.k.iat[i_], k) for k in (U.at[j_, "keys"] or [])):
+            pairs.append((50.0, i_, j_))
 taken_i, taken_j, n2 = set(), set(), 0
 for sc, i, j in sorted(pairs, key=lambda t: -t[0]):
     if i in taken_i or j in taken_j:
@@ -196,6 +202,19 @@ def curated_matcher(frame):
     return match
 
 
+# a source on a host that blocks us (robots.txt disallows ClaudeBot, Claude-User or anthropic-ai, or a bot check) is never used:
+# pipeline/check_sources.py checks every cited host and caches the answers in data/research/source_hosts.json
+SOURCE_HOSTS = json.load(open(f"{DATA}/research/source_hosts.json")) if os.path.exists(f"{DATA}/research/source_hosts.json") else {}
+UNCHECKED_HOSTS = set()
+
+
+def source_blocked(u):
+    from check_sources import why_not, host
+    if host(u) not in SOURCE_HOSTS:
+        UNCHECKED_HOSTS.add(host(u)); return False
+    return why_not(SOURCE_HOSTS, u) is not None
+
+
 def load_curated():
     """MICHELIN Guide Florida 2026 and James Beard honors -> curated entries (facts only, each with sources)."""
     out, by = [], {}
@@ -213,7 +232,7 @@ def load_curated():
             c = entry(r["name"], r.get("address"), r.get("city"), r.get("zip"), rank=3)   # MICHELIN's own spelling
             c["michelin"] = r.get("distinction")
             c["green_star"] = bool(r.get("green_star"))
-            c["sources"] += (r.get("sources") or []) + ([r["michelin_url"]] if r.get("michelin_url") else [])
+            c["sources"] += [u for u in (r.get("sources") or []) + ([r["michelin_url"]] if r.get("michelin_url") else []) if not source_blocked(u)]
             if r.get("open") is False or r.get("closed_after_release"):   # Papa Llama closed after the May 2026 release
                 c["open"] = False
                 CLOSED_HONORS.append({"name": r["name"], "address": r.get("address"), "city": r.get("city"), "closed_reason": r.get("note")})
@@ -224,9 +243,10 @@ def load_curated():
             if r["name"] in NOT_THEIRS:   # the honor went to a group that no longer runs the place (honors_notes.md)
                 continue
             c["james_beard"] += [h for h in r.get("honors") or [] if h not in c["james_beard"]]
-            c["sources"] += r.get("sources") or []
-            if r.get("open") is False:
+            c["sources"] += [u for u in r.get("sources") or [] if not source_blocked(u)]
+            if r.get("open") is False:   # Maty's: its listing must go too, not just the honor
                 c["open"] = False
+                CLOSED_HONORS.append({"name": r["name"], "address": r.get("address"), "city": r.get("city"), "closed_reason": r.get("note")})
     return out
 
 
@@ -249,6 +269,9 @@ def load_research():
         for e in entries:
             if e.get("open") is False or not e.get("name"):
                 continue
+            usable = [u for u in e.get("sources") or [] if not source_blocked(u)]
+            if not usable:   # a guide entry needs a 2025-26 source we may use; it waits until it has one
+                NO_SOURCE.append(e["name"] + " (" + (e.get("city") or "") + ")"); continue
             key = (norm_name(e["name"]), (canon_city(e.get("city")) or "").lower())
             c = by.get(key)
             if c is None:
@@ -258,7 +281,7 @@ def load_research():
                 by[key] = c; out.append(c)
             c["tags"] = list(dict.fromkeys((c.get("tags") or []) + [k.lower() for k in (e.get("kinds") or [])]))
             c["dishes"] = list(dict.fromkeys((c.get("dishes") or []) + (e.get("dishes") or [])))
-            c["rsources"] = list(dict.fromkeys((c.get("rsources") or []) + (e.get("sources") or [])))
+            c["rsources"] = list(dict.fromkeys((c.get("rsources") or []) + usable))
             for k in ("note", "website", "seasonal", "founded_note", "evidence_date"):
                 c[k] = c.get(k) or e.get(k)
             if not c.get("founded") and e.get("founded"):
@@ -266,7 +289,10 @@ def load_research():
     return out
 
 
+NO_SOURCE = []
 CUR = CUR + load_research()
+print("research entries waiting for a source we may use:", len(NO_SOURCE), NO_SOURCE[:12],
+      "| cited hosts never checked (run check_sources.py):", sorted(UNCHECKED_HOSTS)[:8])
 CLOSED = list(CLOSED_HONORS)
 for f in [f"{DATA}/research/closed.json"] + sorted(glob.glob(f"{DATA}/research/app/closed_*.json")):
     if os.path.exists(f):
@@ -349,6 +375,9 @@ def is_legal(n):
     return bool(re.search(r"\b(?:INC|LLC|L L C|CORP|CORPORATION|LTD|LLP|LP|PA|PLLC|CO)\b\.?\s*$", (n or "").upper()))
 
 
+# a license held by a hotel or an institution names the holder, not a restaurant
+HOLDER = re.compile(r"\b(?:INN|HOTEL|RESORT|SUITES|MOTEL|LODGE|HILTON|MARRIOTT|HYATT|COURTYARD|SHERATON|WYNDHAM|ALOFT|TEMPLE|CHURCH|HOSPITAL|"
+                    r"MEDICAL|SCHOOL|UNIVERSITY|COLLEGE|ACADEMY|ASSOCIATION|LEGION|ELKS|MOOSE|SHRINE|SODEXO|ARAMARK|EUREST|MORRISON)\b")
 LEGALISH = re.compile(r"\b(?:HOLDINGS?|ENTERPRISES?|GROUP|MANAGEMENT|VENTURES?|PARTNERS|PARTNERSHIP|INVESTMENTS?|PROPERTIES|OPERATIONS|"
                       r"OPERATING|DEVELOPMENT|ASSOCIATES|CAPITAL|SERVICES|SOLUTIONS|FRANCHISE|FRANCHISING|CONCEPTS|HOSPITALITY|"
                       r"OF FLORIDA|OF FL|OF AMERICA|USA|INTERNATIONAL|DEVEL|PRTNRS|PTNRS)\b")
@@ -436,6 +465,27 @@ for sc, ai, gi in sorted(pairs, key=lambda t: -t[0]):
 A["in21"] = A.gi.notna()
 print("license rows added:", len(A), "| matched to Google 2021:", int(A.in21.sum()))
 o = pd.concat([o, A.drop(columns=["akey", "pri"])], ignore_index=True)
+# a map listing tied to a license whose current business has another name: DBPR's name is the business licensed there now (a listing
+# can be a closed tenant's, "Thai Orchid" on Milano's license at 12620 Beach Blvd). The place takes DBPR's name, and the listing's own
+# website, phone and category go with the old one. When DBPR's name is a holder's (a hotel, a company), the listing's name stays.
+_ren = 0
+for i_ in o.index[(o.off >= 0) & o.src.ne("official")]:
+    f_ = F.loc[int(o.at[i_, "off"])]
+    if any(official.same_business(o.at[i_, "name"], k) for k in list(f_["keys"] or []) + [f_["name"]] + list(f_.dbas or [])):
+        continue
+    nm_ = clean_official(f_["name"], f_.dbas, brand_of(norm_name(f_["name"])))
+    if nm_ and not is_legal(nm_) and not LEGALISH.search(nm_.upper()) and not HOLDER.search(nm_.upper()):
+        o.at[i_, "name"] = nm_; o.at[i_, "k"] = norm_name(nm_); o.at[i_, "st"] = _stems(norm_name(nm_)) - GENERIC
+        for c_ in ("web", "phone", "tax", "brand", "n_web"):
+            if c_ in o.columns:
+                o.at[i_, c_] = None
+        o.at[i_, "cat"] = "restaurant"; o.at[i_, "via"] = str(o.at[i_, "via"]) + ", DBPR's name"
+        _ren += 1
+print("listings renamed to the business DBPR licenses there now:", _ren)
+# a licensed place takes DBPR's town for the license address: the map listings often give the mailing town ("Eastpoint" for
+# St. George Island, "Panama City" for Panama City Beach, "Fort Lauderdale" for Oakland Park)
+_lt = o.off.map(lambda j: F.city.loc[j] if j >= 0 and isinstance(F.city.loc[j], str) and F.city.loc[j] else None)
+o["city"] = _lt.where(_lt.notna(), o.city)
 o["city"] = o.city.map(canon_city)
 main = o.city.dropna().groupby(o.city.dropna().map(town_key)).agg(lambda x: x.mode().iat[0])
 o["city"] = o.city.map(lambda c: main.get(town_key(c), c) if isinstance(c, str) else c)
@@ -453,6 +503,8 @@ for i_, c_, z_ in zip(o.index, o.city, o.z5):
     cc = re.sub(r",.*$|\s*\.\s.*$", "", c_).strip()
     if zt and (fuzz.ratio(cc.lower(), zt.lower()) >= 75 or zt.lower() in c_.lower() or c_.lower() in zt.lower()):
         o.at[i_, "city"] = zt; snapped += 1; continue
+    if cc in ("Bellview", "St. George Island", "Pensacola Beach"):   # real small towns that look like a bigger one's typo
+        continue
     best_t = max(common_towns, key=lambda t: fuzz.ratio(cc.lower(), t.lower()))
     if fuzz.ratio(cc.lower(), best_t.lower()) >= 90:
         o.at[i_, "city"] = best_t; snapped += 1
@@ -511,6 +563,24 @@ print("hand-verified places added (in neither list):", len(added), "of", len(mis
 CTY = {official.county_name(n.replace(" County", "")): prep(shape(g).buffer(0.002)) for n, g in json.load(open(f"{FL}/fl_counties_detail.geojson")).items()}
 miss_c = o.county.isna() & o.lat.notna()
 o.loc[miss_c, "county"] = [next((n for n, p in CTY.items() if p.contains(Point(lo, la))), None) for la, lo in zip(o.lat[miss_c], o.lon[miss_c])]
+# a licensed place's map point must be in its license's county: a geocode that lands elsewhere is wrong (Deadman Bay Marina,
+# Steinhatchee, Taylor County, was once pinned in Broward). Such a point is dropped; the place goes when it has no other.
+import shapely
+_CG = {official.county_name(n.replace(" County", "")): shape(g).buffer(0.01) for n, g in json.load(open(f"{FL}/fl_counties_detail.geojson")).items()}
+for g_ in _CG.values():
+    shapely.prepare(g_)
+_la, _lo = o.lat.to_numpy(float), o.lon.to_numpy(float)
+_pc = np.full(len(o), None, dtype=object)
+for n_, g_ in _CG.items():
+    _hit = np.equal(_pc, None) & ~np.isnan(_la) & shapely.contains_xy(g_, _lo, _la)
+    _pc[_hit] = n_
+_lic_cty = o.off.map(lambda j: F.county.loc[j] if j >= 0 else None)
+_inside = [not isinstance(lc, str) or pc is None or lc == pc or (lc in _CG and _CG[lc].contains(Point(lo, la)))   # no license: NaN
+           for lc, pc, la, lo in zip(_lic_cty, _pc, _la, _lo)]
+_wrong = ~pd.Series(_inside, index=o.index)
+print("licensed places whose map point is outside the license's county (point dropped):", int(_wrong.sum()), o.name[_wrong].head(8).tolist())
+o.loc[_wrong, ["lat", "lon"]] = np.nan
+o.loc[_lic_cty.notna(), "county"] = _lic_cty[_lic_cty.notna()]
 o["region"] = o.county.map(REGION_OF)
 split = 0
 for c, grp in o[o.city.notna() & o.county.notna()].groupby("city"):
@@ -739,7 +809,7 @@ o["name_out"] = o.name_out.str.replace(r"^(?:Under New Management|New Owners?|Gr
 LEGAL_END = re.compile(r"(?i)(?:\b(?:llc|l\.l\.c|inc|corp|corporation|ltd)\b\.?|''llc''|\binc\.s)\s*$")
 FOODISH = re.compile(r"(?i)\b(?:restaurant|cafe|café|grill|kitchen|pizza|bar|pub|tavern|bistro|diner|deli|bakery|coffee|seafood|sushi|taco|burger|bbq|"
                      r"cantina|eatery|steak|wings|subs|sandwich|cuban|oyster|crab|fish|chicken|thai|chinese|mexican|italian|indian|"
-                     r"juice|smoothie|ice cream|donut|bagel|tea|boba|pho|ramen|noodle|buffet|lounge|saloon|brewing|brewery)\b")
+                     r"juice|smoothie|ice cream|donut|bagel|tea|boba|pho|ramen|noodle|buffet|lounge|saloon|brewing|brewery|cuisine|cocina|comida)\b")
 legal_left = o.src.eq("official") & (o.name_out.str.contains(LEGAL_END)
                                      | (o.name_out.str.upper().str.contains(LEGALISH) & ~o.name_out.str.contains(FOODISH)))
 lg = 0
@@ -748,6 +818,10 @@ if legal_left.any():
     S1 = S1[~S1.j_junk & S1.name.notna() & S1.cat.isin(["restaurant", "casual_eatery", "bar", "fast_food_restaurant", "coffee_shop", "cafe"])]
     for i_ in o.index[legal_left]:
         la_, lo_ = o.at[i_, "lat"], o.at[i_, "lon"]
+        if re.search(r"\b(?:TEMPLE|CHURCH|HOSPITAL|MEDICAL|SCHOOL|UNIVERSITY|COLLEGE|ACADEMY|ASSOCIATION|LEGION|ELKS|MOOSE|SHRINE|SODEXO|"
+                     r"ARAMARK|EUREST|MORRISON)\b", o.at[i_, "name_out"].upper()):
+            o.at[i_, "legal_hidden"] = True; continue   # an institution's kitchen or a contract caterer's: not a restaurant to list
+        # (Amara Shrine Temple's banquet kitchen once took the name of a closed Sweet Tomatoes listed at its address)
         near = S1[(abs(S1.lat - la_) < 0.0004) & (abs(S1.lon - lo_) < 0.0004)]
         if len(near) == 1:
             o.at[i_, "name_out"] = tidy(near.name.iat[0], None); lg += 1
@@ -884,7 +958,8 @@ o["t_keys"] = o.hc & (tags_c.str.contains(r"\bkeys\b|keylime|key lime")
                       | (tags_c.str.contains("conch") & (dish_c.str.contains("conch fritter") | o.region.eq("Keys"))))
 o["t_oyster"] = o.hc & tags_c.str.contains("oyster")
 o["t_fishcamp"] = o.hc & tags_c.str.contains("fishcamp|fish camp|smokedfish|smoked fish")
-o["t_latin"] = o.hc & tags_c.str.contains(r"\blatin\b|minorcan|haitian|venezuelan|colombian|nicaraguan|puerto rican")
+# Minorcan (St. Augustine's Menorcan heritage: chowder, datil pepper) is Spanish, not Latin American: O'Steen's isn't on this list
+o["t_latin"] = o.hc & tags_c.str.contains(r"\blatin\b|haitian|venezuelan|colombian|nicaraguan|puerto rican")
 o["t_oldest"] = o.hc & pd.to_numeric(o.founded, errors="coerce").le(1960)
 if not APP:   # the web leaderboard also counts places 3+ Google reviews (2%+ of them) called out for it in 2021
     o["t_cuban"] |= strong(ment("cuban", "cafecito"))
@@ -895,6 +970,12 @@ if not APP:   # the web leaderboard also counts places 3+ Google reviews (2%+ of
     o["t_fishcamp"] |= strong(ment("fishdip"))
 o["honored"] = o.jbf.notna() | o.michelin.notna() | o.t_oldest
 o.loc[o.michelin.notna() & o.cuisine.eq("Bar & Pub"), "cuisine"] = "American & Other"
+# a hand-checked Cuban or Latin place is Latin & Caribbean, whatever its map category said (Sergio's "American & Other", Chef Creole
+# "Soul & Southern", Antojitos "Mexican", Q'kenan "Steakhouse", Columbia "European")
+o.loc[(o.t_cuban | o.t_latin) & ~o.cuisine.isin(["Latin & Caribbean", "Coffee & Café", "Bakery & Sweets", "Seafood"]), "cuisine"] = "Latin & Caribbean"
+# Italian ice is a dessert, and Pei Wei is a pan-Asian chain, not a diner
+o.loc[o.name_out.str.contains(r"italian ice|gelato", case=False), "cuisine"] = "Bakery & Sweets"
+o.loc[o.name_out.str.contains(r"^pei wei\b", case=False), "cuisine"] = "Chinese"
 o.loc[o.michelin.isin(["1 Star", "2 Stars", "3 Stars"]) & o.price_est.eq(1), "price"] = 4
 o.loc[o.honored | o.hc, "venue"] = False
 print("tags:", {t: int(o["t_" + t].sum()) for t in TAGS})
@@ -904,13 +985,33 @@ I = pd.read_parquet(f"{FL}/inspections.parquet")
 I = I[I.date >= pd.Timestamp("2023-07-01")].copy()
 I["d"] = I.date.dt.strftime("%Y-%m-%d")
 I["key"] = I.ltype.astype(str) + "|" + I.num.astype(str)
-I = I.sort_values(["key", "date", "visit"])
+# same-day visits: a new inspection's first visit comes after an older inspection's callback (Verona Grill once showed "Met" from
+# a callback on the day DBPR closed it)
+I["insp_i"] = pd.to_numeric(I.insp_no, errors="coerce")
+I = I.sort_values(["key", "date", "insp_i", "visit"])
 DISP = sorted(I.disp.dropna().unique().tolist())
 ITYPE = sorted(I.itype.dropna().unique().tolist())
 GRP = {"met": 0, "followup": 1, "closed": 2}
 by_key = {k: g for k, g in I.groupby("key")}
 C_ = pd.read_parquet(f"{FL}/closures.parquet")
 clo_by = {k: g.sort_values("date") for k, g in C_.groupby("num")}
+# the closure file gives the license number without its type, and catering, seating and other licenses share numbers: a closure
+# belongs to a license only if the name or the house number agrees (LongHorn once showed a caterer's roach closures). Closures filed
+# under 9999999 are matched by house number and town, and the name.
+from official import same_business, current_era
+from addr import street_nums as _snums
+clo_unk = collections.defaultdict(list)
+for r in C_[C_.num.eq("9999999")].itertuples():
+    for n_ in _snums(r.addr or ""):
+        clo_unk[(n_, (canon_city(r.city) or "").lower())].append(r)
+
+
+def closures_for(f):
+    rows = [r for r in (clo_by.get(f.num).itertuples() if clo_by.get(f.num) is not None else [])
+            if same_business(r.name, f["name"]) or (_snums(r.addr or "") & _snums(f.addr or ""))]
+    for n_ in _snums(f.addr or ""):
+        rows += [r for r in clo_unk.get((n_, (f.city or "").lower()), []) if same_business(r.name, f["name"])]
+    return sorted(rows, key=lambda r: r.date)
 R_ = pd.read_parquet(f"{FL}/discipline.parquet")
 fine_by = {k: g.sort_values("order_date") for k, g in R_.groupby("num")}
 cols_i = ["in_g", "in_disp", "in_d", "in_t", "in_rd", "in_hp", "in_im", "in_bs", "in_n", "in_eo", "in_hist", "in_cl", "in_fines", "lic_no", "seats"]
@@ -920,15 +1021,17 @@ for b in o.biz:
         recs.append([None] * len(cols_i)); continue
     f = F.loc[int(b)]
     g = by_key.get(f"{f.ltype}|{f.num}")
-    cl = clo_by.get(f.num)
+    if g is not None:
+        g = current_era(g, f["name"])   # the current business's visits only
+    cl = closures_for(f)
     fn = fine_by.get(f.num)
     cl_list = [[str(r.date.date()), r.reason, str(r.reopened.date()) if r.reopened == r.reopened and r.reopened is not None else None]
-               for r in cl.itertuples()] if cl is not None else []
+               for r in cl]
     fn_list = [[str(r.order_date.date()), int(r.fine) if r.fine == r.fine else None] for r in fn.itertuples()] if fn is not None else []
     if g is None or not len(g):
         recs.append([None] * 10 + [None, cl_list or None, fn_list or None, f.lic, int(f.seats)]); continue
     last = g.iloc[-1]
-    rout = g[g.itype.eq("Routine - Food")]
+    rout = g[g.itype.eq("Routine - Food") & g.visit.eq(1)]   # DBPR files callbacks as "Routine - Food" too: the counts come from first visits
     lr = rout.iloc[-1] if len(rout) else None
     hist = [[r.d, r.itype, r.disp, None if r.hp != r.hp else int(r.hp), None if r.im != r.im else int(r.im), None if r.bs != r.bs else int(r.bs), r.cats]
             for r in g.iloc[::-1].head(12).itertuples()]
@@ -984,6 +1087,34 @@ for (nm_, town), g in single.groupby([keyname[single.index], single.city]):
             if math.hypot((o.at[j, "lat"] - o.at[i, "lat"]) * 111, (o.at[j, "lon"] - o.at[i, "lon"]) * 99) < 0.4:
                 lose = i if rank[i] <= rank[j] else j
                 drop.add(lose); merged.append((j if lose == i else i, lose))
+# a hand-checked copy with no license next to its licensed twin under another town label (Columbia Sand Key was listed twice: as
+# "Indian Rocks Beach" with no license, pinned 7 km off by its research geocode, and as "Clearwater Beach" with its license). The
+# licensed record keeps its inspections and takes the verified name and the hand-checked facts. Twins: the same business by name,
+# within 150 m or at the same street address in the same county.
+_lic = o[o.official & ~o.index.isin(drop)]
+_by_addr = collections.defaultdict(list)
+for j, s_ in zip(_lic.index, _lic.street):
+    k_ = street_key(s_ or "")
+    if k_[0] and k_[1]:
+        _by_addr[k_].append(j)
+twins = 0
+for i in o.index[o.hc & ~o.official & ~o.index.isin(drop)]:
+    la, lo, nm = o.at[i, "lat"], o.at[i, "lon"], o.at[i, "name_out"]
+    cands = list(_by_addr.get(street_key(o.at[i, "street"] or ""), []))
+    if la == la:
+        near = _lic[(abs(_lic.lat - la) < 0.0015) & (abs(_lic.lon - lo) < 0.0016)]
+        cands += [j for j in near.index if math.hypot((o.at[j, "lat"] - la) * 111000, (o.at[j, "lon"] - lo) * 99000) <= 150]
+    for j in dict.fromkeys(cands):
+        if j in drop or (o.at[j, "county"] != o.at[i, "county"] and isinstance(o.at[i, "county"], str)):
+            continue
+        keys_ = [o.at[j, "name_out"]] + list(F.at[int(o.at[j, "off"]), "keys"] or []) if o.at[j, "off"] >= 0 else [o.at[j, "name_out"]]
+        if any(official.same_business(nm, k) for k in keys_):
+            if norm_name(o.at[j, "name_out"]) != norm_name(nm):
+                o.at[j, "aka"] = o.at[j, "name_out"]
+            o.at[j, "name_out"] = nm
+            drop.add(i); merged.append((j, i)); twins += 1
+            break
+print("hand-checked copies merged into their licensed twin:", twins)
 for keep_, lose in merged:
     for col in [c for c in o.columns if c.startswith("t_")] + ["hc", "honored"]:
         if bool(o.at[lose, col]) and not bool(o.at[keep_, col]):
@@ -1002,8 +1133,50 @@ adult = o.name_out.str.contains(r"gentlem[ae]n'?s club|exotic dancer|strip club|
                                 r"thee dollhouse|^pink pony|mons venus|club pink",
                                 case=False, regex=True) \
     | webs.str.contains(r"gentlemensclub|stripclub|cheetahclub|scoresclub|tootsies|kingofdiamonds|e11evenmiami|theedollhouse", case=False, regex=True)
+# most strip clubs hold an ordinary food service license under a plain trade name ("Sunset Eatery", "Italian beef", "Kemos Kitchen"),
+# so a name filter misses them: a checked list (license numbers, or name and address for unlicensed listings) and Overture's own
+# adult_entertainment_venue category, matched by name within 40 m
+AV = json.load(open(f"{DATA}/research/adult_venues.json"))["venues"] if os.path.exists(f"{DATA}/research/adult_venues.json") else []
+adult_lic = {v["lic"] for v in AV if v.get("lic")}
+adult |= o.lic_no.isin(adult_lic)
+for v in AV:
+    if v.get("lic"):
+        continue
+    num_ = street_key(v["address"])[0]
+    k_ = norm_name(v["name"])
+    adult |= (o.city.fillna("").str.lower() == (canon_city(v["city"]) or "").lower()) & o.name_out.map(lambda n: fuzz.token_set_ratio(norm_name(n), k_) >= 85) \
+        & o.street.fillna("").map(lambda s_: street_key(s_)[0] == num_)
+import duckdb
+_AO = duckdb.connect().execute(f"""SELECT name, lat, lon FROM '{FL}/overture_fl_bbox.parquet' WHERE region = 'FL' AND cat = 'adult_entertainment_venue'""").df()
+_AO = _AO[~_AO.name.str.contains(r"day ?care|swim|escape|consult|video|superstore|book|boutique|novelt|toys|lingerie|stress|massage", case=False)]
+for n_, la_, lo_ in zip(_AO.name, _AO.lat, _AO.lon):
+    near = (abs(o.lat - la_) < 0.0004) & (abs(o.lon - lo_) < 0.00045)
+    if near.any():
+        k_ = norm_name(n_)
+        adult |= near & o.name_out.map(lambda n: fuzz.token_set_ratio(norm_name(n), k_) >= 85)
+adult &= ~(o.hc | o.honored)   # a hand-checked or honored place is never dropped by an automatic rule
 print("adult clubs removed:", int(adult.sum()), o.name_out[adult].tolist()[:12])
 o = o[~adult].reset_index(drop=True)
+# last word on names: a place tied to a license whose current business has another name shows DBPR's name (checked here, after every
+# naming step, so no later step can bring a stale listing name back: "Ruby Tuesday" on Barnie's Coffee's airport license). The listing's
+# website and phone go with the old name. A hotel's or company's license keeps the restaurant's own name.
+_late = []
+for i_ in o.index[o.biz.notna() & o.src.ne("official") & ~o.hc]:
+    f_ = F.loc[int(o.at[i_, "biz"])]
+    nms = [o.at[i_, "name_out"]] + ([o.at[i_, "aka"]] if isinstance(o.at[i_, "aka"], str) else []) + [o.at[i_, "name"]]
+    if any(official.same_business(a_, k) for a_ in nms if isinstance(a_, str) for k in list(f_["keys"] or []) + [f_["name"]] + list(f_.dbas or [])):
+        continue
+    nm_ = clean_official(f_["name"], f_.dbas, brand_of(norm_name(f_["name"])))
+    if not nm_ or is_legal(nm_) or LEGALISH.search(nm_.upper()) or HOLDER.search(nm_.upper()):
+        continue
+    _late.append((o.at[i_, "name_out"], nm_))
+    o.at[i_, "name_out"] = tidy(nice(nm_) if nm_.isupper() else nm_, None)
+    o.at[i_, "aka"] = None
+    for c_ in ("web", "phone", "rsite"):
+        if c_ in o.columns:
+            o.at[i_, c_] = None
+    o.at[i_, "cuisine"] = pick_cuisine(None, norm_name(nm_), "", nm_)
+print("names replaced by DBPR's current business at export:", len(_late), _late[:10])
 smoke = o.name_out.str.contains(r"\bvape\b|smoke shop|\btobacco\b|cigar lounge|\bcbd\b|dispensary|head shop|cannabis|marijuana|\bkava\b|kratom", case=False, regex=True)
 o.loc[smoke, "venue"] = True
 fixes = json.load(open(f"{DATA}/research/name_fixes.json")) if os.path.exists(f"{DATA}/research/name_fixes.json") else []
@@ -1153,6 +1326,10 @@ if APP:
             p["in"] = [None if x.in_g != x.in_g or x.in_g is None else int(x.in_g), x.in_d]
             if isinstance(x.in_rd, str):
                 p["in"] += [r(x.in_hp), r(x.in_im), r(x.in_bs)]
+            # latest visit "Facility Temporarily Closed", but DBPR's closure report already shows the reopening: say so beside the badge
+            reo = [c_[2] for c_ in (x.in_cl or []) if p["in"][0] == 2 and c_[2] and c_[0] <= c_[2] and c_[0] >= x.in_d]
+            if reo:
+                p["in"] += [None] * (5 - len(p["in"])) + [max(reo)]
             dt_["in"] = {"dp": DISP.index(x.in_disp), "t": ITYPE.index(x.in_t), "n": int(x.in_n), "eo": int(x.in_eo),
                          "rd": x.in_rd if isinstance(x.in_rd, str) else None,
                          "h": [[d, ITYPE.index(t) if t in ITYPE else -1, DISP.index(dp) if dp in DISP else -1, hp, im, bs] for d, t, dp, hp, im, bs, cats in x.in_hist[:8]]}

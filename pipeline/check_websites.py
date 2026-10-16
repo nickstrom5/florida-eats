@@ -111,8 +111,30 @@ def regdom(host):
     return ".".join(parts[-2:])
 
 
+# pages on a real host that still aren't the place's own page (QA 2026-10-09): a map, a checkout session, one photo, a rewards sign-up
+NOT_OWN_PAGE = re.compile(r"^https?://(?:maps\.apple\.com|(?:[^/]*\.)?square\.link/|checkout\.square\.site|(?:[^/]*\.)?squareup\.com/(?:checkout|pay)"
+                          r"|(?:[^/]*\.)?facebook\.com/(?:photo|[^/]+/photos)|(?:[^/]*\.)?toasttab\.com/[^?#]*(?:rewards|signup|sign-up|giftcards|loyalty))", re.I)
+
+
+def _blocked(url, b):
+    """A blocked entry matches whole domains only: "restaurant.com" once rejected versaillesrestaurant.com (and 235 real sites in
+    Colorado). Entries ending in "." match a domain label (tripadvisor.*), entries with a path match host + path, the rest (a query
+    word like "preview=true") match anywhere."""
+    pr = urllib.parse.urlparse(url if "//" in url else "https://" + url)
+    host = pr.netloc.lower().split(":")[0].removeprefix("www.")
+    if "/" in b:
+        hb, _, pb = b.partition("/")
+        return (host == hb or host.endswith("." + hb)) and pr.path.lower().lstrip("/").startswith(pb)
+    if b.endswith("."):
+        return bool(re.search(r"(?:^|\.)" + re.escape(b), host))
+    if "." in b:
+        return host == b or host.endswith("." + b)
+    return b in url.lower()
+
+
 def bad_host(url):
-    return any(b in url.lower() for b in BAD_HOSTS) or bool(SHADY.search(regdom(urllib.parse.urlparse(url).netloc)))
+    return any(_blocked(url, b) for b in BAD_HOSTS) or bool(SHADY.search(regdom(urllib.parse.urlparse(url).netloc))) \
+        or bool(NOT_OWN_PAGE.search(url if "//" in url else "https://" + url))
 
 
 def news_page(url):
@@ -216,6 +238,19 @@ def check(url, ctx):
     return {"ok": True, "why": "ok", "final": final, "ship": ship, "where": where}
 
 
+def save(results, indent=None):
+    """Atomic: a temp file, then a rename. A checker stopped mid-save used to leave invalid JSON and lose every earlier check
+    (California lost 24,000 on 2026-10-07)."""
+    with lock_save:
+        tmp = OUT + ".tmp"
+        with open(tmp, "w") as f:
+            json.dump(dict(results), f, indent=indent)
+        os.replace(tmp, OUT)
+
+
+lock_save = threading.Lock()
+
+
 def main():
     # every link the export considered (written by florida.py, FL_APP=1), so a link dropped last time gets another chance
     cands = json.load(open(f"{ROOT}/data/fl/website_candidates.json"))
@@ -259,7 +294,7 @@ def main():
             done += 1
             if done % 500 == 0:
                 print(f"  {done}/{len(todo)}", flush=True)
-                json.dump(results, open(OUT, "w"))
+                save(results)
 
     with ThreadPoolExecutor(max_workers=24) as ex:
         list(ex.map(run, todo))
@@ -274,7 +309,7 @@ def main():
                 results[u] = {**results[u], "ok": True, "why": why}
         for u in urls[3:]:
             results[u] = {"ok": verdict, "why": why, "final": u, "ship": u, "at": TODAY, "v": RULES}
-    json.dump(results, open(OUT, "w"), indent=0)
+    save(results, indent=0)
     c = collections.Counter(v["why"] if not v["ok"] else "ok" for v in results.values())
     print("results:", c.most_common())
 

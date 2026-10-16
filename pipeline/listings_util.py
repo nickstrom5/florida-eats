@@ -3,6 +3,7 @@ import math
 from rapidfuzz import fuzz
 from common import name_sim, _stems, GENERIC, real_share, kind_conflict, town_words as all_town_words
 from addr import street_key, street_nums, street_compat
+from official import same_business
 
 
 def _close_words(a, b):
@@ -48,7 +49,9 @@ def official_match(L, R, one_to_one=False, town_words=frozenset(), street_col="s
                 not all(kind_conflict(k, rk) for rk in R["keys"].iat[j])
             if same_addr and rl == rl and la == la and dist > 2000:
                 same_addr = False
-            if (same_addr and (s >= 75 or shared)) or (dist <= 150 and s >= 88) or (dist <= 60 and s >= 80 and shared):
+            # and the names must be one business (official.same_business): at a shared address, "Thai Orchid" is not WHIT'S FROZEN CUSTARD
+            if ((same_addr and (s >= 75 or shared)) or (dist <= 150 and s >= 88) or (dist <= 60 and s >= 80 and shared)) \
+                    and any(same_business(k, rk) for rk in R["keys"].iat[j]):
                 pairs.append((s + (15 if same_addr else 0) - dist / 20, i, j))
     out, taken_l, taken_r = {}, set(), set()
     for sc, i, j in sorted(pairs, key=lambda t: -t[0]):

@@ -2,7 +2,7 @@
 <html lang="en" data-base="/florida-eats">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-BgJmbaINEQUFu7virxVOdfOaikMdCK8nl/GiBpr6iOc='; style-src 'sha256-Mnsxv+HXUWIqF26sZ7va49SqEF84pzvvTFR5EJkb7A4='; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-YfPxYBJDc639ac4gHFGjFpJLVatKf6JcrBZeF/tuACM='; style-src 'sha256-xg93jCQCIl9nEocf6kJXWS9sXZl90tI1bx04qaz3XNc='; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Florida Cities &amp; Towns: Restaurant Guides | Florida Eats</title>
 <meta name="description" content="Restaurant guides for 19 Florida cities and beach towns, from Miami and Miami Beach to Winter Park and Destin: Cuban food, seafood and honors.">
@@ -30,14 +30,19 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/florida-eats/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/florida-eats/apple-touch-icon.png">
 <link rel="manifest" href="/florida-eats/site.webmanifest">
+<link rel="preload" href="/florida-eats/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+  @font-face { font-family: "Archivo"; src: url("/florida-eats/fonts/archivo-latin.woff2") format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
+  @font-face { font-family: "IBM Plex Mono"; src: url("/florida-eats/fonts/IBMPlexMono-Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+  @font-face { font-family: "IBM Plex Mono"; src: url("/florida-eats/fonts/IBMPlexMono-SemiBold.ttf") format("truetype"); font-weight: 600; font-display: swap; }
   :root {
     --bg: #fbf5ea; --surface: #fff; --surface2: #f3ecdf; --rule: #e6dccb;
     --ink: #0b3c49; --ink2: #24505c; --muted: #56676c;
     --accent: #006d77; --accent2: #0b7f89; --on-accent: #fff; --orange: #f28c28; --lime: #b5d46a; --soft: #fde3c8; --limesoft: #e3efc4;
     --focus: #006d77;
     --radius: 16px;
-    --display: "Avenir Next Condensed", "HelveticaNeue-CondensedBold", "Arial Narrow", system-ui, sans-serif;
+    --display: "Archivo", "Avenir Next Condensed", "Arial Narrow", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root { --bg: #0b1f26; --surface: #10303a; --surface2: #163b46; --rule: #24505c; --ink: #eaf4f4; --ink2: #cfe2e4; --muted: #a8c2c6; --accent: #7fd3da; --accent2: #9fdfe4; --on-accent: #0b1f26; --focus: #f28c28; }
@@ -52,16 +57,21 @@
   .skip { position: absolute; left: -9999px; top: 0; background: var(--orange); color: #0b3c49; padding: 10px 14px; font-weight: 700; z-index: 10; }
   .skip:focus { left: 8px; top: 8px; }
   .wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
-  header.site { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0; border-bottom: 4px solid var(--orange); box-shadow: 0 4px 0 var(--lime); }
-  .logo { display: flex; align-items: center; gap: 10px; font: 800 22px/1 var(--display); text-transform: uppercase; letter-spacing: .01em; color: var(--accent); text-decoration: none; }
+  header.site { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0 14px; }
+  .stripes { display: grid; gap: 3px; margin: 0 0 4px; }
+  .stripes i { display: block; height: 6px; border-radius: 3px; background: var(--accent); }
+  .stripes i:nth-child(2) { background: var(--orange); }
+  .stripes i:nth-child(3) { background: var(--lime); }
+  .logo { display: flex; align-items: center; gap: 10px; font: 850 24px/1 var(--display); font-stretch: 68%; text-transform: uppercase; letter-spacing: .01em; color: var(--accent); text-decoration: none; }
   .logo svg { flex: 0 0 auto; border-radius: 7px; }
   header.site nav { display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: flex-end; }
   header.site nav a { color: var(--ink2); text-decoration: none; font-size: 15px; }
   header.site nav a:hover { color: var(--accent); text-decoration: underline; }
-  h1, h2 { font-family: var(--display); font-weight: 800; color: var(--accent); letter-spacing: -.005em; }
-  h1 { font-size: clamp(34px, 7.5vw, 54px); line-height: 1.04; margin: 0 0 16px; text-transform: uppercase; overflow-wrap: break-word; }
-  .kicker { font: 700 15px/1.4 -apple-system, system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
-  h2 { font-size: 32px; line-height: 1.1; margin: 0 0 10px; }
+  h1, h2 { font-family: var(--display); font-weight: 850; font-stretch: 68%; color: var(--accent); letter-spacing: -.005em; }
+  h1 { font-size: clamp(40px, 8.5vw, 64px); line-height: .95; margin: 0 0 18px; text-transform: uppercase; overflow-wrap: break-word; text-shadow: 3px 3px 0 var(--orange); }
+  .kicker { font: 600 13px/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
+  .kicker::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--orange); margin: 0 8px 1px 0; }
+  h2 { font-size: 34px; line-height: 1.02; margin: 0 0 10px; text-transform: uppercase; }
   h3 { font-size: 18px; margin: 0; line-height: 1.3; }
   .lede { font-size: 19px; color: var(--ink2); margin: 0 0 26px; }
   .hero { padding: 44px 0 28px; }
@@ -74,7 +84,7 @@
   .pill { font-size: 14px; color: var(--muted); }
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 28px 0 0; padding: 0; list-style: none; }
   .stats li { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 14px; }
-  .stats b { display: block; font: 800 30px/1 var(--display); color: var(--accent); }
+  .stats b { display: block; font: 600 28px/1 var(--mono); color: var(--accent); }
   .stats span { font-size: 14px; color: var(--muted); }
   .steps { display: grid; gap: 12px; list-style: none; margin: 0; padding: 0; }
   .step { display: flex; gap: 14px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px; }
@@ -86,6 +96,17 @@
   .shots p { font-size: 14px; color: var(--muted); margin: 8px 2px 0; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .card { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px; }
+  .card h3 { font: 800 21px/1.1 var(--display); font-stretch: 75%; text-transform: uppercase; letter-spacing: .01em; }
+  a.card.gc { display: flex; flex-direction: column; gap: 6px; border: 0; border-radius: 18px; min-height: 150px; }
+  a.card.gc b { font: 600 32px/1 var(--mono); margin-bottom: auto; }
+  a.card.gc p, a.card.gc h3 { color: inherit; }
+  a.card.gc p { opacity: .92; }
+  a.card.gc.gc-stonecrab p, a.card.gc.gc-fishcamp p { opacity: 1; }   /* ink on orange is 4.9:1 only at full strength (AA) */
+  a.card.gc.gc-cuban, a.card.gc.gc-oyster { background: #006d77; color: #fbf5ea; }
+  a.card.gc.gc-stonecrab, a.card.gc.gc-fishcamp { background: #f28c28; color: #0b3c49; }
+  a.card.gc.gc-grouper, a.card.gc.gc-latin { background: #b5d46a; color: #0b3c49; }
+  a.card.gc.gc-keys { background: #0b3c49; color: #fbf5ea; }
+  a.card.gc.gc-keys b { color: #b5d46a; }
   .card p { margin: 6px 0 0; color: var(--ink2); }
   a.card { display: block; text-decoration: none; color: var(--ink); }
   a.card:hover h3 { text-decoration: underline; color: var(--accent); }
@@ -140,6 +161,7 @@
     .grid2 { grid-template-columns: 1fr; }
     .stats { grid-template-columns: 1fr 1fr; }
     .toc { columns: 1; }
+    .toc a { display: inline-block; padding: 3px 0; }
     header.site { flex-direction: column; align-items: flex-start; }
     header.site nav { justify-content: flex-start; }
     header.site nav a, footer nav a, nav.crumbs a { display: inline-block; padding: 10px 0; }
@@ -170,6 +192,27 @@
  ]
 }
 </script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "Organization",
+ "@id": "https://nickstrom5.github.io/florida-eats/#org",
+ "name": "Florida Eats",
+ "url": "https://nickstrom5.github.io/florida-eats/",
+ "logo": {
+  "@type": "ImageObject",
+  "url": "https://nickstrom5.github.io/florida-eats/icon-512.png",
+  "width": 512,
+  "height": 512
+ },
+ "parentOrganization": {
+  "@type": "Organization",
+  "@id": "https://eatsranked.com/#organization",
+  "name": "Eats Ranked",
+  "url": "https://eatsranked.com/"
+ }
+}
+</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -184,6 +227,7 @@
       <a href="/florida-eats/explore/">Search</a>
     </nav>
   </header>
+  <div class="stripes" aria-hidden="true"><i></i><i></i><i></i></div>
 <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="/florida-eats/">Home</a></li><li aria-current="page">Cities</li></ol></nav>
   <main id="main">
   <section class="hero">
@@ -193,7 +237,7 @@
   </section>
   <section id="cities-list">
     <h2>Pick a town</h2>
-    <div class="grid2"><a class="card" href="/florida-eats/cities/miami.html"><h3>Miami</h3><p>MICHELIN &amp; James Beard (40), Cuban sandwiches &amp; cafecito (16), Latin &amp; Caribbean food (10), stone crabs (3) and oyster bars (2). 3,436 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/miami-beach.html"><h3>Miami Beach</h3><p>MICHELIN &amp; James Beard (13), Cuban sandwiches &amp; cafecito (3), Latin &amp; Caribbean food (2), stone crabs (1), key lime pie &amp; conch (1) and oldest restaurants (1). 726 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/tampa.html"><h3>Tampa</h3><p>MICHELIN &amp; James Beard (28), Cuban sandwiches &amp; cafecito (9), Latin &amp; Caribbean food (3), oldest restaurants (2) and oyster bars (1). 2,233 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/orlando.html"><h3>Orlando</h3><p>MICHELIN &amp; James Beard (50), Cuban sandwiches &amp; cafecito (2), Latin &amp; Caribbean food (2), oyster bars (1) and oldest restaurants (1). 3,540 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/jacksonville.html"><h3>Jacksonville</h3><p>Cuban sandwiches &amp; cafecito (4), Latin &amp; Caribbean food (3), MICHELIN &amp; James Beard (3), fish camps &amp; smoked fish (2), oyster bars (1) and oldest restaurants (1). 2,204 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/st-petersburg.html"><h3>St. Petersburg</h3><p>MICHELIN &amp; James Beard (6), stone crabs (2), grouper &amp; seafood shacks (2), oyster bars (2), fish camps &amp; smoked fish (2), Cuban sandwiches &amp; cafecito (1) and oldest restaurants (1). 820 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/fort-lauderdale.html"><h3>Fort Lauderdale</h3><p>MICHELIN &amp; James Beard (6), stone crabs (1), key lime pie &amp; conch (1), oyster bars (1), fish camps &amp; smoked fish (1) and oldest restaurants (1). 1,039 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/key-west.html"><h3>Key West</h3><p>Key lime pie &amp; conch (9), oyster bars (4), Cuban sandwiches &amp; cafecito (3), fish camps &amp; smoked fish (2), MICHELIN (2), grouper &amp; seafood shacks (1) and oldest restaurants (1). 382 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/sarasota.html"><h3>Sarasota</h3><p>Oyster bars (3), MICHELIN (3), Cuban sandwiches &amp; cafecito (1), grouper &amp; seafood shacks (1), fish camps &amp; smoked fish (1) and oldest restaurants (1). 854 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/naples.html"><h3>Naples</h3><p>Grouper &amp; seafood shacks (3), stone crabs (2), MICHELIN &amp; James Beard (2), Cuban sandwiches &amp; cafecito (1) and oyster bars (1). 878 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/pensacola.html"><h3>Pensacola</h3><p>Oyster bars (4) and MICHELIN (1). 696 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/st-augustine.html"><h3>St. Augustine</h3><p>Oyster bars (4), MICHELIN &amp; James Beard (4), Cuban sandwiches &amp; cafecito (3), Latin &amp; Caribbean food (3) and fish camps &amp; smoked fish (2). 543 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/west-palm-beach.html"><h3>West Palm Beach</h3><p>MICHELIN &amp; James Beard (6) and Cuban sandwiches &amp; cafecito (1). 663 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/apalachicola.html"><h3>Apalachicola</h3><p>Oyster bars (4), Cuban sandwiches &amp; cafecito (1), grouper &amp; seafood shacks (1), fish camps &amp; smoked fish (1) and Latin &amp; Caribbean food (1). 23 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/kissimmee.html"><h3>Kissimmee</h3><p>Latin &amp; Caribbean food (8) and Cuban sandwiches &amp; cafecito (2). 795 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/coral-gables.html"><h3>Coral Gables</h3><p>MICHELIN (7) and Cuban sandwiches &amp; cafecito (2). 261 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/key-largo.html"><h3>Key Largo</h3><p>Key lime pie &amp; conch (7) and stone crabs (2). 84 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/winter-park.html"><h3>Winter Park</h3><p>MICHELIN &amp; James Beard (6) and Cuban sandwiches &amp; cafecito (1). 265 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/destin.html"><h3>Destin</h3><p>Grouper &amp; seafood shacks (4), oyster bars (2), fish camps &amp; smoked fish (1) and MICHELIN (1). 197 places to eat in all.</p></a></div>
+    <div class="grid2"><a class="card" href="/florida-eats/cities/miami.html"><h3>Miami</h3><p>MICHELIN &amp; James Beard (43), Cuban sandwiches &amp; cafecito (15), Latin &amp; Caribbean food (9), stone crabs (3) and oyster bars (3). 3,595 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/miami-beach.html"><h3>Miami Beach</h3><p>MICHELIN &amp; James Beard (11), Cuban sandwiches &amp; cafecito (3), Latin &amp; Caribbean food (2), stone crabs (1), key lime pie &amp; conch (1) and oldest restaurants (1). 714 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/tampa.html"><h3>Tampa</h3><p>MICHELIN &amp; James Beard (28), Cuban sandwiches &amp; cafecito (9), Latin &amp; Caribbean food (3) and oldest restaurants (2). 2,228 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/orlando.html"><h3>Orlando</h3><p>MICHELIN &amp; James Beard (50), Cuban sandwiches &amp; cafecito (2), Latin &amp; Caribbean food (2), oyster bars (1) and oldest restaurants (1). 3,523 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/jacksonville.html"><h3>Jacksonville</h3><p>Cuban sandwiches &amp; cafecito (4), Latin &amp; Caribbean food (3), MICHELIN &amp; James Beard (3), fish camps &amp; smoked fish (2), oyster bars (1) and oldest restaurants (1). 2,206 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/st-petersburg.html"><h3>St. Petersburg</h3><p>MICHELIN &amp; James Beard (6), stone crabs (2), grouper &amp; seafood shacks (2), Cuban sandwiches &amp; cafecito (1), oyster bars (1) and fish camps &amp; smoked fish (1). 811 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/fort-lauderdale.html"><h3>Fort Lauderdale</h3><p>MICHELIN &amp; James Beard (6), key lime pie &amp; conch (1), oyster bars (1), fish camps &amp; smoked fish (1) and oldest restaurants (1). 1,020 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/key-west.html"><h3>Key West</h3><p>Key lime pie &amp; conch (10), oyster bars (4), Cuban sandwiches &amp; cafecito (3), fish camps &amp; smoked fish (2), MICHELIN (2), grouper &amp; seafood shacks (1) and oldest restaurants (1). 381 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/sarasota.html"><h3>Sarasota</h3><p>Oyster bars (3), MICHELIN (3), Cuban sandwiches &amp; cafecito (1), grouper &amp; seafood shacks (1), fish camps &amp; smoked fish (1) and oldest restaurants (1). 849 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/naples.html"><h3>Naples</h3><p>Grouper &amp; seafood shacks (3), stone crabs (2), MICHELIN &amp; James Beard (2), Cuban sandwiches &amp; cafecito (1) and oyster bars (1). 875 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/pensacola.html"><h3>Pensacola</h3><p>Oyster bars (4) and MICHELIN (1). 698 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/st-augustine.html"><h3>St. Augustine</h3><p>Oyster bars (4), MICHELIN &amp; James Beard (4), Cuban sandwiches &amp; cafecito (3), fish camps &amp; smoked fish (2) and Latin &amp; Caribbean food (1). 545 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/west-palm-beach.html"><h3>West Palm Beach</h3><p>MICHELIN &amp; James Beard (6) and Cuban sandwiches &amp; cafecito (1). 665 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/apalachicola.html"><h3>Apalachicola</h3><p>Oyster bars (4), Cuban sandwiches &amp; cafecito (1), grouper &amp; seafood shacks (1), fish camps &amp; smoked fish (1) and Latin &amp; Caribbean food (1). 23 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/kissimmee.html"><h3>Kissimmee</h3><p>Latin &amp; Caribbean food (7). 758 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/coral-gables.html"><h3>Coral Gables</h3><p>MICHELIN (7) and Cuban sandwiches &amp; cafecito (2). 261 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/key-largo.html"><h3>Key Largo</h3><p>Key lime pie &amp; conch (7) and stone crabs (2). 84 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/winter-park.html"><h3>Winter Park</h3><p>MICHELIN &amp; James Beard (7) and Cuban sandwiches &amp; cafecito (1). 265 places to eat in all.</p></a><a class="card" href="/florida-eats/cities/destin.html"><h3>Destin</h3><p>Grouper &amp; seafood shacks (4), oyster bars (2), fish camps &amp; smoked fish (1) and MICHELIN (1). 206 places to eat in all.</p></a></div>
   </section>
   </main>
   <footer>
@@ -213,15 +257,15 @@
       <a href="/florida-eats/cities/">Cities and towns</a>
       <a href="/florida-eats/privacy.html">Privacy policy</a>
       <a href="/florida-eats/terms.html">Terms of use</a>
-      <a href="mailto:work-with-nick@gmail.com">Email us</a>
+      <a href="mailto:nick@eatsranked.com">Email us</a>
     </nav>
     <p>Place data: hand-checked research by Florida Eats (fall 2026); Florida Department of Business and Professional Regulation, Division of Hotels and Restaurants: food service licenses, inspections and emergency closure reports (public records, Chapter 119, Florida Statutes); Overture Maps Foundation places (CDLA Permissive 2.0) and addresses (open address sources under permissive licenses, docs.overturemaps.org/attribution); map outlines © OpenStreetMap contributors, Overture Maps Foundation (ODbL); U.S. Census Bureau Geocoder (public domain). Not affiliated with or endorsed by the State of Florida, DBPR, any restaurant or chain, Walt Disney World, Universal Orlando, the MICHELIN Guide or the James Beard Foundation. MICHELIN and the MICHELIN Guide are trademarks of Michelin; James Beard Foundation and James Beard Award are trademarks of the James Beard Foundation. Places open and close, so check before you go.</p>
-    <p>© 2026 Florida Eats.</p>
+    <p>© 2026 Florida Eats. Part of <a href="https://eatsranked.com/" rel="noopener">Eats Ranked</a>, restaurant apps state by state.</p>
   </footer>
 </div>
 <script>
   // Once the App Store listing exists, paste its URL here (looks like https://apps.apple.com/app/id123456789).
-  // Every button switches from "Get early access" to "Download on the App Store" automatically (then use Apple's badge artwork,
+  // Every button switches from "Ask for early access" to "Download on the App Store" automatically (then use Apple's badge artwork,
   // see store_button() in scripts/make-site.py). Also fill in the apple-itunes-app meta tag in <head> on every page, and put the
   // MobileApplication "offers" back in the landing page's JSON-LD (re-run scripts/make-site.py after editing it there).
   var APP_STORE_URL = "";

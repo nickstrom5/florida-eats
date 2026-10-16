@@ -11,12 +11,21 @@ Three products share this folder and one data pipeline (built 2026-10-07 from th
 - **The website** in `docs/` (GitHub Pages): https://nickstrom5.github.io/florida-eats/ until Nick's Cloudflare `CNAME florida → nickstrom5.github.io`
   (DNS only) resolves; then `FL_DOMAIN=florida.eatsranked.com` for `scripts/make-site.py` (it writes `docs/CNAME`).
 
-Nick's calls (2026-10-07): the name above, the flat stone crab claw icon (`scripts/make-brand.swift`, concept A of `scripts/icon-concepts.swift`),
-the landscape palette (Gulf teal #006D77 for text and accents; citrus orange #F28C28 and key lime #B5D46A only as fills under ink #0B3C49 text;
+Nick's calls (2026-10-07): the name above, a stone crab claw icon, the landscape palette (Gulf teal #006D77 for text and accents; citrus orange #F28C28 and key lime #B5D46A only as fills under ink #0B3C49 text;
 sand #FBF5EA). Light mode only in the app.
+Icon (Nick, 2026-10-09: every state icon matches the Chicago and Wisconsin style): a flat, level, centred stone crab claw with its
+black-tipped pincer wide open, on flat Gulf teal, no wave and no tilt. `scripts/make-brand.swift` draws it (copied from
+`../state-prompts/icon-style/approved/fl/icon.swift`); check the 1024 with `swift ../state-prompts/icon-style/check.swift`. Never bring
+back the 2026-10-07 tilted claw over a wave (concept A of `scripts/icon-concepts.swift`) or add scenery, tilt or gradients.
+Design (Nick's pick, 2026-10-09, row D of the private design canvas; its link is in the session memory): the "Postcard" setup
+(Greetings-from eyebrow, title with a hard orange shadow, three motel stripes, color-block guide cards) with the "Gulf Chart" lettering:
+Archivo condensed heavy caps (wdth 68, wght 850) for titles and IBM Plex Mono for numbers and small labels. Both SIL OFL 1.1: the app
+bundles them (`FloridaEats/Resources/Fonts`, `BrandFont`, `displayFont`/`monoFont` in `Design/Theme.swift`), the site self-hosts them
+(`scripts/make-webfonts.py` → `docs/fonts/`; IBM Plex is a Reserved Font Name, so its files ship unmodified), the leaderboard loads them
+from Google Fonts. The eatsranked.com hub card keeps the hub's shared design (colors and icon only).
 
 ## Data rules (the app's promise)
-- **Florida DBPR is the official base.** The Division of Hotels and Restaurants licenses and inspects every restaurant and publishes the
+- **Florida DBPR is the official base.** The Division of Hotels and Restaurants licenses and inspects public food service establishments and publishes the
   files weekly (public records, Ch. 119 F.S.; `playbook/12-sources.md`). Every current seating/non-seating license is a place; Overture
   listings that match one lend it a map point, website and category; unmatched listings are kept only for café-type places and bars (FDACS
   licenses many cafés) when confident (`pipeline/florida.py` keep rule, measured by `pipeline/calibrate.py`).
@@ -33,11 +42,25 @@ sand #FBF5EA). Light mode only in the app.
 - Hand-checked places show their verified name (MICHELIN's spelling, then the place's own site, then James Beard's); the listing's name stays
   searchable as `aka`.
 - Website links: `pipeline/check_websites.py` (polite, honest UA, resumable). Re-run it before each submission, then rebuild with `FL_APP=1`.
+  `pipeline/website_blocklist.json` lists hacked, expired or wrong-business sites (`match`: `domain` = that domain and its subdomains,
+  or `url` = that URL only). `scripts/make-site.py` drops those links (never the place) from every page and web-app data file, and
+  `scripts/qa-site.py` fails if one appears anywhere in `docs/` or the list is empty. The app export doesn't read it yet: until it
+  does, the app's bundled detail files keep those links (2026-10-12: mrsouvlaki.net, gianniitaliano.com, istanbulfoodlovers.com).
 - A place shows a license's inspections only if it is that business. Name matches never count a shared town word ("Miami Subs" is not
   "Wok N Roll Miami") or ignore conflicting food words ("fish" vs "tea"), and name-only geocoding needs the same house number
   (`common.real_share`, `common.kind_conflict`, `geocode.py`). `pipeline/qa_licenses.py` lists any place whose license disagrees on both
   name and house number; fix the cause, or add the place id to its `OK` set with the reason. `pipeline/qa_curated.py` checks that each
   researched place landed on the branch at its researched address (the name-only fallback never takes another branch).
+- A license's inspections and match names come from its current business only (`official.current_era`): when a restaurant changes
+  hands the license number often stays, and visits under the previous business's name are not this place's. Same-day visits sort by
+  inspection number, then visit; "latest routine inspection" counts come from first visits, not callbacks (DBPR files those as
+  "Routine - Food" too). Closures join a license only when the name or house number agrees (the closure file has no license type).
+- A map listing tied to a license whose current business has another name takes DBPR's name (the listing can be a closed tenant's);
+  a hotel's or company's license keeps the restaurant's own name.
+- Adult clubs: `data/research/adult_venues.json` (license numbers or name and address, each with its reason) plus Overture's
+  `adult_entertainment_venue` category by name within 40 m; a unit test guards the license numbers. Most hold plain trade names.
+- Research sources: `pipeline/check_sources.py` robots-checks every cited host (cache `data/research/source_hosts.json`); the
+  pipeline never uses a blocked-host source, and a guide entry with no source we may use waits (Punta Cana, 2026-10-09).
 - Places the research finds closed go in `data/research/app/closed_*.json` with a source; they're matched by name, never by address alone
   (a new business often sits at a closed one's address).
 
@@ -50,8 +73,11 @@ cd pipeline && ../.venv/bin/python dbpr.py && ../.venv/bin/python geocode.py && 
 ../.venv/bin/python calibrate.py && ../.venv/bin/python reviews.py   # reviews: web leaderboard only
 ../.venv/bin/python florida.py && FL_APP=1 ../.venv/bin/python florida.py
 ../.venv/bin/python qa_licenses.py && ../.venv/bin/python qa_curated.py && cd ..   # own license; hand-checked facts on the right branch
+# before a release: ../.venv/bin/python pipeline/check_sources.py (robots-check every research source; exits 1 on a blocked one)
 cp data/app/places.json data/app/detail-*.json FloridaEats/Resources/
 .venv/bin/python scripts/make-leaderboard.py && .venv/bin/python scripts/make-site.py && .venv/bin/python scripts/qa-site.py
+# after new app screenshots (scripts/capture-screenshots.sh): bash scripts/site-images.sh, then make-site.py again (landing-page copies)
+# qa-site.py serves docs/ on a random port; QA_PORT=<port> pins it (the machine is shared), QA_DOCS=<dir> checks a copy
 ```
 The machine is shared and often heavily loaded: run long jobs with `nohup … &` and `python -u`, and never start a second copy of a job.
 
@@ -73,4 +99,4 @@ The machine is shared and often heavily loaded: run long jobs with `nohup … &`
 Creating the public repo `nickstrom5/florida-eats`, pushing, Pages, anything in App Store Connect, uploads, emails, records requests.
 Never submit for review or accept agreements. Public commits: `git -c user.name="Nick Soderstrom" -c user.email="329204362+nickstrom5@users.noreply.github.com" commit`.
 Only `docs/`, the app source and scripts go public: never `data/`, `site/` (Google-derived) or downloaded files (see `.gitignore`).
-Support email: work-with-nick@gmail.com.
+Support email: the website shows nick@eatsranked.com (Nick, 2026-10-12; Cloudflare Email Routing), and qa-site.py fails if work-with-nick@gmail.com appears anywhere in docs/. The app (FloridaEats/App/Links.swift) and the App Store listing files still say work-with-nick@gmail.com until the next build.

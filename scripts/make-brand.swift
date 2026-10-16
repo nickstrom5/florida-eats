@@ -1,5 +1,8 @@
-// Regenerates the brand images: the app icon (a flat stone crab claw on Gulf teal with a low wave, Nick's pick 2026-10-07, concept A
-// of scripts/icon-concepts.swift), playbook/brand/, and the site's og.png, favicons and manifest icons.
+// Regenerates the brand images: the app icon, playbook/brand/, and the site's og.png, favicons and manifest icons.
+// The icon (Nick's approval 2026-10-09, the Eats Ranked icon style shared by every state): a flat, level stone crab claw with its
+// black-tipped pincer wide open, centred on flat Gulf teal, no wave and no tilt. `claw` is copied from
+// ../state-prompts/icon-style/approved/fl/icon.swift; check the 1024 with ../state-prompts/icon-style/check.swift.
+// It replaced the 2026-10-07 tilted claw over a wave (concept A of scripts/icon-concepts.swift).
 // Usage: swift scripts/make-brand.swift ["50,000+"]   (run from fl-eats/; the argument is the restaurant count on the share image)
 import AppKit
 import CoreGraphics
@@ -8,7 +11,7 @@ let root = FileManager.default.currentDirectoryPath
 func rgb(_ hex: UInt32, _ a: CGFloat = 1) -> CGColor {
     CGColor(srgbRed: CGFloat((hex >> 16) & 255) / 255, green: CGFloat((hex >> 8) & 255) / 255, blue: CGFloat(hex & 255) / 255, alpha: a)
 }
-let teal = rgb(0x006D77), teal2 = rgb(0x0B7F89), white = rgb(0xFFFFFF), ink = rgb(0x0B3C49), sand = rgb(0xFBF5EA)
+let teal = rgb(0x006D77), white = rgb(0xFFFFFF), ink = rgb(0x0B3C49), sand = rgb(0xFBF5EA)
 let orange = rgb(0xF28C28), lime = rgb(0xB5D46A)
 
 func canvas(_ w: Int, _ h: Int, _ draw: (CGContext) -> Void) -> CGImage {
@@ -24,60 +27,64 @@ func save(_ img: CGImage, _ path: String) {
     try! NSBitmapImageRep(cgImage: img).representation(using: .png, properties: [:])!.write(to: url)
     print("wrote", path)
 }
-func P(_ s: CGFloat, _ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: x * s, y: y * s) }
 
-/// The ground: Gulf teal with one low, lighter wave along the bottom.
-func ground(_ c: CGContext, _ s: CGFloat) {
-    c.setFillColor(teal); c.fill(CGRect(x: 0, y: 0, width: s, height: s))
-    let w = CGMutablePath()
-    w.move(to: P(s, 0, 0)); w.addLine(to: P(s, 0, 0.14))
-    w.addCurve(to: P(s, 0.5, 0.14), control1: P(s, 0.16, 0.21), control2: P(s, 0.34, 0.21))
-    w.addCurve(to: P(s, 1.0, 0.14), control1: P(s, 0.66, 0.07), control2: P(s, 0.84, 0.07))
-    w.addLine(to: P(s, 1, 0)); w.closeSubpath()
-    c.setFillColor(teal2); c.addPath(w); c.fillPath()
-}
-
-/// A: a stone crab claw, flat: orange palm with a cream underside, thick black-tipped pincers, a small joint at the base.
+/// Florida's food: a stone crab claw. Draws inside (0,0)-(s,s), centred, and paints no background (the og.png call
+/// `claw(c, 420)` keeps working). Design units are px of a 1024 canvas with the origin at the centre, y up.
 func claw(_ c: CGContext, _ s: CGFloat) {
+    let teal = rgb(0x006D77), orange = rgb(0xE8572A), cream = rgb(0xF7E4C8), black = rgb(0x17191A)
+    func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: x, y: y) }
+    func beyond(_ a: CGPoint, _ b: CGPoint) -> CGPath {   // the half-plane to the right of the line a -> b
+        let m = CGMutablePath(); let dx = b.x - a.x, dy = b.y - a.y
+        m.move(to: a); m.addLine(to: b); m.addLine(to: p(b.x + dy, b.y - dx)); m.addLine(to: p(a.x + dy, a.y - dx))
+        m.closeSubpath(); return m
+    }
     c.saveGState()
-    c.translateBy(x: s * 0.53, y: s * 0.53); c.rotate(by: 0.70); c.scaleBy(x: s * 1.02, y: s * 1.02)   // local units: claw points along +x
-    let orange = rgb(0xE8572A), orange2 = rgb(0xC4401A), cream = rgb(0xF7E4C8), black = rgb(0x17191A)
-    c.setFillColor(orange2); c.fillEllipse(in: CGRect(x: -0.50, y: -0.10, width: 0.20, height: 0.20))   // the joint
-    let lower = CGMutablePath()
-    lower.move(to: CGPoint(x: -0.02, y: -0.18))
-    lower.addCurve(to: CGPoint(x: 0.42, y: -0.015), control1: CGPoint(x: 0.18, y: -0.19), control2: CGPoint(x: 0.37, y: -0.12))
-    lower.addCurve(to: CGPoint(x: 0.31, y: -0.035), control1: CGPoint(x: 0.40, y: 0.012), control2: CGPoint(x: 0.35, y: -0.02))
-    lower.addCurve(to: CGPoint(x: 0.02, y: -0.005), control1: CGPoint(x: 0.21, y: -0.05), control2: CGPoint(x: 0.10, y: -0.03))
-    lower.closeSubpath()
-    let upper = CGMutablePath()
-    upper.move(to: CGPoint(x: -0.06, y: 0.18))
-    upper.addCurve(to: CGPoint(x: 0.42, y: 0.035), control1: CGPoint(x: 0.15, y: 0.23), control2: CGPoint(x: 0.37, y: 0.15))
-    upper.addCurve(to: CGPoint(x: 0.31, y: 0.05), control1: CGPoint(x: 0.41, y: 0.012), control2: CGPoint(x: 0.35, y: 0.035))
-    upper.addCurve(to: CGPoint(x: 0.02, y: 0.045), control1: CGPoint(x: 0.21, y: 0.07), control2: CGPoint(x: 0.10, y: 0.06))
-    upper.closeSubpath()
-    for f in [lower, upper] {
-        c.saveGState(); c.addPath(f); c.clip()
-        c.setFillColor(orange); c.fill(CGRect(x: -1, y: -1, width: 2, height: 2))
-        c.setFillColor(black); c.fill(CGRect(x: 0.25, y: -1, width: 1, height: 2))   // the black tips
-        c.restoreGState()
-    }
-    let palm = CGPath(ellipseIn: CGRect(x: -0.40, y: -0.20, width: 0.52, height: 0.40), transform: nil)
-    c.saveGState(); c.addPath(palm); c.clip()
-    c.setFillColor(orange); c.fill(CGRect(x: -1, y: -1, width: 2, height: 2))
+    c.translateBy(x: s / 2, y: s / 2); c.scaleBy(x: s / 1024, y: s / 1024)
+    c.setLineJoin(.round); c.setLineCap(.round)
+
+    // Palm: a small, squarish soft block.
+    let palm = CGPath(roundedRect: CGRect(x: -370, y: -238, width: 338, height: 436), cornerWidth: 120, cornerHeight: 120, transform: nil)
+    // Fixed (lower) finger: leaves the palm's flat underside and curls up to a point.
+    let fixed = CGMutablePath()
+    fixed.move(to: p(-272, -238))
+    fixed.addCurve(to: p(80, -199), control1: p(-153, -247), control2: p(-33, -235))
+    fixed.addCurve(to: p(237, -128), control1: p(135, -181), control2: p(188, -158))
+    fixed.addCurve(to: p(360, -6), control1: p(281, -98), control2: p(349, -62))
+    fixed.addCurve(to: p(-232, -13), control1: p(172, -78), control2: p(-42, -84))
+    fixed.closeSubpath()
+    // Movable (upper) finger: hinged at the palm's top front, opened wide, curling down to a point.
+    let dactyl = CGMutablePath()
+    dactyl.move(to: p(-202, 89))
+    dactyl.addCurve(to: p(86, 236), control1: p(-124, 166), control2: p(-23, 219))
+    dactyl.addCurve(to: p(240, 232), control1: p(137, 243), control2: p(190, 243))
+    dactyl.addCurve(to: p(370, 149), control1: p(285, 220), control2: p(361, 202))
+    dactyl.addCurve(to: p(-35, -51), control1: p(210, 169), control2: p(42, 93))
+    dactyl.closeSubpath()
+    // Black tips: each finger beyond a cut straight across it, about 63% of the way out.
+    let fixedBlack = beyond(p(293, -677), p(-20, 481))
+    let dactylBlack = beyond(p(261, -432), p(65, 751))
+    // Cream underside: below one hard curve across the palm and the fixed finger.
     let belly = CGMutablePath()
-    belly.move(to: CGPoint(x: -0.45, y: -0.08)); belly.addCurve(to: CGPoint(x: 0.16, y: -0.10), control1: CGPoint(x: -0.24, y: -0.15), control2: CGPoint(x: 0.0, y: -0.15))
-    belly.addLine(to: CGPoint(x: 0.16, y: -0.3)); belly.addLine(to: CGPoint(x: -0.45, y: -0.3)); belly.closeSubpath()
-    c.setFillColor(cream); c.addPath(belly); c.fillPath()
+    belly.move(to: p(-500, -75)); belly.addCurve(to: p(491, -195), control1: p(-206, -118), control2: p(99, -200))
+    belly.addLine(to: p(491, -512)); belly.addLine(to: p(-500, -512)); belly.closeSubpath()
+
+    // 1. The palm and the fixed finger (one piece of shell): orange, the cream underside, the fixed finger's black tip.
+    c.setFillColor(orange); c.addPath(palm); c.fillPath(); c.addPath(fixed); c.fillPath()
+    c.setFillColor(cream)
+    for part in [palm, fixed as CGPath] { c.saveGState(); c.addPath(part); c.clip(); c.addPath(belly); c.fillPath(); c.restoreGState() }
+    c.saveGState(); c.addPath(fixed); c.clip(); c.setFillColor(black); c.addPath(fixedBlack); c.fillPath(); c.restoreGState()
+    // 2. A 13 px Gulf-teal ring around the movable finger where it overlaps the palm (STYLE R7), so it reads as a hinged part.
+    c.saveGState(); c.addPath(palm); c.clip()
+    c.setStrokeColor(teal); c.setLineWidth(26); c.addPath(dactyl); c.strokePath()
     c.restoreGState()
-    c.setFillColor(orange2)
-    for (x, y, r) in [(-0.20, 0.09, 0.024), (-0.07, 0.11, 0.018), (-0.27, 0.01, 0.016), (0.02, 0.05, 0.015)] as [(CGFloat, CGFloat, CGFloat)] {
-        c.fillEllipse(in: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2))
-    }
+    // 3. The movable finger on top, with its black tip.
+    c.setFillColor(orange); c.addPath(dactyl); c.fillPath()
+    c.saveGState(); c.addPath(dactyl); c.clip(); c.setFillColor(black); c.addPath(dactylBlack); c.fillPath(); c.restoreGState()
     c.restoreGState()
 }
 
 func icon(_ size: Int) -> CGImage {
-    canvas(size, size) { c in let s = CGFloat(size); ground(c, s); claw(c, s) }
+    canvas(size, size) { c in let s = CGFloat(size); c.setFillColor(teal); c.fill(CGRect(x: 0, y: 0, width: s, height: s)); claw(c, s) }
 }
 
 func text(_ c: CGContext, _ str: String, font: NSFont, color: CGColor, at p: CGPoint) {

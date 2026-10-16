@@ -9,7 +9,8 @@ temporary events are left out: their address is a commissary or the owner's, not
 """
 import os, re, json
 import numpy as np, pandas as pd
-from common import FL, norm_name, canon_city
+from rapidfuzz import fuzz
+from common import FL, norm_name, canon_city, _stems, GENERIC, town_words, kind_conflict
 from addr import street_key
 
 KIND = {"SEAT": "restaurant", "NOST": "nonseating", "CATR": "catering", "PARK": "park"}
@@ -51,16 +52,62 @@ def _names(*vals):
     return out
 
 
+def same_business(a, b):
+    """Two names for one business: one's words inside the other's ("SUBWAY" / "SUBWAY 1234"), nearly the same spelling, or a distinctive
+    word in common that isn't a town ("FLACO'S CUBAN AND LATIN FOOD" / "FLACOS CUBAN BAKERY"). "LA FIESTA MEXICAN RESTAURANT" and
+    "RIO BRAVO" are two."""
+    # a note in parentheses isn't the name ("Thai Orchid restaurant (beach-kernan)", "(Downtown WPB)"), unless it names the business
+    # it used to be ("FAT CAT Pizza + Dogs (Formerly Original II)")
+    unnote = lambda x: re.sub(r"\s*\((?!\s*(?:formerly|fka|f/k/a|was)\b)[^)]*\)", " ", x if isinstance(x, str) else "", flags=re.I)
+    a, b = norm_name(unnote(a)), norm_name(unnote(b))
+    if not a or not b:
+        return True
+    if kind_conflict(a, b) and a != b:   # each says what it serves, and they disagree: FLAGLER FISH COMPANY isn't FLAGLER TEA COMPANY
+        return False
+    fa, fb = a.replace(" ", ""), b.replace(" ", "")
+    if fa in fb or fb in fa or fuzz.ratio(fa, fb) >= 85 or fuzz.token_set_ratio(a, b) >= 85:
+        return True
+    # a misspelling inside a longer name ("LITTLE CEASARS PIZZA", "CHURRULAND" / "CHURROLAND MIAMI"), or one chain ("DQ GRILL & CHILL")
+    if min(len(fa), len(fb)) >= 6 and fuzz.partial_ratio(fa, fb) >= 88:
+        return True
+    from brands import brand_of
+    ba = brand_of(a)
+    if ba and ba == brand_of(b):
+        return True
+    wa, wb = (_stems(a) - GENERIC) - town_words(), (_stems(b) - GENERIC) - town_words()
+    if wa & wb:
+        return True
+    return any(len(x) >= 5 and len(y) >= 5 and fuzz.ratio(x, y) >= 85 for x in wa for y in wb)   # "ATLACATL" / "ATLACAT"
+
+
+def current_era(g, name):
+    """A license's inspections from its current business only: the visits after the last one under a name that isn't this business's.
+    When a restaurant changes hands the license number often stays, so earlier visits (and their trade names) belong to the previous
+    business. g is sorted oldest first; returns the suffix (empty when even the latest visit was under another business's name)."""
+    ok = [same_business(d, name) if isinstance(d, str) else True for d in g.dba]
+    start = 0
+    for i, v in enumerate(ok):
+        if not v:
+            start = i + 1
+    return g.iloc[start:]
+
+
 def load(with_inactive=True):
     L = pd.read_parquet(f"{FL}/licenses.parquet")
     L = L[L["rank"].isin(list(KIND)) & L.status.isin(["20", "45"] if with_inactive else ["20"])].copy()
     geo = pd.read_parquet(f"{FL}/lic_geo.parquet") if os.path.exists(f"{FL}/lic_geo.parquet") else pd.DataFrame(columns=["lic", "lat", "lon", "geo"])
     L = L.merge(geo, on="lic", how="left")
-    I = pd.read_parquet(f"{FL}/inspections.parquet", columns=["ltype", "num", "dba"]) if os.path.exists(f"{FL}/inspections.parquet") else None
+    I = pd.read_parquet(f"{FL}/inspections.parquet", columns=["ltype", "num", "dba", "date", "insp_no", "visit"]) \
+        if os.path.exists(f"{FL}/inspections.parquet") else None
     dbas = {}
     if I is not None:
-        for (lt, n), g in I.drop_duplicates(["ltype", "num", "dba"]).groupby(["ltype", "num"]):
-            dbas[(lt, n)] = list(g.dba.dropna())
+        # match names: only the trade names of the license's current business (a former business's name would match a stale listing)
+        I["insp_i"] = pd.to_numeric(I.insp_no, errors="coerce")
+        I = I.sort_values(["ltype", "num", "date", "insp_i", "visit"])
+        cur = {(r.ltype, r.num): r.bname for r in L.itertuples()}
+        for (lt, n), g in I.groupby(["ltype", "num"]):
+            if (lt, n) in cur:
+                dbas[(lt, n)] = list(dict.fromkeys(current_era(g, cur[(lt, n)]).dba.dropna()))
     rows = []
     for r in L.itertuples():
         other = dbas.get((r.ltype, r.num), [])

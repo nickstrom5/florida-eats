@@ -83,7 +83,7 @@ def nice(s, addr=False):
 
 
 # ---------------------------------------------------------------- towns
-_ABBR = [(r"\bBCH\b", "BEACH"), (r"\bBCHS\b", "BEACHES"), (r"\bSPGS?\b|\bSPRGS?\b|\bSPRINGS?\b", "SPRINGS"), (r"\bGDNS?\b|\bGARDEN\b(?=$)", "GARDENS"),
+_ABBR = [(r"\bBCH\b", "BEACH"), (r"\bBCHS\b", "BEACHES"), (r"\bSPGS?\b|\bSPRGS?\b", "SPRINGS"), (r"\bGDNS?\b|\bGARDEN\b(?=$)", "GARDENS"),
          (r"\bHTS\b", "HEIGHTS"), (r"\bLK\b", "LAKE"), (r"\bPK\b", "PARK"), (r"\bPT\b", "PORT"), (r"\bFT\b", "FORT"), (r"\bMT\b", "MOUNT"),
          (r"\bVLG\b", "VILLAGE"), (r"\bSHRS\b", "SHORES"), (r"\bIS\b|\bISL\b", "ISLAND"), (r"\bCV\b", "COVE"), (r"\bPNTE\b", "PONTE"),
          (r"\bVDRA\b", "VEDRA"), (r"\bJAX\b", "JACKSONVILLE")]
@@ -116,7 +116,9 @@ def canon_city(c):
            "WESTPALMBEACH": "West Palm Beach", "NORTHPALMBEACH": "North Palm Beach", "PALMBEACHGARDENS": "Palm Beach Gardens",
            "MIAMIBEACH": "Miami Beach", "NORTHMIAMIBEACH": "North Miami Beach", "FORTLAUDERDALE": "Fort Lauderdale", "FORTMYERS": "Fort Myers",
            "FORTMYERSBEACH": "Fort Myers Beach", "NORTHFORTMYERS": "North Fort Myers", "FORTPIERCE": "Fort Pierce", "FORTWALTONBEACH": "Fort Walton Beach",
-           "FORTMEADE": "Fort Meade", "WINTERGARDENS": "Winter Garden", "KISSIMEE": "Kissimmee", "HIALIAH": "Hialeah", "FORTWHITE": "Fort White", "KEYWEST": "Key West", "KEYLARGO": "Key Largo", "KEYBISCAYNE": "Key Biscayne"}
+           "FORTMEADE": "Fort Meade", "WINTERGARDENS": "Winter Garden", "KISSIMEE": "Kissimmee", "HIALIAH": "Hialeah", "FORTWHITE": "Fort White", "KEYWEST": "Key West", "KEYLARGO": "Key Largo", "KEYBISCAYNE": "Key Biscayne",
+           "DANIA": "Dania Beach", "LAUDERDALEBYTHESE": "Lauderdale-by-the-Sea", "STAUGUSTINEBEAC": "St. Augustine Beach",
+           "STPETERSABURG": "St. Petersburg", "BELLVIEW": "Bellview", "STGEORGEISLAND": "St. George Island", "PENSACOLABEACH": "Pensacola Beach"}
     if key in fix:
         return fix[key]
     out = []
@@ -191,7 +193,7 @@ def town_words():
         cities = pd.read_parquet(f"{FL}/licenses.parquet", columns=["city_raw"]).city_raw.dropna().unique()
         words = {w for c in cities for w in norm_name(canon_city(c) or c).split() if len(w) >= 4}
         words |= set("""AMELIA SIESTA CAPTIVA LONGBOAT BRICKELL WYNWOOD YBOR KENDALL COCONUT DOWNTOWN MIDTOWN UPTOWN SOBE OLAS ANNA MARIA
-                        HUTCHINSON PERDIDO OKALOOSA SANTA ROSA DESTIN WALTON BAYSHORE""".split())
+                        HUTCHINSON PERDIDO OKALOOSA SANTA ROSA DESTIN WALTON BAYSHORE WPB JAX KERNAN BEACHES FTL TERMINAL CONCOURSE GATE AIRPORT""".split())
         _TOWN_WORDS = (words | {w[:-1] for w in words if len(w) > 3 and w.endswith("S")}) - GENERIC
     return _TOWN_WORDS
 

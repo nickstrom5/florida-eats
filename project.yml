@@ -42,6 +42,7 @@ targets:
         NSLocationWhenInUseUsageDescription: "Your location sorts Cuban spots, seafood shacks and restaurants by distance and shows where you are on the map. It stays on your device."
         ITSAppUsesNonExemptEncryption: false
         LSApplicationQueriesSchemes: [maps]
+        UIAppFonts: [Archivo-Variable.ttf, IBMPlexMono-Medium.ttf, IBMPlexMono-SemiBold.ttf]   # Resources/Fonts, SIL OFL 1.1
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.floridaeats.ios

@@ -11,6 +11,8 @@ final class AppModel {
     private(set) var loadError: String?
     private(set) var generated = ""
     private(set) var restaurantCount = 0
+    /// restaurants with a DBPR inspection result: the others are licensed by the Department of Agriculture or matched to no license
+    var inspectedCount: Int { places.filter { !$0.isVenue && $0.inspection != nil }.count }
     private(set) var calibration = Calibration(statewide: nil)
     private(set) var inspectionsThrough = ""
     /// the day DBPR's files were downloaded

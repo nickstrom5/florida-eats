@@ -283,6 +283,7 @@ final class FloridaEatsTests: XCTestCase {
         await m.load()
         XCTAssertTrue(m.isLoaded, m.loadError ?? "")
         XCTAssertEqual(DataGuards.adultVenues(m.places), [], "no strip club under its name")
+        XCTAssertEqual(DataGuards.adultLicensed(try DataGuards.bundledLicenses(m.places)), [], "no strip club under a plain trade name (data/research/adult_venues.json)")
         XCTAssertEqual(DataGuards.badWebsites(try DataGuards.bundledLinks(m.places)), [], "no directory, Google or news page as a restaurant's website")
         XCTAssertEqual(DataGuards.badNames(m.places), [], "no visible name ending in \u{201C} the\u{201D} or \u{201C} of\u{201D}, or just \u{201C}The\u{201D}")
         XCTAssertEqual(DataGuards.legalNames(m.places), [], "no licensee entity name (\u{201C}… LLC\u{201D}, \u{201C}… INC\u{201D}) shown as a place's name")
@@ -312,6 +313,7 @@ final class FloridaEatsTests: XCTestCase {
         let links = [(name: "A", id: "x1", url: "https://www.yelp.com/biz/some-place"), (name: "B", id: "x2", url: "https://www.miaminewtimes.com/restaurants/a-story-123"),
                      (name: "C", id: "x3", url: "https://smart.com/menu")]
         XCTAssertEqual(DataGuards.badWebsites(links).count, 2, "the guard catches a Yelp page and a news story, and not smart.com")
+        XCTAssertEqual(DataGuards.adultLicensed(["x1": "SEA1102230", "x2": "SEA2300159"]), ["x1: SEA1102230"], "the guard catches Cafe Risque's license, and not Akashi's")
         caught(DataGuards.adultVenues(m.places), 2, "a gentlemen's club")
         caught(DataGuards.badNames(m.places), 3, "\u{201C}Kitchen the\u{201D}")
         caught(DataGuards.legalNames(m.places), 4, "a licensee entity name")
@@ -344,7 +346,27 @@ enum DataGuards {
         return out
     }
 
-    static let adultNames = #"gentlem[ae]n['’]?s club|strip club|exotic dancer|cabaret|\bscores\b|^tootsies$|tootsie['’]?s cabaret|king of diamonds|booby trap|e11even"#
+    static let adultNames = #"gentlem[ae]n['’]?s club|strip club|exotic dancer|cabaret|\bscores\b|^tootsies$|tootsie['’]?s cabaret|king of diamonds|booby trap|e11even|cafe risqu|diamond dolls|playmates|penthouse club|gold club|showgirls|pure nude|naturally nude|vixens|teasers|peppermint hippo|climaxxx|g5ive|mons venus|thee dollhouse"#
+
+    /// strip clubs that hold an ordinary food service license under a plain trade name ("Sunset Eatery", "Italian beef"): their DBPR
+    /// license numbers, from data/research/adult_venues.json (checked 2026-10-08)
+    static let adultLicenses: Set<String> = ["NOS5816416", "SEA1102230", "SEA1305892", "SEA1506974", "SEA1600321", "SEA1608112", "SEA1608490", "SEA1609428", "SEA1617724", "SEA1621854", "SEA1621877", "SEA1622800", "SEA1623304", "SEA1624280", "SEA2315104", "SEA2322140", "SEA2323366", "SEA2325206", "SEA2326196", "SEA2328638", "SEA2333496", "SEA2334078", "SEA2334385", "SEA2335402", "SEA2336319", "SEA2336951", "SEA2609854", "SEA2612663", "SEA2614869", "SEA2706560", "SEA3901908", "SEA3911313", "SEA3918668", "SEA4606920", "SEA5807352", "SEA6008072", "SEA6013191", "SEA6020971", "SEA6100823", "SEA6102505", "SEA6211563", "SEA6214485", "SEA6217540", "SEA6218147", "SEA6218183", "SEA7407691"]
+
+    static func adultLicensed(_ licByID: [String: String]) -> [String] {
+        licByID.filter { adultLicenses.contains($0.value) }.map { "\($0.key): \($0.value)" }.sorted()
+    }
+
+    /// every DBPR license number in the bundled region detail files, by place id
+    static func bundledLicenses(_ places: [Place]) throws -> [String: String] {
+        var out: [String: String] = [:]
+        for region in Set(places.compactMap(\.region)) {
+            guard let url = Bundle.main.url(forResource: "detail-" + AppModel.regionSlug(region), withExtension: "json") else { continue }
+            for (id, d) in try JSONDecoder().decode([String: PlaceDetail].self, from: Data(contentsOf: url)) {
+                if let lic = d.lic { out[id] = lic }
+            }
+        }
+        return out
+    }
 
     static func adultVenues(_ places: [Place]) -> [String] {
         places.filter { $0.name.range(of: adultNames, options: [.regularExpression, .caseInsensitive]) != nil }.map { "\($0.name) [\($0.id)]" }

@@ -48,12 +48,19 @@ BASE = "" if CUSTOM_DOMAIN else f"/{REPO}"     # path prefix for root-relative l
 BRAND = "Florida Eats"
 APP_NAME = "Florida Eats: Restaurants"
 TAGLINE = "Cuban, seafood & more"
-EMAIL = "work-with-nick@gmail.com"
+EMAIL = "nick@eatsranked.com"   # Nick, 2026-10-12: the site's contact address (Cloudflare Email Routing)
 PUBLISHED = "2026-10-07"        # the site's first publication (Article datePublished)
-SITE_REV = "2026-10-07"         # the last change to this generator's own copy or code: bump it when you change the words
-POLICY_UPDATED = "2026-10-07"   # privacy policy and terms: bump only when their text changes
+SITE_REV = "2026-10-12"         # the last change to this generator's own copy or code: bump it when you change the words
+POLICY_UPDATED = "2026-10-12"   # privacy policy and terms: bump only when their text changes
 CHECKED = "fall 2026"
 STORAGE_PREFIX = "fleats-"      # the web app's localStorage keys (other state sites share the nickstrom5.github.io origin)
+# Florida Eats is one of the Eats Ranked state sites: the hub (eatsranked.com) lists it as a subOrganization, and every page says so
+# from this side too (the footer line and the Organization's parentOrganization), in Wisconsin's words.
+HUB = {"@type": "Organization", "@id": "https://eatsranked.com/#organization", "name": "Eats Ranked", "url": "https://eatsranked.com/"}
+ORG_ID = f"{DOMAIN}/#org"
+# the site's Organization as other pages name it (author, publisher): the same @id as the full node on the landing page
+ORG_REF = {"@type": "Organization", "@id": ORG_ID, "name": BRAND, "url": f"{DOMAIN}/",
+           "logo": {"@type": "ImageObject", "url": f"{DOMAIN}/icon-512.png", "width": 512, "height": 512}, "parentOrganization": HUB}
 
 # ---------------------------------------------------------------- data: the core file plus, when split out, the detail files
 D = json.load(open(f"{ROOT}/data/app/places.json"))
@@ -68,7 +75,7 @@ if D.get("v", 1) >= 2:
 def core_in(v):
     """The core file's inspection summary: a compact array [g, d] or [g, d, hp, im, bs] (older files: a dictionary)."""
     if isinstance(v, list):
-        return dict(zip(("g", "d", "hp", "im", "bs"), v))
+        return dict(zip(("g", "d", "hp", "im", "bs", "ro"), v))
     return v
 
 
@@ -144,6 +151,36 @@ def safe_url(u):
     return ""
 
 
+# Websites we must not link (pipeline/website_blocklist.json): hacked, expired or another business's site. Each entry is
+# {"domain", "match": "domain" (that registered domain and every subdomain) | "url" (that exact URL only), "place", "reason",
+# "severity", "evidence", "found"}. A blocked link is dropped, never the place: P.site is the only way a website reaches docs/
+# (the guide and city pages' links and JSON-LD sameAs, and the web app's detail files), so it drops there, and the place then shows
+# no website, like any place without one. qa-site.py fails if a blocked domain or URL appears anywhere in docs/. New entries need
+# no code change.
+BLOCKLIST = json.load(open(f"{ROOT}/pipeline/website_blocklist.json"))
+for _b in BLOCKLIST:
+    assert _b.get("match", "domain") in ("domain", "url") and (_b.get("url") or _b.get("domain")), f"bad blocklist entry {_b}"
+BLOCKED_LINKS = []   # (place, link) pairs the blocklist dropped from this build
+
+
+def url_key(u):
+    """A URL compared without its scheme, a leading www., a trailing slash or letter case."""
+    return re.sub(r"^(?:https?:)?//(?:www\.)?", "", str(u or "").strip().lower()).rstrip("/")
+
+
+def blocked_site(u):
+    host = (urllib.parse.urlsplit(u).hostname or "").rstrip(".").removeprefix("www.")
+    for b in BLOCKLIST:
+        if b.get("match", "domain") == "url":
+            if url_key(u) == url_key(b.get("url") or b["domain"]):
+                return b
+        else:
+            d = b["domain"].strip().lower().rstrip(".").removeprefix("www.")
+            if host == d or host.endswith("." + d):
+                return b
+    return None
+
+
 class P:
     """One place, with the same meaning the app gives each field (FloridaEats/Models/Place.swift)."""
 
@@ -167,6 +204,9 @@ class P:
         self.season = r.get("seas") or ""
         self.note = r.get("note") or ""
         self.site = safe_url(r.get("w"))
+        if self.site and blocked_site(self.site):
+            BLOCKED_LINKS.append((self.name, self.site))
+            self.site = ""   # the link goes, the place stays
         self.jbf = r.get("jbf") or ""
         self.h = r.get("h") or 0
         self.mi = r.get("mi") if r.get("mi") in range(1, len(MI)) else 0
@@ -291,14 +331,20 @@ FAVICON = "data:image/svg+xml," + LOGO.replace('width="30" height="30" ', "").re
 
 # Nick's palette: Gulf teal #006D77 for text and accents (6.1:1 on white, 5.6:1 on sand), citrus orange #F28C28 and key lime #B5D46A
 # only as fills under ink #0B3C49 text (4.9:1 and 7.2:1), sand #FBF5EA as the page tint, ink #0B3C49 for text.
+# Lettering (Nick's pick, 2026-10-09: the Postcard setup with the Gulf Chart lettering): Archivo condensed and heavy for headings,
+# IBM Plex Mono for numbers and small labels, both self-hosted in docs/fonts (scripts/make-webfonts.py, SIL OFL 1.1).
 CSS = """
+  @font-face { font-family: "Archivo"; src: url("/fonts/archivo-latin.woff2") format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
+  @font-face { font-family: "IBM Plex Mono"; src: url("/fonts/IBMPlexMono-Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+  @font-face { font-family: "IBM Plex Mono"; src: url("/fonts/IBMPlexMono-SemiBold.ttf") format("truetype"); font-weight: 600; font-display: swap; }
   :root {
     --bg: #fbf5ea; --surface: #fff; --surface2: #f3ecdf; --rule: #e6dccb;
     --ink: #0b3c49; --ink2: #24505c; --muted: #56676c;
     --accent: #006d77; --accent2: #0b7f89; --on-accent: #fff; --orange: #f28c28; --lime: #b5d46a; --soft: #fde3c8; --limesoft: #e3efc4;
     --focus: #006d77;
     --radius: 16px;
-    --display: "Avenir Next Condensed", "HelveticaNeue-CondensedBold", "Arial Narrow", system-ui, sans-serif;
+    --display: "Archivo", "Avenir Next Condensed", "Arial Narrow", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root { --bg: #0b1f26; --surface: #10303a; --surface2: #163b46; --rule: #24505c; --ink: #eaf4f4; --ink2: #cfe2e4; --muted: #a8c2c6; --accent: #7fd3da; --accent2: #9fdfe4; --on-accent: #0b1f26; --focus: #f28c28; }
@@ -313,16 +359,21 @@ CSS = """
   .skip { position: absolute; left: -9999px; top: 0; background: var(--orange); color: #0b3c49; padding: 10px 14px; font-weight: 700; z-index: 10; }
   .skip:focus { left: 8px; top: 8px; }
   .wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
-  header.site { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0; border-bottom: 4px solid var(--orange); box-shadow: 0 4px 0 var(--lime); }
-  .logo { display: flex; align-items: center; gap: 10px; font: 800 22px/1 var(--display); text-transform: uppercase; letter-spacing: .01em; color: var(--accent); text-decoration: none; }
+  header.site { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0 14px; }
+  .stripes { display: grid; gap: 3px; margin: 0 0 4px; }
+  .stripes i { display: block; height: 6px; border-radius: 3px; background: var(--accent); }
+  .stripes i:nth-child(2) { background: var(--orange); }
+  .stripes i:nth-child(3) { background: var(--lime); }
+  .logo { display: flex; align-items: center; gap: 10px; font: 850 24px/1 var(--display); font-stretch: 68%; text-transform: uppercase; letter-spacing: .01em; color: var(--accent); text-decoration: none; }
   .logo svg { flex: 0 0 auto; border-radius: 7px; }
   header.site nav { display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: flex-end; }
   header.site nav a { color: var(--ink2); text-decoration: none; font-size: 15px; }
   header.site nav a:hover { color: var(--accent); text-decoration: underline; }
-  h1, h2 { font-family: var(--display); font-weight: 800; color: var(--accent); letter-spacing: -.005em; }
-  h1 { font-size: clamp(34px, 7.5vw, 54px); line-height: 1.04; margin: 0 0 16px; text-transform: uppercase; overflow-wrap: break-word; }
-  .kicker { font: 700 15px/1.4 -apple-system, system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
-  h2 { font-size: 32px; line-height: 1.1; margin: 0 0 10px; }
+  h1, h2 { font-family: var(--display); font-weight: 850; font-stretch: 68%; color: var(--accent); letter-spacing: -.005em; }
+  h1 { font-size: clamp(40px, 8.5vw, 64px); line-height: .95; margin: 0 0 18px; text-transform: uppercase; overflow-wrap: break-word; text-shadow: 3px 3px 0 var(--orange); }
+  .kicker { font: 600 13px/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
+  .kicker::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--orange); margin: 0 8px 1px 0; }
+  h2 { font-size: 34px; line-height: 1.02; margin: 0 0 10px; text-transform: uppercase; }
   h3 { font-size: 18px; margin: 0; line-height: 1.3; }
   .lede { font-size: 19px; color: var(--ink2); margin: 0 0 26px; }
   .hero { padding: 44px 0 28px; }
@@ -335,7 +386,7 @@ CSS = """
   .pill { font-size: 14px; color: var(--muted); }
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 28px 0 0; padding: 0; list-style: none; }
   .stats li { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 14px; }
-  .stats b { display: block; font: 800 30px/1 var(--display); color: var(--accent); }
+  .stats b { display: block; font: 600 28px/1 var(--mono); color: var(--accent); }
   .stats span { font-size: 14px; color: var(--muted); }
   .steps { display: grid; gap: 12px; list-style: none; margin: 0; padding: 0; }
   .step { display: flex; gap: 14px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px; }
@@ -347,6 +398,17 @@ CSS = """
   .shots p { font-size: 14px; color: var(--muted); margin: 8px 2px 0; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .card { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px; }
+  .card h3 { font: 800 21px/1.1 var(--display); font-stretch: 75%; text-transform: uppercase; letter-spacing: .01em; }
+  a.card.gc { display: flex; flex-direction: column; gap: 6px; border: 0; border-radius: 18px; min-height: 150px; }
+  a.card.gc b { font: 600 32px/1 var(--mono); margin-bottom: auto; }
+  a.card.gc p, a.card.gc h3 { color: inherit; }
+  a.card.gc p { opacity: .92; }
+  a.card.gc.gc-stonecrab p, a.card.gc.gc-fishcamp p { opacity: 1; }   /* ink on orange is 4.9:1 only at full strength (AA) */
+  a.card.gc.gc-cuban, a.card.gc.gc-oyster { background: #006d77; color: #fbf5ea; }
+  a.card.gc.gc-stonecrab, a.card.gc.gc-fishcamp { background: #f28c28; color: #0b3c49; }
+  a.card.gc.gc-grouper, a.card.gc.gc-latin { background: #b5d46a; color: #0b3c49; }
+  a.card.gc.gc-keys { background: #0b3c49; color: #fbf5ea; }
+  a.card.gc.gc-keys b { color: #b5d46a; }
   .card p { margin: 6px 0 0; color: var(--ink2); }
   a.card { display: block; text-decoration: none; color: var(--ink); }
   a.card:hover h3 { text-decoration: underline; color: var(--accent); }
@@ -401,6 +463,7 @@ CSS = """
     .grid2 { grid-template-columns: 1fr; }
     .stats { grid-template-columns: 1fr 1fr; }
     .toc { columns: 1; }
+    .toc a { display: inline-block; padding: 3px 0; }
     header.site { flex-direction: column; align-items: flex-start; }
     header.site nav { justify-content: flex-start; }
     header.site nav a, footer nav a, nav.crumbs a { display: inline-block; padding: 10px 0; }
@@ -428,14 +491,15 @@ def crumbs(trail):
     return f'<nav class="crumbs" aria-label="Breadcrumb"><ol>{items}</ol></nav>', ld
 
 
-def store_button(label="Get early access"):
+def store_button(label="Ask for early access"):
     # A plain mailto button until launch: no Apple logo (Apple's marketing rules allow it only in the official badge). When
-    # APP_STORE_URL is set in page() below, swap this for Apple's "Download on the App Store" badge artwork.
+    # APP_STORE_URL is set in page() below, swap this for Apple's "Download on the App Store" badge artwork. Only Nick's internal
+    # TestFlight group exists (2026-10-13): the mailto asks, and no page copy promises an invite or a link.
     return (f'<a class="btn store-btn" href="mailto:{EMAIL}?subject=Florida%20Eats%20early%20access&amp;body=Send%20me%20the%20TestFlight%20link.">'
             f'<span class="store-label">{label}</span></a>')
 
 
-STORE_NOTE = "Free iPhone and iPad app, coming soon to the App Store."
+STORE_NOTE = "The free Florida Eats app for iPhone and iPad is on its way to the App Store."
 
 
 def sha256_src(s):
@@ -449,7 +513,7 @@ def csp_for(doc):
     return ("default-src 'none'; "
             f"script-src {' '.join(sha256_src(s) for s in scripts) or chr(39) + 'none' + chr(39)}; "
             f"style-src {' '.join(sha256_src(s) for s in styles) or chr(39) + 'none' + chr(39)}; "
-            "img-src 'self' data:; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'")
+            "img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'")
 
 
 CSP_SLOT = "__CSP__"
@@ -465,6 +529,8 @@ def page(path, title, desc, body, lds=(), robots="index,follow,max-image-preview
     assert 'style="' not in body, f"{path}: inline style attributes break the CSP"
     url = DOMAIN + "/" + ("" if path == "index.html" else path.removesuffix("index.html"))
     indexed = "noindex" not in robots
+    if not any("parentOrganization" in json.dumps(x) for x in lds):   # every page names its publisher and the Eats Ranked parent
+        lds = list(lds) + [{"@context": "https://schema.org", **ORG_REF}]
     og_alt = og_alt or f"{BRAND}: {TAGLINE}. Florida restaurants, with hand-checked Cuban sandwiches, stone crabs, oyster bars and the state's oldest places."
     ld = "\n".join(jsonld(x) for x in lds)
     canon = f'<link rel="canonical" href="{url}">\n' if indexed else ""
@@ -500,6 +566,7 @@ def page(path, title, desc, body, lds=(), robots="index,follow,max-image-preview
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>{CSS}{extra_css}</style>
 {ld}
 </head>
@@ -512,6 +579,7 @@ def page(path, title, desc, body, lds=(), robots="index,follow,max-image-preview
 {nav}
     </nav>
   </header>
+  <div class="stripes" aria-hidden="true"><i></i><i></i><i></i></div>
 {body}
   <footer>
     <nav aria-label="Footer">
@@ -524,12 +592,12 @@ def page(path, title, desc, body, lds=(), robots="index,follow,max-image-preview
       <a href="mailto:{EMAIL}">Email us</a>
     </nav>
     <p>{SOURCES_LINE}</p>
-    <p>© 2026 {BRAND}.</p>
+    <p>© 2026 {BRAND}. Part of <a href="{HUB['url']}" rel="noopener">Eats Ranked</a>, restaurant apps state by state.</p>
   </footer>
 </div>
 <script>
   // Once the App Store listing exists, paste its URL here (looks like https://apps.apple.com/app/id123456789).
-  // Every button switches from "Get early access" to "Download on the App Store" automatically (then use Apple's badge artwork,
+  // Every button switches from "Ask for early access" to "Download on the App Store" automatically (then use Apple's badge artwork,
   // see store_button() in scripts/make-site.py). Also fill in the apple-itunes-app meta tag in <head> on every page, and put the
   // MobileApplication "offers" back in the landing page's JSON-LD (re-run scripts/make-site.py after editing it there).
   var APP_STORE_URL = "";
@@ -544,6 +612,7 @@ def page(path, title, desc, body, lds=(), robots="index,follow,max-image-preview
 """
     if BASE:   # served under /florida-eats/: every root-relative link and asset gets the prefix
         doc = re.sub(r'(href|src|srcset)="/', rf'\1="{BASE}/', doc)
+        doc = doc.replace('url("/fonts/', f'url("{BASE}/fonts/')   # the self-hosted fonts in the CSS
     doc = doc.replace(CSP_SLOT, csp_for(doc), 1)   # hashed last, over the exact bytes the browser will see
     os.makedirs(os.path.dirname(f"{DOCS}/{path}"), exist_ok=True)
     open(f"{DOCS}/{path}", "w").write(doc)
@@ -649,8 +718,7 @@ def item_list(name, places, url, anchors):
 def article_ld(url, headline, desc):
     return {"@context": "https://schema.org", "@type": "Article", "headline": headline, "description": desc,
             "datePublished": PUBLISHED, "dateModified": TODAY, "inLanguage": "en", "mainEntityOfPage": url,
-            "image": f"{DOMAIN}/og.png", "author": {"@type": "Organization", "name": BRAND, "url": DOMAIN + "/"},
-            "publisher": {"@type": "Organization", "name": BRAND, "url": DOMAIN + "/", "logo": {"@type": "ImageObject", "url": f"{DOMAIN}/icon-512.png"}}}
+            "image": f"{DOMAIN}/og.png", "author": ORG_REF, "publisher": ORG_REF}
 
 
 # ---------------------------------------------------------------- counts shared by several pages
@@ -784,21 +852,23 @@ def towns_counts(places, k=8):
 def top_dishes(places, k=6, skip=()):
     c = Counter()
     for p in places:
-        for d in {x.strip().lower() for x in re.split(r"[;,]", p.r.get("dish") or "") if x.strip()}:
+        # sorted: a set's order changes from run to run, and ties in most_common() would reorder the copy on every rebuild
+        for d in sorted({x.strip().lower() for x in re.split(r"[;,]", p.r.get("dish") or "") if x.strip()}):
             if d not in skip:
                 c[d] += 1
     return ", ".join(f"{d} ({n})" for d, n in c.most_common(k) if n > 1)
 
 
-HOW_BUILT = ("How the list was built: each place was checked against a 2025 or 2026 source, such as its own website or menu, recent local "
-             "news or an official tourism listing, with the address checked. Places with no current source or a dead website were left "
-             "out. Nothing here comes from review sites, and the order is by region and town, not by anyone's rating. Menus change, so "
-             "check before you go.")
-APP_LINE = f"In the {BRAND} app, the same list sorts by distance from you, and each place opens Apple Maps' own card for live hours, photos and directions."
+HOW_BUILT = ("Our method: a place made the list only if a 2025 or 2026 source backed it up (its own site or menu, a dated local news "
+             "story or an official tourism listing) and its street address matched. No current source, or a website gone dark, and it "
+             "stayed off. Review sites played no part, and places run by region and town rather than by anybody's score. Menus change, "
+             "so call ahead.")
+APP_LINE = (f"On your phone, {BRAND} orders this list by how far each place is from you, and a tap opens Apple Maps' live card with "
+            "hours, photos and directions.")
 
 
 def checked_kicker():
-    return f"{BRAND} guide · checked {CHECKED}"
+    return f"{BRAND} · checked by hand, {CHECKED}"
 
 
 def seasonal_line(places):
@@ -820,7 +890,7 @@ guide_page(GUIDE_PATH["cuban"], "Florida Cuban sandwiches & cafecito", checked_k
            f"{plural(len(G), 'restaurant')}, bakeries and coffee windows across Florida known for Cuban sandwiches and Cuban coffee, each checked in {CHECKED} against a 2025–26 source: its own menu or site, recent local news or an official tourism listing. {n_mdade:,} are in Miami-Dade County and {n_tampa:,} in Hillsborough (Tampa).",
            f"""<h2>The sandwich and the coffee window</h2>
     <p>A Cuban sandwich is roast pork, ham, Swiss cheese, pickles and mustard on Cuban bread, pressed flat and hot. Tampa's version, from the Ybor City cigar-factory days, usually adds Genoa salami. The coffee comes strong and sweet: a cafecito is a single shot of Cuban espresso, and a colada is a bigger cup poured into thimble-sized cups to share, often from a walk-up window, the ventanita.</p>
-    <h2>What's on the list</h2>
+    <h2>The list at a glance</h2>
     <p>Towns with the most: {e(towns_counts(G))}. The dishes we found most often: {e(top_dishes(G))}.</p>
     <p>{HOW_BUILT}</p>
     <p>{APP_LINE}</p>""",
@@ -833,10 +903,10 @@ guide_page(GUIDE_PATH["stonecrab"], "Florida stone crab", f"{checked_kicker()} �
            [f"{plural(len(G), 'Florida place')} for stone crab claws, checked in {CHECKED} against a 2025–26 source. The FWC season runs October 15 to May 1. By region and town.",
             f"{plural(len(G), 'Florida place')} serving stone crab claws in season (October 15 to May 1), each checked in {CHECKED} against a 2025–26 source, by region.",
             f"{plural(len(G), 'Florida restaurant')} and fish markets for stone crab claws, in season October 15 to May 1, checked in {CHECKED}, by region and town."],
-           f"{plural(len(G), 'restaurant')}, fish houses and markets across Florida that serve stone crab claws in season, each checked in {CHECKED} against a 2025–26 source. Florida's stone crab season, set by the Florida Fish and Wildlife Conservation Commission (FWC), runs from October 15 to May 1: out of season, these places are open but the claws aren't on the menu.",
+           f"{plural(len(G), 'restaurant')}, fish houses and markets across Florida that serve stone crab claws in season, each checked in {CHECKED} against a 2025–26 source. Florida's stone crab season, set by the Florida Fish and Wildlife Conservation Commission (FWC), runs from October 15 to May 1. Out of season most of these places stay open without the claws; a few close for part of it (Joe's Stone Crab takes a late-summer break), so check each place's season note.",
            f"""<h2>A claw, not a crab</h2>
-    <p>Florida stone crab is sold as claws: harvesters take the claws and return the crab to the water, where it can grow them back. They're served chilled and cracked, usually with a mustard sauce. The commercial and recreational season set by the FWC runs from October 15 to May 1, so a stone crab place is seasonal, not closed, the rest of the year.{seasonal_line(G)}</p>
-    <h2>What's on the list</h2>
+    <p>Florida stone crab is sold as claws: harvesters take the claws and return the crab to the water, where it can grow them back. They're served chilled and cracked, usually with a mustard sauce. The commercial and recreational season set by the FWC runs from October 15 to May 1, so outside the season a stone crab place serves other things, and a few close for part of it: each place's note says when.{seasonal_line(G)}</p>
+    <h2>The list at a glance</h2>
     <p>Towns with the most: {e(towns_counts(G))}.</p>
     <p>{HOW_BUILT}</p>
     <p>{APP_LINE}</p>""",
@@ -855,7 +925,7 @@ guide_page(GUIDE_PATH["grouper"], "Florida grouper sandwiches & seafood shacks",
            f"{plural(len(G), 'seafood shack')}, fish houses and waterfront grills across Florida for a grouper sandwich and the day's catch, each checked in {CHECKED} against a 2025–26 source. {n_gulf:,} of them are in the Panhandle, Tampa Bay and Southwest Florida.",
            f"""<h2>The grouper sandwich</h2>
     <p>A Florida grouper sandwich is a thick fillet, fried, grilled or blackened, on a bun with lettuce, tomato and tartar sauce, and it's on the menu at most seafood shacks on both coasts. The list adds the docks, fish markets with kitchens and beach grills where it's served, along with shrimp, mullet and the day's catch.</p>
-    <h2>What's on the list</h2>
+    <h2>The list at a glance</h2>
     <p>Towns with the most: {e(towns_counts(G))}. The dishes we found most often: {e(top_dishes(G))}.</p>
     <p>{HOW_BUILT}</p>
     <p>{APP_LINE}</p>""",
@@ -871,7 +941,7 @@ guide_page(GUIDE_PATH["keys"], "Florida Keys classics: key lime pie & conch", ch
            f"{plural(len(G), 'place')} for the Keys' classics, key lime pie, conch fritters and chowder and Keys seafood, each checked in {CHECKED} against a 2025–26 source. {n_monroe:,} are in the Keys themselves (Monroe County); the rest are mainland places known for the same dishes.",
            f"""<h2>What the Keys eat</h2>
     <p>Key lime pie is made with the small, tart key lime, sweetened condensed milk and egg yolks. Conch comes as fritters and chowder, and the Keys' seafood houses cook the local catch, such as hogfish, yellowtail snapper, mahi and pink shrimp.</p>
-    <h2>What's on the list</h2>
+    <h2>The list at a glance</h2>
     <p>Towns with the most: {e(towns_counts(G))}. The dishes we found most often: {e(top_dishes(G))}.</p>
     <p>{HOW_BUILT}</p>
     <p>{APP_LINE}</p>""",
@@ -887,7 +957,7 @@ guide_page(GUIDE_PATH["oyster"], "Florida oyster bars & raw bars", checked_kicke
            f"{plural(len(G), 'oyster bar')}, raw bars and seafood houses across Florida where oysters are the main event, raw on the half shell, steamed or baked, each checked in {CHECKED} against a 2025–26 source.",
            f"""<h2>Oysters, Florida style</h2>
     <p>Florida's oyster bars run from Panhandle shacks with a shucking counter to raw bars on the Atlantic and the Keys. Oysters come raw on the half shell with saltines and cocktail sauce, steamed by the bucket, or baked with toppings. Where the oysters come from changes with the season and the harvest, so ask; we name a source only when the place itself does.</p>
-    <h2>What's on the list</h2>
+    <h2>The list at a glance</h2>
     <p>Towns with the most: {e(towns_counts(G))}. The dishes we found most often: {e(top_dishes(G))}.</p>
     <p>{HOW_BUILT}</p>
     <p>{APP_LINE}</p>""",
@@ -903,7 +973,7 @@ guide_page(GUIDE_PATH["fishcamp"], "Florida fish camps & smoked fish", checked_k
            f"{plural(len(G), 'fish camp')}, river and lake restaurants and smoked fish spots across Florida, many of them Old Florida places on the water, each checked in {CHECKED} against a 2025–26 source.",
            f"""<h2>Old Florida on the water</h2>
     <p>Fish camps started as bait shops and boat ramps on rivers, lakes and the Intracoastal, and many grew kitchens: fried catfish and mullet, shrimp, hush puppies and a view of the water. Smoked fish dip, made from smoked mullet, mackerel or other local fish, is the snack of both coasts.</p>
-    <h2>What's on the list</h2>
+    <h2>The list at a glance</h2>
     <p>Towns with the most: {e(towns_counts(G))}. The dishes we found most often: {e(top_dishes(G))}.</p>
     <p>{HOW_BUILT}</p>
     <p>{APP_LINE}</p>""",
@@ -923,7 +993,7 @@ guide_page(GUIDE_PATH["latin"], "Florida Latin & Caribbean restaurants", checked
            f"{plural(len(G), 'restaurant')}, bakeries and cafés across Florida for the Latin American and Caribbean cooking beyond Cuban, each checked in {CHECKED} against a 2025–26 source. Towns with the most: {e(towns_counts(G, 5))}.",
            f"""<h2>Beyond the Cuban sandwich</h2>
     <p>Florida eats the whole region: Haitian griot and pikliz, Venezuelan arepas and cachapas, Colombian bandeja paisa, Puerto Rican mofongo and pernil, Peruvian ceviche, Nicaraguan fritanga and Dominican mangú. The dish line under each place says what it serves, from its own menu or a recent source.</p>
-    <h2>What's on the list</h2>
+    <h2>The list at a glance</h2>
     <p>The dishes we found most often: {e(top_dishes(G))}.</p>
     <p>{HOW_BUILT}</p>
     <p>{APP_LINE}</p>""",
@@ -936,15 +1006,15 @@ N_MI = sum(MI_N.values())
 mi_line = (join_words(mi_parts) + (" restaurants" if N_MI != 1 else " restaurant")) if mi_parts else ""
 green = (f" {plural(N_GREEN, 'restaurant')} also {'holds' if N_GREEN == 1 else 'hold'} a MICHELIN Green Star from the 2026 selection, an "
          "honor MICHELIN is phasing out during 2026.") if N_GREEN else ""
-guide_page(HON_PATH, "Florida MICHELIN & James Beard restaurants", f"{BRAND} guide · honors as of {CHECKED}",
+guide_page(HON_PATH, "Florida MICHELIN & James Beard restaurants", f"{BRAND} · honors current as of {CHECKED}",
            [f"Florida MICHELIN & James Beard Restaurants | {BRAND}", "Florida MICHELIN Guide & James Beard Restaurants List",
             f"MICHELIN & James Beard Restaurants in Florida | {BRAND}"],
            [f"{plural(len(HON_L), 'Florida restaurant')} in the MICHELIN Guide Florida 2026 or honored by the James Beard Foundation from 2023 to 2026, by region and town.",
             f"{plural(len(HON_L), 'Florida restaurant')} in the MICHELIN Guide Florida 2026 or honored by the James Beard Foundation, 2023 to 2026, listed by region and town.",
             f"{plural(len(HON_L), 'Florida restaurant')} with a MICHELIN Guide Florida 2026 distinction or a James Beard honor, listed by region and town."],
-           f"{plural(len(HON_L), 'Florida restaurant')} with an honor: {plural(N_MI, 'place')} from the MICHELIN Guide Florida 2026 selection ({e(mi_line)}), and {plural(N_JBF, 'place')} with a James Beard Foundation award, finalist or semifinalist nod from 2023 to 2026 or an America's Classics award.",
-           f"""<h2>What's here, and what isn't</h2>
-    <p>These are facts from the honoring organizations, not ratings: a distinction in MICHELIN's first statewide Florida selection (announced May 28, 2026), or a James Beard Foundation award, finalist or semifinalist recognition from 2023 to 2026, or an America's Classics award from any year ({plural(N_CLASSICS, 'place')}). A finalist or semifinalist is listed as one, never as a winner. Restaurants that have closed since their honor are left out, and a few honors belong to a chef or restaurant group rather than the restaurant itself; the line under the place says so. Readers' polls, "best of" lists and star ratings from review sites are never included.{green}</p>
+           f"{plural(len(HON_L), 'Florida restaurant')} recognized by MICHELIN or the James Beard Foundation. The MICHELIN Guide Florida 2026 selection accounts for {plural(N_MI, 'place')} ({e(mi_line)}); {plural(N_JBF, 'place')} hold a James Beard award, a finalist or semifinalist nod from 2023 to 2026, or an America's Classics award.",
+           f"""<h2>What counts as an honor here</h2>
+    <p>Two sources, both reported as facts rather than scores. One is MICHELIN's first statewide Florida selection, announced May 28, 2026. The other is the James Beard Foundation: its awards and its finalist and semifinalist nods from 2023 to 2026, plus America's Classics awards from any year ({plural(N_CLASSICS, 'place')}). Finalists and semifinalists are labeled as exactly that, not as winners. A restaurant that has closed since it was honored is off the list, and where an honor went to a chef or a restaurant group instead of the restaurant, the line under the place says so. Reader polls, "best of" roundups and review-site stars don't count.{green}</p>
     <p class="fine">MICHELIN and the MICHELIN Guide are trademarks of Michelin. James Beard Foundation and James Beard Award are trademarks of the James Beard Foundation. {BRAND} is not affiliated with either.</p>""",
            HON_L, "restaurant", "restaurants", "Florida MICHELIN Guide and James Beard restaurants", honors=True)
 
@@ -952,7 +1022,7 @@ guide_page(HON_PATH, "Florida MICHELIN & James Beard restaurants", f"{BRAND} gui
 oldest_named = next((p for p in OLD_L if p.promo_ok()), None)
 assert all(p.founded <= 1960 for p in OLD_L), "the oldest-places copy says 'since 1960 or earlier'"
 old_pre1950 = sum(1 for p in OLD_L if p.founded < 1950)
-from_line = f" The oldest, {e(oldest_named.name)} in {e(oldest_named.city)}, dates from {oldest_named.founded}." if oldest_named else ""
+from_line = f" The oldest, {e(oldest_named.name)} in {e(oldest_named.city)}, goes back to {oldest_named.founded}." if oldest_named else ""
 guide_page(OLD_PATH, "Florida's oldest restaurants", checked_kicker(),
            [f"Florida's Oldest Restaurants: {len(OLD_L)} Places, Oldest First", f"Oldest Restaurants in Florida: {len(OLD_L)} Places | {BRAND}",
             "Florida's Oldest Restaurants, Year by Year | Florida Eats"],
@@ -960,9 +1030,9 @@ guide_page(OLD_PATH, "Florida's oldest restaurants", checked_kicker(),
             f"Florida's oldest restaurants and bars: {plural(len(OLD_L), 'place')} open at the same address since 1960 or earlier, oldest first, with the source behind each year.",
             f"Florida's oldest restaurants: {plural(len(OLD_L), 'place')} open at the same address since 1960 or earlier, oldest first, with the source behind each year.",
             f"Florida's oldest restaurants and bars: {plural(len(OLD_L), 'place')} with a documented founding year at their current address, oldest first, sources noted."],
-           f"{plural(len(OLD_L), 'Florida restaurant')}, bars and lunch counters open at their current address since 1960 or earlier, oldest first, each checked in {CHECKED} against a 2025–26 source. {old_pre1950:,} opened before 1950.{from_line} Under each one, a note says what the year rests on.",
-           f"""<h2>How a founding year is chosen</h2>
-    <p>A founding year here means the year the place opened at this address in its present form, as the place itself or a published history documents it. It is never the year a brand started elsewhere, and never a year before a move. When sources disagree we use the later date. Several places call themselves the oldest in their town or county, and one calls itself Florida's oldest restaurant; those are their own claims, and the note under each place attributes them as written. A place that isn't here may simply not have been documented yet: email us with a source.</p>""",
+           f"Restaurants, bars and lunch counters that have fed Florida from the same address since 1960 or before: {plural(len(OLD_L), 'place')} in all, oldest first, each checked in {CHECKED} against a 2025–26 source. {old_pre1950:,} of them opened before 1950.{from_line} The note under each place names what its year rests on.",
+           f"""<h2>Which year counts</h2>
+    <p>We count from the year a place opened at its current address in its current form, going by the place's own history or a published one. A brand's earlier start somewhere else doesn't count, and neither do the years before a move; if two sources give different years, the later one wins. Some places bill themselves as the oldest in their town or county, and one calls itself Florida's oldest restaurant. Those are their claims, quoted as such in the note under each place. Know a Florida place from 1960 or earlier that's missing? Send us the source.</p>""",
            OLD_L, "place", "places", "Florida's oldest restaurants", region=False, show_fn=True)
 
 # ---------------------------------------------------------------- the inspections explainer (counts only: no place is named here)
@@ -972,9 +1042,9 @@ INS_DATE = hdate(INS_THROUGH)
 nav, bc = crumbs([("Home", "/"), ("Florida restaurant inspections", "/" + INS_PATH)])
 title = fit(["Florida Restaurant Inspections, Explained: DBPR Results", "Florida Restaurant Inspections: How DBPR Results Work",
              f"Florida Restaurant Inspections Explained | {BRAND}"], 50, 60, "inspections title")
-desc = fit([f"How Florida's DBPR inspects restaurants, what its three results mean, and how {n_ins:,} licensed places stood at their latest visit. Florida gives no grade.",
+desc = fit([f"How Florida's DBPR inspects restaurants, what its three results mean, and how the {n_ins:,} places with a DBPR inspection stood at their latest visit. Florida gives no grade.",
             f"How Florida's DBPR inspects restaurants, what Met Inspection Standards and Follow-Up Inspection Required mean, and the latest results for {n_ins:,} places.",
-            f"How Florida's DBPR inspects restaurants and what its three results mean, with the latest results for {n_ins:,} licensed places. Florida gives no grade."],
+            f"How Florida's DBPR inspects restaurants and what its three results mean, with the latest results for the {n_ins:,} places with a DBPR inspection. Florida gives no grade."],
            140, 160, "inspections description")
 grp_items = []
 for g in (0, 1, 2):
@@ -1003,7 +1073,7 @@ body = f"""{nav}
   <section class="hero">
     <p class="kicker">{BRAND} guide · records through {e(INS_DATE)}</p>
     <h1>Florida restaurant inspections, explained</h1>
-    <p class="lede">Florida's Department of Business and Professional Regulation (DBPR) licenses the state's restaurants and inspects them, and it publishes every visit's result. It doesn't grade them: in DBPR's words, “{NO_GRADE}.” Here is how an inspection works, what DBPR's three result groups mean, and where the {n_ins:,} DBPR-licensed places in our data stood at their latest visit, with records through {e(INS_DATE)}.</p>
+    <p class="lede">Florida's Department of Business and Professional Regulation (DBPR) licenses the state's restaurants and inspects them, and it publishes every visit's result. It doesn't grade them: in DBPR's words, “{NO_GRADE}.” Here is how an inspection works, what DBPR's three result groups mean, and where the {n_ins:,} places in our data with a DBPR inspection stood at their latest visit, with records through {e(INS_DATE)}.</p>
   </section>
   <section id="how">
     <h2>How DBPR inspects</h2>
@@ -1016,7 +1086,7 @@ body = f"""{nav}
     <ul class="groups">{"".join(grp_items)}</ul>
     <p>A Follow-Up Inspection Required result means the inspector will come back to check that violations were corrected; the place stays open. Facility Temporarily Closed means DBPR recommended an emergency order (or found the place operating without a license); a closed place reopens after a callback inspection, which DBPR records as “Emergency Order Callback Complied.”{ungrouped_line}</p>
     {cl_line}
-    <p>One visit is a snapshot of one day, and conditions can change quickly; that's why DBPR doesn't grade restaurants, and why this site doesn't rank them by inspections. We don't list places by their results here.</p>
+    <p>One visit is a snapshot of one day, and conditions can change quickly; that's why DBPR doesn't grade restaurants. We don't list places by their results here; the web search can sort a list by DBPR's high-priority violation counts at the latest routine inspection, as recorded.</p>
   </section>
   <section id="lookup">
     <h2>Look up a restaurant</h2>
@@ -1074,7 +1144,10 @@ def city_sections(info):
         out.append(("hon", long, "MICHELIN" if has_mi else "James Beard", long if long != "James Beard" else "James Beard honorees",
                     plural(len(info["hon"]), "MICHELIN or James Beard honoree")))
     if info["oldest"]:
-        out.append(("oldest", "Oldest Restaurants", "Oldest Places", "oldest restaurants", f"the oldest restaurants (back to {info['oldest'][0].founded})"))
+        k_old = len(info["oldest"])   # "1 of Florida's oldest restaurants", not "the oldest restaurants" (one place isn't the town's all)
+        out.append(("oldest", "Oldest Restaurants", "Oldest Places", "oldest restaurants",
+                    f"1 of Florida's oldest restaurants (from {info['oldest'][0].founded})" if k_old == 1
+                    else f"{k_old} of Florida's oldest restaurants (back to {info['oldest'][0].founded})"))
     return sorted(out, key=lambda s: (-len(info[s[0]]), SEC_ORDER.index(s[0])))
 
 
@@ -1090,10 +1163,12 @@ def city_title(c, secs):
     for k in range(min(len(secs), 3), 0, -1):
         for col in (1, 2):
             J = tjoin([s[col] for s in secs[:k]])
-            forms = [f"{c} {J} | {BRAND}", f"{c}, FL {J} | {BRAND}", f"{c}, Florida {J}", f"{c}, FL {J}", f"{c} {J}"]
+            # "<town> restaurants" is what people search, so those forms come first
+            forms = ([f"{c} Restaurants: {J}", f"{c}, FL Restaurants: {J}", f"{c} Restaurants: {J} | {BRAND}", f"{c}, Florida Restaurants: {J}"]
+                     if "Restaurant" not in J else [])
+            forms += [f"{c} {J} | {BRAND}", f"{c}, FL {J} | {BRAND}", f"{c}, Florida {J}", f"{c}, FL {J}", f"{c} {J}"]
             if "Restaurant" not in J:
-                forms += [f"{c} Restaurants: {J}", f"{c}, FL Restaurants: {J}", f"{c} Restaurants: {J} | {BRAND}", f"{c}, Florida Restaurants: {J}",
-                          f"{c} {J} & Restaurants", f"{c} {J} & Restaurants | {BRAND}", f"{c}, Florida {J} & Restaurants"]
+                forms += [f"{c} {J} & Restaurants", f"{c} {J} & Restaurants | {BRAND}", f"{c}, Florida {J} & Restaurants"]
             cands += forms
     cands += [f"{c} Restaurants: What {c} Eats | {BRAND}", f"{c}, Florida Restaurants by Kind | {BRAND}", f"{c}, FL Restaurants, Cafés & Bars | {BRAND}",
               f"{c}, Florida Restaurants, Cafés and Bars", f"{c} Restaurants, Cafés & Bars | {BRAND}"]
@@ -1135,14 +1210,14 @@ for c in CITY_PAGES:
     k = 3
     while k > 1 and len(join_words([s[3] for s in secs[:k]])) > 48:   # a heading, not the whole table of contents
         k -= 1
-    h1_bits = [s[3] for s in secs[:k]] + (["restaurants"] if len(secs) == 1 and "restaurant" not in secs[0][3] else [])
-    h1 = f"{c} " + (join_words(h1_bits) + (", and more" if len(secs) > k else "") if secs else "restaurants")
+    h1_bits = [s[3] for s in secs[:k]]
+    h1 = f"{c} restaurants" + (": " + join_words(h1_bits + (["more"] if len(secs) > k else [])) if secs else "")
     nav, bc = crumbs([("Home", "/"), ("Cities", "/cities/"), (c, "/" + path)])
     counts = [s[4] for s in secs]
     n_hc = sum(1 for p in info["listed"] if p.hc and p.tags)
-    lede = (f"In {e(c)}: {e(join_words(counts))}. "
-            + (f"The hand-checked lists were checked in {CHECKED} against 2025–26 sources. " if n_hc else "")
-            + f"The {BRAND} app lists {info['n_town']:,} restaurants, cafés, bars and bakeries in {e(c)} and sorts them by distance from you.")
+    lede = (f"What {e(c)} has on our lists: {e(join_words(counts))}. "
+            + (f"Each hand-checked place had a 2025 or 2026 source when we looked in {CHECKED}. " if n_hc else "")
+            + f"In all, {BRAND} maps {info['n_town']:,} restaurants, cafés, bars and bakeries in {e(c)}, nearest first on your phone.")
     parts = [f"""{nav}
   <main id="main">
   <section class="hero">
@@ -1155,13 +1230,13 @@ for c in CITY_PAGES:
         key = s[0]
         if key in SEC_HEAD:
             head, gk = SEC_HEAD[key]
-            parts.append(f'<section id="{key}" aria-labelledby="h-{key}"><h2 id="h-{key}">{e(head)} in {e(c)}</h2><p class="sub">Hand-checked in {CHECKED} against a 2025–26 source. Statewide: <a href="/{GUIDE_PATH[gk]}">{plural(len(L[gk]), GUIDE_COUNT_NOUN[gk][:-1], GUIDE_COUNT_NOUN[gk])}</a>.</p><ol class="places">'
+            parts.append(f'<section id="{key}" aria-labelledby="h-{key}"><h2 id="h-{key}">{e(head)} in {e(c)}</h2><p class="sub">Each one checked in {CHECKED} against a 2025–26 source. For all of Florida: <a href="/{GUIDE_PATH[gk]}">{plural(len(L[gk]), GUIDE_COUNT_NOUN[gk][:-1], GUIDE_COUNT_NOUN[gk])}</a>.</p><ol class="places">'
                          + "".join(place_item(p, anchors) for p in info[key]) + "</ol></section>")
         elif key == "hon":
-            parts.append(f'<section id="honors" aria-labelledby="h-honors"><h2 id="h-honors">MICHELIN &amp; James Beard in {e(c)}</h2><p class="sub">MICHELIN Guide Florida 2026 and James Beard Foundation honorees. Honors are facts, not ratings. Statewide: <a href="/{HON_PATH}">{plural(len(HON_L), "Florida MICHELIN and James Beard restaurant")}</a>.</p><ol class="places">'
+            parts.append(f'<section id="honors" aria-labelledby="h-honors"><h2 id="h-honors">MICHELIN &amp; James Beard in {e(c)}</h2><p class="sub">Restaurants in the MICHELIN Guide Florida 2026 or named by the James Beard Foundation, reported as facts rather than scores. Across Florida: <a href="/{HON_PATH}">{plural(len(HON_L), "Florida MICHELIN and James Beard restaurant")}</a>.</p><ol class="places">'
                          + "".join(place_item(p, anchors, honors=True) for p in info["hon"]) + "</ol></section>")
         elif key == "oldest":
-            parts.append(f'<section id="oldest" aria-labelledby="h-oldest"><h2 id="h-oldest">Oldest restaurants in {e(c)}</h2><p class="sub">Open at the same address since 1960 or earlier, as each place or a published history documents it, oldest first. The note under each says what the year rests on. Statewide: <a href="/{OLD_PATH}">Florida\'s oldest restaurants</a>.</p><ol class="places">'
+            parts.append(f'<section id="oldest" aria-labelledby="h-oldest"><h2 id="h-oldest">Oldest restaurants in {e(c)}</h2><p class="sub">In business at this address since 1960 or before, going by the place itself or a published history, listed from the oldest. Each note gives the source of the year. Across Florida: <a href="/{OLD_PATH}">Florida\'s oldest restaurants</a>.</p><ol class="places">'
                          + "".join(place_item(p, anchors, show_fn=True) for p in info["oldest"]) + "</ol></section>")
     if info["n_ins"]:
         ig = info["insp"]
@@ -1169,8 +1244,8 @@ for c in CITY_PAGES:
         parts.append(f'<section id="inspections" aria-labelledby="h-inspections"><h2 id="h-inspections">Inspections in {e(c)}</h2><p class="sub">Florida DBPR has an inspection on record for {plural(info["n_ins"], "place")} we list in {e(c)}. At their latest visit, by DBPR\'s own result groups: {e(ins_bits)}. Florida doesn\'t grade restaurants, and neither do we. Records through {e(hdate(INS_THROUGH))}. Each place\'s results are in the <a href="/explore/#g=inspections&amp;town={e(urllib.parse.quote(c))}">web search</a>; what the results mean: <a href="/{INS_PATH}">Florida restaurant inspections, explained</a>.</p></section>')
     if info["cuis"]:
         rows = "".join(f'<tr><td>{e(k)}</td><td class="n">{n:,}</td></tr>' for k, n in info["cuis"])
-        parts.append(f'<section id="cuisines" aria-labelledby="h-cuisines"><h2 id="h-cuisines">What {e(c)} eats</h2><p class="sub">The most common kinds of restaurant among the {info["n_town"]:,} we list in {e(c)}, from DBPR\'s licenses and open map data.</p><table><thead><tr><th scope="col">Kind of place</th><th scope="col" class="n">Places</th></tr></thead><tbody>{rows}</tbody></table></section>')
-    parts.append(f'<section id="more" aria-labelledby="h-more"><h2 id="h-more">More Florida cities and towns</h2>{city_links(current=c)}<p class="fine"><a href="/cities/">All city pages</a></p></section>\n  </main>')
+        parts.append(f'<section id="cuisines" aria-labelledby="h-cuisines"><h2 id="h-cuisines">What {e(c)} eats</h2><p class="sub">Kinds of food among the {info["n_town"]:,} places we list in {e(c)}, counted from DBPR\'s licenses and open map data.</p><table><thead><tr><th scope="col">Kind of place</th><th scope="col" class="n">Places</th></tr></thead><tbody>{rows}</tbody></table></section>')
+    parts.append(f'<section id="more" aria-labelledby="h-more"><h2 id="h-more">Other Florida towns with a page</h2>{city_links(current=c)}<p class="fine"><a href="/cities/">The cities and towns index</a></p></section>\n  </main>')
     lds = [article_ld(url, h1, desc), bc]
     if info["listed"]:
         lds.append(item_list(f"{c}: " + join_words([s[3] for s in secs]), info["listed"], url, anchors))
@@ -1279,19 +1354,24 @@ for i, p in enumerate(WEB):
 assert len(set(ids)) == len(ids), "place ids must be unique (saved places and #p= links use them)"
 for f in glob.glob(f"{DOCS}/data/detail*.json"):   # files from an older layout or a region that emptied
     os.remove(f)
-DETAIL_FILES = {}
-for dk, d in sorted(shards.items()):
-    fn = f"detail-{DFILES[dk]}.json"
-    json.dump(d, open(f"{DOCS}/data/{fn}", "w"), separators=(",", ":"), ensure_ascii=False)
-    DETAIL_FILES[fn] = len(d)
 # columns that are mostly empty (hand-checked and honored facts) go as [[index, value], ...] instead of 52,000 nulls
 sparse = {k: [[i, v] for i, v in enumerate(cols.pop(k)) if v is not None]
           for k in list(cols) if sum(v is not None for v in cols[k]) < len(WEB) * 0.05}
 core = {"generated": D["generated"], "inspections_through": INS_THROUGH, "dbpr_fetched": DBPR_FETCHED, "ins_since": INS_SINCE, "day0": DAY0,
         "n": len(WEB), "cities": CITIES, "cuisines": CUISINES, "counties": COUNTIES + ["Florida"], "brands": D["brands"], "srcs": D["srcs"],
-        "dispositions": DISP, "itypes": ITYPES, "groups": GROUPS, "dfiles": DFILES, "calibration": CAL, "cols": cols, "sparse": sparse}
-json.dump(core, open(f"{DOCS}/data/core.json", "w"), separators=(",", ":"), ensure_ascii=False)
-json.dump(ids, open(f"{DOCS}/data/ids.json", "w"), separators=(",", ":"))
+        "dispositions": DISP, "itypes": ITYPES, "groups": GROUPS, "calibration": CAL, "cols": cols, "sparse": sparse,
+        "dfiles": [f if dk in shards else None for dk, f in enumerate(DFILES)]}   # null: that county has no extras, so no file
+assert all("," not in x for x in ids)
+# ids and details are keyed by row, so a file from one build must never meet another build's core.json (a browser cache can outlive a
+# deploy by GitHub's 10 minutes): every file carries the build's version, the page fetches with ?v=, and the web app refuses a mismatch
+DATA_VER = hashlib.sha256(json.dumps([core, ids, shards], sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:12]
+DETAIL_FILES = {}
+for dk, d in sorted(shards.items()):
+    fn = f"detail-{DFILES[dk]}.json"
+    json.dump({"_v": DATA_VER, **d}, open(f"{DOCS}/data/{fn}", "w"), separators=(",", ":"), ensure_ascii=False)
+    DETAIL_FILES[fn] = len(d)
+json.dump({"ver": DATA_VER, **core}, open(f"{DOCS}/data/core.json", "w"), separators=(",", ":"), ensure_ascii=False)
+json.dump({"v": DATA_VER, "ids": ",".join(ids)}, open(f"{DOCS}/data/ids.json", "w"), separators=(",", ":"))   # one string: smaller than an array
 json.dump(json.load(open(f"{ROOT}/data/fl/fl_shapes.json")), open(f"{DOCS}/data/fl_shapes.json", "w"), separators=(",", ":"))
 
 
@@ -1339,8 +1419,8 @@ EXPLORE_CSS = """
   #ex-map { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
   .ex-zoom { position: absolute; right: 10px; top: 10px; display: flex; flex-direction: column; gap: 6px; }
   .ex-zoom button { width: 44px; height: 44px; border-radius: 10px; border: 1px solid #e6dccb; background: #fff; color: #006d77; font: 700 22px/1 system-ui, sans-serif; cursor: pointer; }
-  #ex-maphint { position: absolute; left: 10px; top: 10px; margin: 0; font-size: 13px; background: #fff; padding: 3px 8px; border-radius: 999px; color: #24505c; }
-  #ex-mapattr { position: absolute; right: 0; bottom: 0; margin: 0; font-size: 11px; background: rgba(255,255,255,.85); padding: 2px 6px; border-radius: 6px 0 0 0; color: #24505c; }
+  #ex-maphint { position: absolute; left: 10px; top: 10px; margin: 0; font-size: 13px; background: #fff; padding: 3px 8px; border-radius: 999px; color: #24505c; pointer-events: none; }
+  #ex-mapattr { position: absolute; right: 0; bottom: 0; margin: 0; font-size: 11px; background: rgba(255,255,255,.85); padding: 2px 6px; border-radius: 6px 0 0 0; color: #24505c; pointer-events: none; }
   .ex-panel { position: fixed; z-index: 20; right: 0; top: 0; bottom: 0; width: min(440px, 100%); overflow-y: auto; background: var(--surface); border-left: 1px solid var(--rule); box-shadow: -8px 0 24px rgba(0,0,0,.12); padding: 18px 20px 40px; }
   @media (max-width: 600px) { .ex-panel { top: auto; height: 86vh; border-left: 0; border-top: 4px solid var(--orange); border-radius: 18px 18px 0 0; } }
   .ex-close { position: sticky; top: 0; float: right; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--rule); background: var(--surface); font-size: 24px; line-height: 1; cursor: pointer; color: var(--ink); }
@@ -1363,14 +1443,20 @@ EXPLORE_CSS = """
   .ex-result { display: flex; align-items: center; gap: 10px; font-weight: 600; flex-wrap: wrap; }
   .ex-app { margin-top: 22px; font-size: 14px; color: var(--muted); }
   body.ex-open { overflow: hidden; }
-  @media (min-width: 601px) { body.ex-open { overflow: auto; } }
+  .ex-backdrop { position: fixed; inset: 0; z-index: 19; background: rgba(11, 31, 38, .32); }
+  /* phones: 16px or more in the search box and the selects, or iOS Safari zooms the page when one gets focus */
+  @media (max-width: 600px) { .ex-row1 input[type=search], .ex-row2 select { font-size: 16px; } }
+  /* the sort's longest choice ("Fewest high-priority violations") at 16px: wider than 46vw, so on phones it may use the row */
+  @media (max-width: 600px) { #ex-sort { max-width: calc(100vw - 100px); } }
   .ex-res { display: inline-block; font: 800 12px/1.4 -apple-system, system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; text-align: center; }
   .ex-res-0 { background: #ddefe3; color: #0e5a2b; } .ex-res-1 { background: #ffe9c2; color: #6b3a00; } .ex-res-2 { background: #f9d5db; color: #7a0019; } .ex-res-x { background: var(--surface2); color: var(--ink2); }
 """
 url = f"{DOMAIN}/explore/"
 N_HC_GUIDES = len(HC_ANY)
-title = fit(["Search Florida Restaurants: Cuban, Seafood & Inspections", "Florida Restaurant Search & Map | Florida Eats"], 50, 60, "explore title")
-desc = fit([f"Search {N_REST:,} Florida restaurants by name, town, street or dish, map {N_HC_GUIDES} hand-checked places and see DBPR's inspection results. Free.",
+title = fit(["Florida Restaurant Search: Map, Cuban Spots & Inspections", "Search Florida Restaurants: Cuban, Seafood & Inspections"], 50, 60, "explore title")
+desc = fit([f"Look up {N_REST:,} Florida restaurants by name, town, street, zip or dish, put {N_HC_GUIDES} hand-checked places on a map and open DBPR's inspection records.",
+            f"Look up {N_REST:,} Florida restaurants by name, town, street, zip or dish, see {N_HC_GUIDES} hand-checked places on a map, and open DBPR's inspection records.",
+            f"Search {N_REST:,} Florida restaurants by name, town, street or dish, map {N_HC_GUIDES} hand-checked places and see DBPR's inspection results. Free.",
             f"Search {N_REST:,} Florida restaurants by name, town, street or dish, map {N_HC_GUIDES} hand-checked places and see Florida DBPR's latest inspection results.",
             f"Search {N_REST:,} Florida restaurants by name, town, street or dish, browse {N_HC_GUIDES} hand-checked places on a map and read DBPR's inspection results."],
            140, 160, "explore description")
@@ -1381,6 +1467,8 @@ guide_buttons = "".join(f'<button type="button" data-g="{k}" aria-pressed="false
                          ("honors", "MICHELIN & James Beard"), ("oldest", "Oldest"), ("inspections", "Inspections"),
                          ("all", "All restaurants"), ("saved", "Saved")))
 explore_js = open(f"{ROOT}/scripts/explore.js").read()
+JS_KEYS = sorted(set(re.findall(r'store\.set\("([a-z]+)"', explore_js)))   # the keys the web app writes, each under STORAGE_PREFIX
+assert JS_KEYS and "localStorage.setItem(PREFIX + k" in explore_js and len(re.findall(r"localStorage\.setItem", explore_js)) == 1
 assert "</script" not in explore_js.lower()
 assert f'"{STORAGE_PREFIX}"' in explore_js, "explore.js must keep its localStorage keys under " + STORAGE_PREFIX
 body = f"""{nav}
@@ -1388,16 +1476,16 @@ body = f"""{nav}
   <section class="ex-hero">
     <p class="kicker">{BRAND} · on the web</p>
     <h1>Search Florida restaurants</h1>
-    <p class="sub">{N_REST:,} restaurants, cafés, bars and bakeries, with {N_HC_GUIDES} hand-checked places on the Cuban, stone crab, grouper, Keys, oyster bar, fish camp and Latin lists, {len(HON_L)} MICHELIN and James Beard honorees and Florida DBPR's own inspection results. The same data as the iPhone and iPad app, which is coming soon. Nothing about you is stored anywhere but this browser.</p>
+    <p class="sub">Pick a list, or type a name, a town, a street or a dish. Behind the search: {N_REST:,} Florida restaurants, cafés, bars and bakeries; {N_HC_GUIDES} hand-checked places on the Cuban, stone crab, grouper, Keys, oyster bar, fish camp and Latin lists; {len(HON_L)} MICHELIN and James Beard honorees; and DBPR's own inspection records. It's the data the iPhone and iPad app will ship with, and what you save stays in this browser.</p>
   </section>
   <p id="ex-loading" hidden>Loading the restaurant list…</p>
   <noscript><p>The search needs JavaScript. The guides work without it: <a href="/{GUIDE_PATH['cuban']}">Cuban sandwiches</a>, <a href="/{GUIDE_PATH['stonecrab']}">stone crabs</a>, <a href="/{GUIDE_PATH['oyster']}">oyster bars</a>, <a href="/{INS_PATH}">inspections explained</a>.</p></noscript>
-  <div id="ex-app" hidden>
+  <div id="ex-app" hidden data-ver="{DATA_VER}">
     <div class="ex-controls">
       <div class="ex-guides" role="group" aria-label="Guides">{guide_buttons}</div>
       <div class="ex-row1">
         <label class="skip" for="ex-q">Search</label>
-        <input id="ex-q" type="search" placeholder="Name, town, street, zip or dish" autocomplete="off" enterkeyhint="search">
+        <input id="ex-q" type="search" placeholder="Name, town, street or dish" autocomplete="off" enterkeyhint="search">
         <button type="button" id="ex-locate" class="ex-small">Near me</button>
       </div>
       <div class="ex-row2">
@@ -1420,6 +1508,7 @@ body = f"""{nav}
       <p id="ex-mapattr">Outlines © OpenStreetMap contributors, Overture Maps Foundation</p>
     </div>
   </div>
+  <div id="ex-backdrop" class="ex-backdrop" hidden></div>
   <aside id="ex-panel" class="ex-panel" hidden aria-labelledby="ex-pname"></aside>
   </main>
 <script>
@@ -1428,14 +1517,15 @@ body = f"""{nav}
 webapp_ld = {"@context": "https://schema.org", "@type": "WebApplication", "name": f"{BRAND} web app", "url": url,
              "applicationCategory": "TravelApplication", "operatingSystem": "Any", "browserRequirements": "Requires JavaScript",
              "description": desc, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-             "publisher": {"@type": "Organization", "@id": f"{DOMAIN}/#org", "name": BRAND, "url": f"{DOMAIN}/"}}
+             "publisher": ORG_REF}
 page("explore/index.html", title, desc, body, [webapp_ld, bc], extra_css=EXPLORE_CSS, og_type="website")
 
 # ---------------------------------------------------------------- landing page
-shots = [("home", "Florida Eats home screen with guide cards for Cuban sandwiches and cafecito, stone crabs, grouper and seafood shacks, Keys classics, oyster bars, fish camps, Latin and Caribbean food, MICHELIN and James Beard, the oldest places and inspections.", "A guide for each Florida craving."),
-         ("cuban", "The hand-checked Cuban sandwich and cafecito list in Florida Eats, nearest first.", "Cuban sandwiches and coffee windows nearest you."),
-         ("detail", "A place in Florida Eats: address, a button for Apple Maps' ratings, hours and photos, what's on the menu and Florida DBPR's latest inspection result.", "Each place, with DBPR's own inspection results."),
-         ("map", "The Florida Eats map of Florida with pins for hand-checked places.", "The map, by guide."),
+# alt text says what each capture shows (docs/screenshots, made by scripts/capture-screenshots.sh; copies by scripts/site-images.sh)
+shots = [("home", "The Florida Eats home screen: a search box and guide cards for Cuban & Cafecito, Stone Crabs, Grouper & Seafood Shacks and Keys Classics, each with its count of places.", "A guide for each Florida craving."),
+         ("cuban", "The hand-checked Cuban sandwich and cafecito list in Florida Eats, nearest first, with each place's town, kind and distance.", "Cuban sandwiches and coffee windows nearest you."),
+         ("detail", "A place in Florida Eats: its address, honors and guide tags, a button for Apple Maps' ratings, hours and photos, Directions, Call and Website buttons, a small map and the hand-checked notes on the menu.", "Each place, with DBPR's own inspection results further down."),
+         ("map", "The Florida Eats map around Miami, with pins and numbered clusters for hand-checked places and filter buttons for Cuban, seafood and honors.", "The map, by guide."),
          ("honors", "The MICHELIN and James Beard list in Florida Eats.", "MICHELIN Guide and James Beard honorees.")]
 shot_html = []
 for i, (name, alt, cap) in enumerate(shots):
@@ -1443,21 +1533,25 @@ for i, (name, alt, cap) in enumerate(shots):
     if not os.path.exists(png):
         continue
     w, h = png_size(png)
-    lazy = ' loading="lazy"' if i > 1 else ""
+    lazy = ' loading="lazy"'   # the section sits below the fold at every width
     webp = os.path.exists(f"{DOCS}/img/screen-{name}.webp")
     src = (f'<source srcset="/img/screen-{name}.webp" type="image/webp">' if webp else "")
     shot_html.append(f'<li><picture>{src}<img src="/img/screen-{name}.png" alt="{e(alt)}" width="{w}" height="{h}"{lazy} decoding="async"></picture><p>{e(cap)}</p></li>')
 
 g_ins = GROUP_N
+CUBAN_L = L["cuban"]
+n_cuban_md = sum(1 for p in CUBAN_L if p.county == "Miami-Dade")
+n_cuban_hb = sum(1 for p in CUBAN_L if p.county == "Hillsborough")
+n_cuban_towns = len({p.city for p in CUBAN_L if p.county not in ("Miami-Dade", "Hillsborough") and p.city})
 faq = [
-    ("Is Florida Eats free?", "Yes. The app is free, with no ads, no in-app purchases and no account. It's coming soon to the App Store; the web search works today."),
-    ("Where do the lists come from?", f"We checked the themed lists by hand in {CHECKED}: each place on the Cuban, stone crab, grouper, Keys, oyster bar, fish camp, Latin and oldest-places lists has a 2025 or 2026 source, such as its own website or menu, a dated local news story or an official tourism listing. The rest of the {N_REST:,} restaurants come from the Florida Department of Business and Professional Regulation's list of current food service licenses ({N_LICENSED:,} places) and Overture Maps' open place data, placed on the map with Overture's address points and the U.S. Census Bureau Geocoder."),
-    ("Does the app show ratings and reviews?", "Not its own. Tap a place and Apple Maps' own place card opens inside the app with Apple's current ratings, hours, photos and directions. Our lists are never ordered by ratings."),
-    ("What are the inspection results?", f"Florida's DBPR inspects licensed restaurants and publishes each visit's result. Florida doesn't grade restaurants (in DBPR's words, “{NO_GRADE}”), and neither do we: the app shows DBPR's own result group for the latest visit (Met Inspection Standards, Follow-Up Inspection Required or Facility Temporarily Closed), DBPR's disposition and the date, with DBPR's violation counts. Records through {hdate(INS_THROUGH)}."),
-    ("When is stone crab season?", "October 15 to May 1, set by the Florida Fish and Wildlife Conservation Commission. Out of season, the places on our stone crab list are open; the claws just aren't on the menu."),
-    ("Does it need my location?", "Only if you want lists sorted by distance. Your location stays on your iPhone or iPad and is never sent to us. Everything else works without it. On the website, Near me uses your location only inside your browser."),
-    ("A place closed or is missing. How do I tell you?", f"Email {EMAIL} with the name and town. Corrections go into the next update."),
-    ("Is there an Android version?", f"Not yet. Florida Eats is for iPhone and iPad. If enough people ask at {EMAIL}, it moves up the list."),
+    ("Is Florida Eats free?", "Completely: no price, no ads, no in-app purchases and no account to create. It's an iPhone and iPad app on its way to the App Store, with no Android version yet; until it's out, the web search here works in any browser."),
+    ("Where do the lists come from?", f"Two kinds of source. The Cuban, stone crab, grouper, Keys, oyster bar, fish camp, Latin and oldest-places lists are our own research from {CHECKED}, with a 2025 or 2026 source behind each place: its website or menu, a dated local news story or an official tourism listing. The wider directory of {N_REST:,} restaurants starts from the Florida Department of Business and Professional Regulation's current food service licenses ({N_LICENSED:,} places), adds Overture Maps' open place data, and puts each place on the map with Overture's address points or the U.S. Census Bureau Geocoder."),
+    ("Where can I get a Cuban sandwich in Miami or Tampa?", f"Our Cuban sandwich and cafecito list has {len(CUBAN_L)} hand-checked places: {n_cuban_md} in Miami-Dade County, {n_cuban_hb} in Hillsborough County (Tampa) and the rest in {plural(n_cuban_towns, 'other town')}. In the web search, the Cuban & Cafecito list puts the nearest first once you share your location."),
+    ("When is stone crab season?", "From October 15 to May 1; the Florida Fish and Wildlife Conservation Commission sets the dates. Outside those months most places on our stone crab list carry on without the claws, a few close for part of the year, and each place's season note says which."),
+    ("How do I check a Florida restaurant's inspection?", f"Look the place up here or in the app. Its page shows DBPR's result group for the latest visit (Met Inspection Standards, Follow-Up Inspection Required or Facility Temporarily Closed), DBPR's disposition and the date, and DBPR's violation counts, with records through {hdate(INS_THROUGH)}. Florida doesn't grade restaurants (in DBPR's words, “{NO_GRADE}”), and we add no grade of our own. For the inspector's full report, search the place's license number in DBPR's own lookup."),
+    ("Does it show ratings and reviews?", "Not from us. Tapping a place opens Apple Maps' own card inside the app, with Apple's current ratings, hours, photos and directions. None of our lists is sorted by anyone's rating."),
+    ("Does it need my location?", "No. Location only matters for putting the nearest places first. If you share it, it stays on your iPhone or iPad and never reaches us, and the app works fine without it. On this website, Near me reads your location inside your browser and nowhere else."),
+    ("A place has closed, or something's wrong. How do I tell you?", f"Write to {EMAIL} with the place's name, its town and what changed. Corrections ship with the next data update."),
 ]
 faq_html = "".join(f"<details><summary>{e(q)}</summary><p>{e(a)}</p></details>" for q, a in faq)
 faq_ld = {"@context": "https://schema.org", "@type": "FAQPage", "@id": f"{DOMAIN}/#faq",
@@ -1468,27 +1562,31 @@ app_ld = {"@context": "https://schema.org", "@graph": [
      "alternateName": ["Florida Eats", "FL Eats", "Florida Eats: Cuban, Seafood & More"],
      "description": f"A free guide to {N_REST:,} Florida restaurants, with hand-checked lists of Cuban sandwiches and cafecito, stone crabs, grouper and seafood shacks, Keys classics, oyster bars, fish camps, Latin and Caribbean food and the state's oldest places, {len(HON_L)} MICHELIN and James Beard honorees, and Florida DBPR's own inspection results. Sort by distance, open Apple Maps' live place card for hours and photos, and save places for your next trip.",
      "url": f"{DOMAIN}/", "image": f"{DOMAIN}/og.png", "operatingSystem": "iOS, iPadOS", "applicationCategory": "TravelApplication",
-     "applicationSubCategory": "Food & Drink", "inLanguage": "en", "publisher": {"@id": f"{DOMAIN}/#org"}},
-    {"@type": "Organization", "@id": f"{DOMAIN}/#org", "name": BRAND, "url": f"{DOMAIN}/",
+     "applicationSubCategory": "Food & Drink", "inLanguage": "en", "publisher": {"@id": ORG_ID}},
+    {"@type": "Organization", "@id": ORG_ID, "name": BRAND, "url": f"{DOMAIN}/",
      "logo": {"@type": "ImageObject", "url": f"{DOMAIN}/icon-512.png", "width": 512, "height": 512}, "email": EMAIL,
-     "contactPoint": {"@type": "ContactPoint", "contactType": "customer support", "email": EMAIL, "availableLanguage": "en"}},
+     "contactPoint": {"@type": "ContactPoint", "contactType": "customer support", "email": EMAIL, "availableLanguage": "en"},
+     # the Eats Ranked hub lists this site as a subOrganization; say so from this side too
+     "parentOrganization": HUB},
     {"@type": "WebSite", "@id": f"{DOMAIN}/#website", "name": BRAND, "alternateName": ["FL Eats", "Florida Eats app"], "url": f"{DOMAIN}/",
-     "inLanguage": "en", "publisher": {"@id": f"{DOMAIN}/#org"}}]}
+     "inLanguage": "en", "publisher": {"@id": ORG_ID}}]}
 if shot_html:
     app_ld["@graph"][0]["screenshot"] = f"{DOMAIN}/img/screen-{next(n for n, *_ in shots if os.path.exists(f'{DOCS}/img/screen-{n}.png'))}.png"
 title = fit(["Florida Eats: Cuban, Seafood & Restaurant Guide App", "Florida Eats: Cuban Food, Seafood & Restaurant App"], 50, 60, "landing title")
-desc = fit([f"Free iPhone and iPad guide to {N_REST:,} Florida restaurants, with hand-checked Cuban sandwiches, stone crabs, oyster bars and DBPR inspection results.",
+desc = fit([f"Cafecito windows, stone crab claws in season, oyster bars and DBPR inspection results for {N_REST:,} Florida restaurants, in a free iPhone and iPad app.",
+            f"Cafecito windows, stone crab in season, oyster bars and DBPR inspection results across {N_REST:,} Florida restaurants: a free iPhone and iPad app.",
+            f"Free iPhone and iPad guide to {N_REST:,} Florida restaurants, with hand-checked Cuban sandwiches, stone crabs, oyster bars and DBPR inspection results.",
             f"A free iPhone and iPad guide to {N_REST:,} Florida restaurants, with hand-checked Cuban sandwiches, stone crabs and oyster bars, plus DBPR inspections."],
            140, 160, "landing description")
 city_cards = "".join(f'<li><a href="{city_url(c)}">{e(c)}</a></li>' for c in CITY_PAGES)
 screens = f"""
   <section id="screens">
-    <h2>What it looks like</h2>
+    <h2>Inside the app</h2>
     <ul class="shots" tabindex="0" aria-label="Florida Eats app screenshots">
       {"".join(shot_html)}
     </ul>
   </section>""" if shot_html else ""
-guide_cards = "".join(f'<a class="card" href="/{GUIDE_PATH[k]}"><h3>{e(GUIDE_NAME[k])}</h3><p>{plural(len(L[k]), "hand-checked place")}{line}.</p></a>'
+guide_cards = "".join(f'<a class="card gc gc-{k}" href="/{GUIDE_PATH[k]}"><b>{len(L[k])}</b><h3>{e(GUIDE_NAME[k])}</h3><p>{plural(len(L[k]), "hand-checked place")}{line}.</p></a>'
                       for k, line in (("cuban", ", from Calle Ocho to Ybor City"), ("stonecrab", ", in season Oct 15 – May 1"),
                                       ("grouper", " on the docks and beaches"), ("keys", " for key lime pie and conch"),
                                       ("oyster", ", raw, steamed and baked"), ("fishcamp", " on rivers, lakes and the coast"),
@@ -1496,9 +1594,9 @@ guide_cards = "".join(f'<a class="card" href="/{GUIDE_PATH[k]}"><h3>{e(GUIDE_NAM
 body = f"""  <main id="main">
   <section class="hero">
     <p class="kicker">{BRAND}: {TAGLINE} for iPhone and iPad</p>
-    <h1>Florida's restaurants, from cafecito to stone crab</h1>
-    <p class="lede">{BRAND} is a free Florida restaurant guide. Find a coffee window pouring cafecito near you, stone crab claws in season, a grouper sandwich on the dock and an oyster bar on the Panhandle, from hand-checked lists, the MICHELIN Guide and James Beard honorees and the state's own inspection records, plus {N_REST:,} restaurants, cafés, bars and bakeries in {N_TOWNS:,} towns.</p>
-    <div class="cta-row">{store_button()}<a class="btn btn-ghost" href="/explore/">Search on the web</a><span class="pill store-note">Free. No ads, no account. Coming soon to the App Store.</span></div>
+    <h1>Florida restaurants, cafecito to stone crab claws</h1>
+    <p class="lede">Want a colada from a walk-up ventanita, stone crab claws while the season's open, a grouper sandwich on the dock or an oyster bar on the Panhandle? {BRAND} starts with lists we checked place by place, adds the MICHELIN Guide and James Beard honorees and the state's own inspection records, and maps {N_REST:,} restaurants, cafés, bars and bakeries in {N_TOWNS:,} Florida towns.</p>
+    <div class="cta-row">{store_button()}<a class="btn btn-ghost" href="/explore/">Search on the web</a><span class="pill store-note">No charge, no ads, no sign-in. The App Store release is on its way.</span></div>
     <ul class="stats" aria-label="What's in the app">
       <li><b>{N_HC_GUIDES}</b><span>hand-checked places</span></li>
       <li><b>{len(HON_L)}</b><span>MICHELIN &amp; James Beard</span></li>
@@ -1508,22 +1606,22 @@ body = f"""  <main id="main">
   </section>
 
   <section id="what">
-    <h2>A Florida guide that knows what's in season</h2>
-    <p class="sub">General restaurant apps rank by star ratings and can't tell you which window pours the colada. {BRAND} starts from what people here look for: a Cuban sandwich and a cafecito, stone crab claws from October to May, a grouper sandwich, key lime pie, an oyster bar, an Old Florida fish camp and the Latin and Caribbean kitchens beyond Cuban. The hand-checked lists were checked in {CHECKED} against 2025–26 sources. Licensed places show Florida DBPR's own latest inspection result, never a grade of ours. For ratings, hours and photos, each place opens Apple Maps' own live card.</p>
+    <h2>Built around how Florida eats</h2>
+    <p class="sub">Star ratings won't tell you which window pours the colada, or whether the claws are in yet. {BRAND} is organized the way people here eat: a Cuban sandwich and a cafecito, stone crab claws from October 15 to May 1, a grouper sandwich, key lime pie, an oyster bar, an Old Florida fish camp and the Haitian, Venezuelan, Colombian and Puerto Rican kitchens beyond Cuban. Each place on those lists was checked in {CHECKED} against a 2025–26 source. Where DBPR has inspected a place, you see its latest result in DBPR's own words, never a grade from us, and Apple Maps' live card supplies ratings, hours and photos.</p>
   </section>
 
   <section id="how">
     <h2>How it works</h2>
     <ol class="steps">
-      <li class="step"><div class="n" aria-hidden="true">1</div><div><h3>Pick a guide.</h3><p>Cuban &amp; Cafecito, Stone Crabs, Grouper &amp; Seafood Shacks, Keys Classics, Oyster Bars, Fish Camps, Latin &amp; Caribbean, MICHELIN &amp; James Beard, Oldest Places, Inspections, or search {N_REST:,} restaurants by name, town, street or dish.</p></div></li>
-      <li class="step"><div class="n" aria-hidden="true">2</div><div><h3>See what's near you.</h3><p>Sort by distance, filter by town or cuisine, or browse the map.</p></div></li>
-      <li class="step"><div class="n" aria-hidden="true">3</div><div><h3>Go.</h3><p>Open Apple Maps' place card for live hours and photos, call, get directions, or save it for your next trip.</p></div></li>
+      <li class="step"><div class="n" aria-hidden="true">1</div><div><h3>Start with a craving.</h3><p>Cuban &amp; Cafecito, Stone Crabs, Grouper &amp; Seafood Shacks, Keys Classics, Oyster Bars, Fish Camps, Latin &amp; Caribbean, MICHELIN &amp; James Beard, Oldest Places or Inspections. Or type a name, a town, a street or a dish to search the {N_REST:,} we list.</p></div></li>
+      <li class="step"><div class="n" aria-hidden="true">2</div><div><h3>Find the closest one.</h3><p>Put the nearest first, narrow it to one town or one kind of food, or pan the map from Pensacola to Key West.</p></div></li>
+      <li class="step"><div class="n" aria-hidden="true">3</div><div><h3>Head out.</h3><p>Check today's hours and photos on Apple Maps' card, call ahead, get directions, or save the place for the next beach weekend.</p></div></li>
     </ol>
   </section>
 {screens}
   <section id="guides">
     <h2>Florida food guides</h2>
-    <p class="sub">The app's lists, readable on the web.</p>
+    <p class="sub">Each of the app's lists has its own page here, free to read.</p>
     <div class="grid2">
       {guide_cards}
       <a class="card" href="/{OLD_PATH}"><h3>Florida's oldest restaurants</h3><p>{plural(len(OLD_L), "place")} open at the same address since 1960 or earlier.</p></a>
@@ -1534,18 +1632,18 @@ body = f"""  <main id="main">
 
   <section id="cities">
     <h2>Cuban food, seafood and more by city</h2>
-    <p class="sub">The guides for Florida's biggest cities and most-visited towns. <a href="/cities/">See what each city page has</a>.</p>
+    <p class="sub">From Pensacola to Key West, the towns with enough hand-checked or honored places for a page of their own. The <a href="/cities/">cities and towns index</a> sums up what's on each.</p>
     <ul class="cities">{city_cards}</ul>
   </section>
 
   <section id="pricing">
-    <h2>Free, and staying that way</h2>
-    <p class="sub">No ads, no subscription, no in-app purchases, no account. The whole guide is built into the app, so lists open instantly and work with a weak signal on the water.</p>
+    <h2>Free, with no catch</h2>
+    <p class="sub">The app costs nothing, shows no ads and sells nothing inside, and there's no account to make. The lists ship inside the app, so they open right away and keep working when the signal drops at the marina or out on the causeway.</p>
   </section>
 
   <section id="privacy">
-    <h2>Your plans are your business</h2>
-    <p class="sub">{BRAND} collects nothing. If you allow location, it only sorts lists by distance on your device. Saved places stay on your device. This website sets no cookies and runs no trackers. <a href="/privacy.html">Read the privacy policy</a>.</p>
+    <h2>What stays on your phone</h2>
+    <p class="sub">{BRAND} collects nothing about you: no sign-in, no analytics, no ads. Location, if you turn it on, only puts the nearest places first, and your saved places are kept on the phone or iPad. The website has no cookies and no trackers. <a href="/privacy.html">The privacy policy</a> has the details.</p>
   </section>
 
   <section id="faq">
@@ -1555,7 +1653,7 @@ body = f"""  <main id="main">
 
   <section id="download" class="final">
     <h2>Find your next cafecito</h2>
-    <p class="sub">{BRAND} is coming soon to the App Store for iPhone and iPad. Free.</p>
+    <p class="sub">The iPhone and iPad app is almost here, and it's free. Ask for early access.</p>
     <div class="cta-row">{store_button()}</div>
   </section>
   </main>"""
@@ -1583,20 +1681,21 @@ body = f"""{nav}
     <h2>This website</h2>
     <p>The site is static pages hosted on GitHub Pages. It sets no cookies and loads no analytics, fonts or scripts from anyone else.</p>
     <ul>
-      <li><b>Saved places and your last guide.</b> The search page (<a href="/explore/">/explore/</a>) keeps the places you save and the last guide you opened in your browser's local storage, on this device only. Nothing is sent to us. Clearing this site's data in your browser removes them.</li>
+      <li><b>Saved places and your last guide.</b> The search page (<a href="/explore/">/explore/</a>) keeps the places you save and the last guide you opened in your browser's local storage, on this device only, under the keys {join_words([f"<code>{STORAGE_PREFIX}{k}</code>" for k in JS_KEYS])}. Nothing is sent to us. Clearing this site's data in your browser removes them.</li>
       <li><b>Location.</b> If you tap Near me or choose the Nearest sort, your browser asks whether to share your location. If you allow it, the location is used only inside your browser to sort places by distance and is never sent to us or anyone else.</li>
     </ul>
     <p>GitHub may keep standard server logs, such as IP addresses, for security; see <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub's privacy statement</a>.</p>
     <h2>Email</h2>
-    <p>If you email us, we use your message and address only to reply and to fix the listing you told us about. We don't add you to a mailing list or share your address.</p>
+    <p>If you email us, we use your message and address only to reply and to fix the listing you told us about. We don't add you to a mailing list or share your address. Mail to {EMAIL} reaches our inbox through Cloudflare Email Routing; see <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">Cloudflare's privacy policy</a>.</p>
     <h2>Children</h2>
     <p>The app collects no personal information from anyone, including children.</p>
     <h2>Changes and contact</h2>
     <p>If this policy changes, the new version will be posted here with a new date. Questions: <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>
   </section>
   </main>"""
-page("privacy.html", "Privacy Policy: Florida Eats, a Free Florida Restaurant App",
-     fit(["The Florida Eats privacy policy: the app collects no data, keeps your location and saved places on your device, and this website sets no cookies at all."], 140, 160),
+page("privacy.html", "Florida Eats Privacy Policy: No Tracking, No Accounts",
+     fit(["How Florida Eats treats your data: the iPhone app collects none, your location and saved places stay on your device, and this site uses no cookies or trackers.",
+          "How Florida Eats treats your data: the app collects none, your location and saved places stay on your device, and this website uses no cookies or trackers."], 140, 160),
      body, [bc])
 
 nav, bc = crumbs([("Home", "/"), ("Terms of use", "/terms.html")])
@@ -1617,7 +1716,7 @@ body = f"""{nav}
     <p>Ratings, reviews, hours and photos in each place card come from Apple Maps and are Apple's and its providers', under Apple's terms. Restaurant names and trademarks belong to their owners. MICHELIN and the MICHELIN Guide are trademarks of Michelin; James Beard Foundation and James Beard Award are trademarks of the James Beard Foundation. {BRAND} is not affiliated with any restaurant, chain, award body, theme park or government agency.</p>
     <h2>Data sources and licenses</h2>
     <ul>
-      <li>Florida Department of Business and Professional Regulation, Division of Hotels and Restaurants: food service licenses, inspections, emergency closure reports and disciplinary reports, from its public records downloads (Chapter 119, Florida Statutes), modified for use here.</li>
+      <li>Florida Department of Business and Professional Regulation, Division of Hotels and Restaurants: food service licenses, inspections and emergency closure reports, from its public records downloads (Chapter 119, Florida Statutes), modified for use here.</li>
       <li>Overture Maps Foundation places data, under the Community Data License Agreement, Permissive 2.0, including data from Meta, Microsoft, DAC, BrightQuery, AllThePlaces (CC0 1.0) and Foursquare (Apache 2.0).</li>
       <li>Overture Maps Foundation divisions, used for the state and county outlines on the map, under the Open Database License: © OpenStreetMap contributors, Overture Maps Foundation.</li>
       <li>Overture Maps Foundation addresses data, compiled from open address sources under permissive licenses (see docs.overturemaps.org/attribution), used to place license records on the map.</li>
@@ -1633,17 +1732,18 @@ body = f"""{nav}
     <p>We may update these terms; the current version and its date are always on this page. See also the <a href="/privacy.html">privacy policy</a>.</p>
   </section>
   </main>"""
-page("terms.html", "Terms of Use: Florida Eats, a Free Florida Restaurant App",
-     fit(["The Florida Eats terms of use: a free Florida restaurant guide, provided as is. Check before you go, and see where each listing and result comes from."], 140, 160),
+page("terms.html", "Florida Eats Terms of Use: A Free Guide, Provided As Is",
+     fit(["The terms for Florida Eats and this site: a free restaurant guide provided as is, DBPR records shown as DBPR published them, and how to report a mistake.",
+          "The terms for Florida Eats and this website: a free guide provided as is, DBPR's records shown as DBPR published them, and how to report a mistake."], 140, 160),
      body, [bc])
 
 body = f"""  <main id="main">
   <section class="hero">
     <h1>Page not found</h1>
-    <p class="lede">That page isn't here. Try the <a href="/">{BRAND} home page</a>, the <a href="/{GUIDE_PATH['cuban']}">Cuban sandwich guide</a> or the <a href="/explore/">restaurant search</a>.</p>
+    <p class="lede">No page lives at this address. Head back to the <a href="/">{BRAND} home page</a>, the <a href="/{GUIDE_PATH['cuban']}">Cuban sandwich list</a> or the <a href="/explore/">Florida restaurant search</a>.</p>
   </section>
   </main>"""
-page("404.html", f"Page not found | {BRAND}", "This page doesn't exist.", body, robots="noindex,follow")
+page("404.html", f"Not found: {BRAND}", "No page lives at this address.", body, robots="noindex,follow")
 noindexed.remove("404.html")
 
 
@@ -1683,5 +1783,6 @@ if noindexed:
 print(f"restaurants {N_REST:,} in {N_TOWNS} towns | licensed {N_LICENSED:,} | hand-checked on a guide {N_HC} | "
       + " | ".join(f"{k} {len(v)}" for k, v in L.items()) + f" | oldest {len(OLD_L)} | honors {len(HON_L)} | DBPR results {len(INS_L):,} {dict(GROUP_N)}")
 print("city pages:", ", ".join(CITY_PAGES), "| no page (listed places):", CITY_SKIPPED)
+print(f"website blocklist: {len(BLOCKLIST)} entries, {len(BLOCKED_LINKS)} links dropped:", "; ".join(f"{n} {u}" for n, u in BLOCKED_LINKS) or "none")
 for k, (r, g) in SIZES.items():
     print(f"  {k}: {r / 1024:,.0f} KB raw, {g / 1024:,.0f} KB gzip")

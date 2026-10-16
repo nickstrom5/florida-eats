@@ -12,13 +12,14 @@ struct HomeView: View {
                 header
                 Button { model.openGuide(.all) } label: {
                     HStack(spacing: 10) {
-                        Image(systemName: "magnifyingglass").foregroundStyle(Theme.green)
+                        Image(systemName: "magnifyingglass").fontWeight(.bold).foregroundStyle(Theme.ink)
                         Text("Search by name, town or street").foregroundStyle(Theme.muted)
                         Spacer()
                     }
                     .font(.subheadline)
-                    .padding(14)
-                    .background(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.green, lineWidth: 2))
+                    .padding(.horizontal, 16).padding(.vertical, 13)
+                    .background(Capsule().fill(Theme.surface))
+                    .overlay(Capsule().strokeBorder(Theme.ink, lineWidth: 2))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Search every restaurant")
@@ -34,22 +35,30 @@ struct HomeView: View {
             }
             .padding(16)
         }
-        .background(Theme.surface)
+        .background(Theme.sand)
         .navigationTitle("")
         .toolbar(.hidden, for: .navigationBar)
     }
 
+    /// The Postcard setup: a "Greetings from" eyebrow, the title with a hard orange shadow, and three motel stripes.
     private var header: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Circle().fill(Theme.gold).frame(width: 10, height: 10)
+                Text("GREETINGS FROM").monoFont(12).tracking(0.5).foregroundStyle(Theme.green)
+            }
+            .accessibilityHidden(true)
             Text("FLORIDA\nEATS")
-                .displayFont(52)
+                .displayFont(62)
                 .foregroundStyle(Theme.green)
-                .lineSpacing(-6)
+                .lineSpacing(-10)
+                .shadow(color: Theme.gold, radius: 0, x: 3, y: 3)
+                .accessibilityLabel("Florida Eats")
                 .accessibilityAddTraits(.isHeader)
-            WaveLine().frame(height: 22).padding(.bottom, 4)
-            Text("Cuban, seafood & more")
-                .font(.headline).foregroundStyle(Theme.ink)
-            Text("Hand-checked Cuban sandwiches, stone crabs, grouper, oyster bars and fish camps, MICHELIN and James Beard honors, and the state's own inspection results for \(model.restaurantCount.formatted()) restaurants in \(model.towns.count.formatted()) towns.")
+            Stripes().padding(.bottom, 2)
+            Text("CUBAN, SEAFOOD & MORE")
+                .displayFont(21, weight: .heavy).foregroundStyle(Theme.ink)
+            Text("Hand-checked Cuban sandwiches, stone crabs, grouper, oyster bars and fish camps, MICHELIN and James Beard honors, and \(model.restaurantCount.formatted()) restaurants in \(model.towns.count.formatted()) towns, \(model.inspectedCount.formatted()) of them with the state's own inspection results.")
                 .font(.subheadline).foregroundStyle(Theme.ink2)
         }
         .padding(.top, 8)
@@ -64,38 +73,56 @@ struct HomeView: View {
                 model.selectedPlace = p
             }
         } label: {
-            Label("Surprise me with a Florida classic", systemImage: "dice")
-                .font(.subheadline.weight(.semibold))
-                .frame(maxWidth: .infinity).padding(12)
-                .background(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.rule2))
+            HStack(spacing: 12) {
+                Image(systemName: "dice").font(.title3.weight(.semibold)).foregroundStyle(Theme.ink)
+                    .frame(width: 44, height: 44).background(Circle().fill(Theme.gold))
+                Text("Surprise me with a Florida classic").font(.subheadline.weight(.bold))
+                Spacer(minLength: 0)
+            }
+            .padding(12)
+            .background(RoundedRectangle(cornerRadius: 14).fill(Theme.surface))
+            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Theme.green, style: StrokeStyle(lineWidth: 2, dash: [6, 4])))
         }
         .buttonStyle(.plain)
         .foregroundStyle(Theme.ink)
     }
 }
 
+/// A guide as a Postcard color block: the count big in IBM Plex Mono, the name in condensed Archivo. Florida's food guides take the
+/// palette's fills in turn; the utility guides (inspections, near me, everything) stay white with an ink outline.
 struct GuideCard: View {
     let guide: Guide
     let count: Int
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: guide.systemImage).font(.title3).foregroundStyle(Theme.green)
-                    .frame(width: 36, height: 36).background(Circle().fill(guide.isFlorida ? Theme.goldSoft : Theme.surface2))
-                Spacer()
-                if guide != .nearMe && guide != .all {   // "All" would just repeat the total in the header; Near Me has no fixed count
-                    Text(count.formatted()).displayFont(22).foregroundStyle(Theme.green).monospacedDigit()
-                }
-            }
-            Text(guide.title).displayFont(22, weight: .heavy).foregroundStyle(Theme.ink).fixedSize(horizontal: false, vertical: true)
-            Text(guide.subtitle).font(.caption).foregroundStyle(Theme.muted).fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 0)
+    private var colors: (fill: Color, text: Color, number: Color) {
+        switch guide {
+        case .cuban, .oyster, .oldest: (Theme.green, Theme.sand, Theme.sand)
+        case .stoneCrab, .fishCamp: (Theme.gold, Theme.ink, Theme.ink)
+        case .grouper, .latin: (Theme.lime, Theme.ink, Theme.ink)
+        case .keys, .honors: (Theme.ink, Theme.sand, Theme.lime)
+        default: (Theme.surface, Theme.ink, Theme.green)
         }
-        .padding(12)
+    }
+
+    var body: some View {
+        let c = colors
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline) {
+                if guide != .nearMe && guide != .all {   // "All" would just repeat the total in the header; Near Me has no fixed count
+                    Text(count.formatted()).monoFont(30).foregroundStyle(c.number)
+                } else {
+                    Image(systemName: guide.systemImage).font(.title2.weight(.semibold)).foregroundStyle(c.number)
+                }
+                Spacer()
+            }
+            Spacer(minLength: 4)
+            Text(guide.title.uppercased()).displayFont(20, weight: .heavy).foregroundStyle(c.text).fixedSize(horizontal: false, vertical: true)
+            Text(guide.subtitle).font(.caption.weight(.medium)).foregroundStyle(c.text.opacity(0.9)).fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(14)
         .frame(maxWidth: .infinity, minHeight: 150, alignment: .topLeading)
-        .background(RoundedRectangle(cornerRadius: 14).fill(Theme.surface))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(guide.isFlorida ? Color(hex: 0xD9822B) : Theme.rule))
+        .background(RoundedRectangle(cornerRadius: 18).fill(c.fill))
+        .overlay { if c.fill == Theme.surface { RoundedRectangle(cornerRadius: 18).strokeBorder(Theme.ink, lineWidth: 2) } }
         // one reading of the count, after the title ("Stone Crabs. Hand-checked …", "47 places")
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(guide.title). \(guide.subtitle)")

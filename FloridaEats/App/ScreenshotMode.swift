@@ -34,7 +34,10 @@ enum ScreenshotMode {
         switch name {
         case "cuban": open(.cuban)
         case "stonecrab": open(.stoneCrab)
-        case "keys": open(.keys)
+        case "keys":
+            // from Key West, so the nearest Keys classics are a short drive, not 160 miles away
+            model.screenshotLocation = CLLocation(latitude: 24.5557, longitude: -81.8010)
+            open(.keys)
         case "honors": open(.honors)
         case "oldest": open(.oldest)
         case "detail":
@@ -46,13 +49,18 @@ enum ScreenshotMode {
         case "about": model.tab = .about
         default: model.tab = .guides; model.selectedGuide = nil
         }
-        // iPad shows the place column next to every list, so give each shot a place instead of "Pick a place": famous ones whose
-        // inspection history is spotless, since the iPad column shows it all.
+        // iPad shows the place column next to every list, so give each shot a place instead of "Pick a place": a different
+        // hand-checked one per shot, each with a spotless inspection history, since the iPad column shows it all.
+        // The first place by each name is the hand-checked one (check after a data refresh: playbook/06-app-store-listing.md).
         guard UIDevice.current.userInterfaceIdiom == .pad, model.selectedPlace == nil else { return }
         let place: Place? = switch name {
+        case "home": pick("Chef Creole")
         case "cuban": pick("Sanguich De Miami")
+        case "map": pick("Islas Canarias")
+        case "stonecrab": pick("Keys Fisheries Market & Marina")
+        case "keys": pick("Conch Republic Seafood Company")
         case "honors": pick("Stubborn Seed")
-        case "stonecrab", "keys": pick("Joe's Stone Crab")
+        case "oldest": pick("Cap's Place Island Restaurant")
         case "saved": pick("Ted Peters' Famous Smoked Fish")
         case "about": nil
         default: pick("Joe's Stone Crab")

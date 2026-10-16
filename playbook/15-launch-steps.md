@@ -49,9 +49,15 @@ Change the website line in `13-app-review-reply.md` too.
 - The version number must be 1.0.0 to match the build.
 - Paste `13-app-review-reply.md`'s reply into App Review Information → Notes, and record the screen recording before submitting.
 - Promotional text: switch to the stone crab season line on Oct 15 (no review needed).
+- App Information → Content Rights: "Yes, it contains, shows or accesses third-party content" (DBPR public records, Overture data,
+  Apple Maps), and we have the rights to use it (public records and open licenses, listed on the About tab).
+- Pricing and Availability: untick "Make this app available on Mac" (Apple silicon) until it has been checked on a Mac.
+- Copyright: "2026 Nicholas Soderstrom".
+- App Review Information → Attachment: the screen recording, from the first submission (the reply says it is attached).
 
 ## 5. Archive and upload (public Xcode only)
-Archive built 2026-10-08: `build/FloridaEats.xcarchive`, DTXcodeBuild 27A266a, 1.0.0 (1), team 4C8TU6U7MQ (development-signed; the
+Archive rebuilt 2026-10-16 with the 10-09 QA data, the Postcard design and the new icon: `build/FloridaEats.xcarchive`, DTXcodeBuild
+27A266a, 1.0.0 (1), team 4C8TU6U7MQ (the 10-08 one is kept as `build/FloridaEats-2026-10-08.xcarchive`; development-signed; the
 export below re-signs it for the App Store and registers the App ID `com.floridaeats.ios` if it isn't yet).
 ```bash
 cd fl-eats && xcodegen generate   # from the claudecode folder

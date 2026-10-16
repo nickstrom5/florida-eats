@@ -124,16 +124,18 @@ struct InspectionRecord: Decodable, Hashable {
     let hp: Int?
     let im: Int?
     let bs: Int?
+    /// when the latest visit closed the place and DBPR's closure report already shows it reopened: that date
+    var reopened: String? = nil
 
-    init(g: InspectionResult?, d: String, hp: Int?, im: Int?, bs: Int?) {
-        self.g = g; self.d = d; self.hp = hp; self.im = im; self.bs = bs
+    init(g: InspectionResult?, d: String, hp: Int?, im: Int?, bs: Int?, reopened: String? = nil) {
+        self.g = g; self.d = d; self.hp = hp; self.im = im; self.bs = bs; self.reopened = reopened
     }
 
     /// From the JSONSerialization array (the launch path); nil without a date.
     init?(array a: [Any]) {
         guard a.count >= 2, let d = a[1] as? String else { return nil }
         func n(_ i: Int) -> Int? { i < a.count ? a[i] as? Int : nil }
-        self.init(g: n(0).flatMap(InspectionResult.init(rawValue:)), d: d, hp: n(2), im: n(3), bs: n(4))
+        self.init(g: n(0).flatMap(InspectionResult.init(rawValue:)), d: d, hp: n(2), im: n(3), bs: n(4), reopened: a.count > 5 ? a[5] as? String : nil)
     }
 
     init(from decoder: Decoder) throws {
@@ -143,6 +145,7 @@ struct InspectionRecord: Decodable, Hashable {
         hp = c.isAtEnd ? nil : try c.decodeIfPresent(Int.self)
         im = c.isAtEnd ? nil : try c.decodeIfPresent(Int.self)
         bs = c.isAtEnd ? nil : try c.decodeIfPresent(Int.self)
+        reopened = c.isAtEnd ? nil : try c.decodeIfPresent(String.self)
     }
 }
 

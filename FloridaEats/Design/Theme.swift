@@ -1,4 +1,6 @@
 import SwiftUI
+import UIKit
+import CoreText
 
 /// Florida landscape palette (Nick's pick, 2026-10-07), light only: Gulf teal #006D77 (6.1:1 on white), citrus orange #F28C28 and
 /// key lime #B5D46A (fills only: as text on white they fail contrast), ink #0B3C49, sand #FBF5EA. No team colors: Florida's loyalties split.
@@ -69,45 +71,72 @@ struct ResultBadge: View {
     }
 }
 
-/// Florida's one header element: a low coast-to-coast wave in orange, key lime and teal under the Home header.
-struct WaveLine: View {
-    var body: some View {
-        Canvas { ctx, size in
-            let w = size.width, h = size.height
-            for (k, color) in [(0, Theme.gold), (1, Theme.lime), (2, Theme.green)] {
-                let top = h * (0.18 + 0.26 * CGFloat(k)), amp = h * 0.16
-                var p = Path()
-                p.move(to: CGPoint(x: 0, y: h))
-                p.addLine(to: CGPoint(x: 0, y: top))
-                let n = 4
-                for i in 0..<n {
-                    let x0 = w * CGFloat(i) / CGFloat(n), x1 = w * CGFloat(i + 1) / CGFloat(n)
-                    p.addCurve(to: CGPoint(x: x1, y: top), control1: CGPoint(x: x0 + (x1 - x0) / 3, y: top - amp),
-                               control2: CGPoint(x: x0 + 2 * (x1 - x0) / 3, y: top + amp))
-                }
-                p.addLine(to: CGPoint(x: w, y: h)); p.closeSubpath()
-                ctx.fill(p, with: .color(color))
-            }
+/// Florida Eats' lettering (Nick's pick, 2026-10-09: the Postcard setup with the Gulf Chart lettering). Archivo, a variable grotesque,
+/// drawn condensed and heavy for titles and guide names; IBM Plex Mono for numbers, dates and small labels. Both SIL OFL 1.1, bundled in
+/// Resources/Fonts (licenses in Resources/Licenses, listed on About).
+enum BrandFont {
+    /// Archivo at a weight (100–900) and width (62–125) from its variable axes; the default instance is "Archivo-SemiBold".
+    static func archivo(_ size: CGFloat, weight: CGFloat, width: CGFloat = 68) -> Font {
+        let axes: [NSNumber: CGFloat] = [NSNumber(value: 0x7767_6874): weight, NSNumber(value: 0x7764_7468): width]   // 'wght', 'wdth'
+        let d = UIFontDescriptor(name: "Archivo-SemiBold", size: size)
+            .addingAttributes([UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String): axes])
+        return Font(UIFont(descriptor: d, size: size) as CTFont)
+    }
+
+    static func wght(_ w: Font.Weight) -> CGFloat {
+        switch w {
+        case .black: 850
+        case .heavy: 780
+        case .bold: 700
+        case .semibold: 620
+        case .medium: 540
+        default: 460
         }
-        .accessibilityHidden(true)
     }
 }
 
-/// Condensed, heavy display type for titles and big numbers (the system font's compressed width). It scales with the
-/// reader's text size, capped at 1.6× so a big number can't swallow its row.
+/// Condensed, heavy display type for titles and guide names (Archivo). It scales with the reader's text size, capped at 1.6× so a big
+/// title can't swallow its row.
 struct DisplayFont: ViewModifier {
     let size: CGFloat
     var weight: Font.Weight = .black
     @ScaledMetric(relativeTo: .body) private var scale: CGFloat = 1
 
     func body(content: Content) -> some View {
-        content.font(.system(size: size * min(scale, 1.6), weight: weight).width(.compressed))
+        content.font(BrandFont.archivo(size * min(scale, 1.6), weight: BrandFont.wght(weight)))
+    }
+}
+
+/// Numbers, dates and small labels in IBM Plex Mono, scaled like DisplayFont.
+struct MonoFont: ViewModifier {
+    let size: CGFloat
+    var weight: Font.Weight = .semibold
+    @ScaledMetric(relativeTo: .body) private var scale: CGFloat = 1
+
+    func body(content: Content) -> some View {
+        content.font(.custom(weight == .medium || weight == .regular ? "IBMPlexMono-Medium" : "IBMPlexMono-SemiBold", fixedSize: size * min(scale, 1.6)))
     }
 }
 
 extension View {
     func displayFont(_ size: CGFloat, weight: Font.Weight = .black) -> some View {
         modifier(DisplayFont(size: size, weight: weight))
+    }
+
+    func monoFont(_ size: CGFloat, weight: Font.Weight = .semibold) -> some View {
+        modifier(MonoFont(size: size, weight: weight))
+    }
+}
+
+/// The Postcard setup's three stripes (teal, orange, key lime) under the Home title, like an old motel sign.
+struct Stripes: View {
+    var height: CGFloat = 6
+
+    var body: some View {
+        VStack(spacing: 3) {
+            ForEach([Theme.green, Theme.gold, Theme.lime], id: \.self) { c in Capsule().fill(c).frame(height: height) }
+        }
+        .accessibilityHidden(true)
     }
 }
 

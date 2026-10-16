@@ -17,7 +17,7 @@ MIN_BYTES=120000
 mkdir -p "$OUT"
 # Screenshot mode pins the location to downtown Miami, so the system permission alert is never wanted here.
 xcrun simctl privacy "$DEVICE" revoke location com.floridaeats.ios >/dev/null 2>&1 || true
-xcrun simctl status_bar "$DEVICE" override --time 9:41 --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4 >/dev/null 2>&1 || true
+xcrun simctl status_bar "$DEVICE" override --time 9:41 --batteryState discharging --batteryLevel 100 --wifiBars 3 --cellularBars 4 >/dev/null 2>&1 || true
 for s in "${SCREENS[@]}"; do
   f="$OUT/$PREFIX$s.png"
   for attempt in 1 2 3 4; do

@@ -1,0 +1,277 @@
+[
+  {
+    "domain": "mrsouvlaki.net",
+    "match": "domain",
+    "place": "Mr Souvlaki (Tarpon Springs)",
+    "reason": "expired: redirects to www.mrsouvlakirestaurant.com, which answers HTTP 404 'Squarespace - Website Expired' (scan twice, rechecked once the same day)",
+    "severity": "P2",
+    "evidence": "$SP/work/link-scan/evidence/fl/parked-mrsouvlaki_net.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "gianniitaliano.com",
+    "match": "domain",
+    "place": "Cafe Gianni (Mount Dora)",
+    "reason": "injected spam text: restaurant page carries injected anabolic-steroid spam (\"best online steroid suppliers anabolic steroids for sale\") ahead of the menu",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/gianniitaliano.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "istanbulfoodlovers.com",
+    "match": "domain",
+    "place": "Istanbulfoodlovers (Fort Walton Beach)",
+    "reason": "injected hidden links: off-screen (left:-7566px) casino links: casinotest2.com, chssvolunteer.org.uk \"best betting sites uk\"",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/istanbulfoodlovers.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "mycurrymango.com",
+    "match": "domain",
+    "place": "Curry Mango (Lakeland)",
+    "reason": "injected hidden links: off-screen (left:-7566px) casino links: casino50.com, lolajacks.com \"Lola jack casino\"",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/mycurrymango.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "blacknbrew.com",
+    "match": "domain",
+    "place": "Black & Brew (Lakeland)",
+    "reason": "injected hidden links: off-screen (left:-73027px) link \"augmentin\" to a pharma spam page planted in the site's own staging uploads (blackandbrew.mystagingwebsite.com/wp-content/uploads/2015/08/8.html)",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/blacknbrew.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "drynkftl.com",
+    "match": "domain",
+    "place": "DrYnk Bar & Lounge (Wilton Manors)",
+    "reason": "injected hidden links: off-screen (left:-11407px) Russian casino links: russiansails2020.ru \"пинко казино\", cueronet.com \"pin up\"",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/drynkftl.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "thefigandbarrel.com",
+    "match": "domain",
+    "place": "The Fig & Barrel (Boynton Beach)",
+    "reason": "injected hidden links: zero-size clipped block of Turkish betting links (nakitbahis, nesine...)",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/thefigandbarrel.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "chowonekoreansteakhouse.com",
+    "match": "domain",
+    "place": "Chow One Korean Steakhouse (Pembroke Pines)",
+    "reason": "injected hidden links: off-screen (top:-49188px) Italian betting copy linking leoncasino-fra.eu.com",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/chowonekoreansteakhouse.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "mrkingcrystalriver.com",
+    "match": "domain",
+    "place": "Mr King (Crystal River)",
+    "reason": "domain taken over: domain is now an Indonesian food blog (\"Cerita Kuliner\") with a hidden \"mahjong slot\" link",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/mrkingcrystalriver.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "harveysstpete.com",
+    "match": "domain",
+    "place": "Harvey's 4th Street Grill (St. Petersburg)",
+    "reason": "injected hidden links: zero-size block of replica-watch links (\"luxury replica watches\", \"replica rolex\") to a hacked ufrgs.br page",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/harveysstpete.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "labrisatacosymariscos.com",
+    "match": "domain",
+    "place": "La Brisa Tacos Y Mariscos (Sarasota)",
+    "reason": "domain taken over: whole site is \"CERIABET\" Indonesian slot site",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/labrisatacosymariscos.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "michaeljohnsrestaurant.com",
+    "match": "domain",
+    "place": "Michael John's - French-American Steakhouse (Bradenton)",
+    "reason": "injected hidden links: off-screen (left:-6987px) link \"Glory Casino\" (theoldgloryrun.com)",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/michaeljohnsrestaurant.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "blackandbrew.com",
+    "match": "domain",
+    "place": "Black & Brew (Lakeland)",
+    "reason": "injected hidden links: same site as blacknbrew.com: off-screen (left:-73027px) \"augmentin\" pharma link on its staging host",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/blackandbrew.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "alfredoparadiso.com",
+    "match": "domain",
+    "place": "Alfredo's Paradiso (Merritt Island)",
+    "reason": "injected hidden links: 1px hidden block linking tr.pinupcasino.com \"pin-up casino\"",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/alfredoparadiso.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "squaregrouperkeywest.com",
+    "match": "domain",
+    "place": "Square Grouper Key West (Key West)",
+    "reason": "injected hidden links: off-screen (left:-68793px) link to lekharna-prague.com (Czech pharmacy)",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/squaregrouperkeywest.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "poposlocalbistro.com",
+    "match": "domain",
+    "place": "Popo's Local Bistro (Orlando)",
+    "reason": "injected hidden links: off-screen block of Austrian casino and pharmacy links (dragonia-bet.at, wintino-casino-au.com, buranbet.at, shop-einhorn-apotheke.at)",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/poposlocalbistro.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "buffet-elrinconcito.com",
+    "match": "domain",
+    "place": "El Rinconcito Restaurant and Bar (Orlando)",
+    "reason": "suspended: Bluehost \"Account Suspended!\"",
+    "severity": "P2",
+    "evidence": "$SP/work/link-scan/evidence/fl/buffet-elrinconcito.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "crocantebakery.com",
+    "match": "domain",
+    "place": "Crocante Cafe & Gourmet Bakery (Coral Springs)",
+    "reason": "injected hidden links: off-screen blocks: pmnewsnigeria.com/casino \"best canadian online casino\", mikeoldfield.it \"Wonaco Casino Italia\"",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/crocantebakery.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "twistedtrunkbrewing.com",
+    "match": "domain",
+    "place": "Twisted Trunk Brewing (Palm Beach Gardens)",
+    "reason": "injected links: essay-mill links appended after the page content (\"hire a writer\", \"professional essay writers\")",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/twistedtrunkbrewing.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "buonaristorante.com",
+    "match": "domain",
+    "place": "Buona Ristorante (St. Pete Beach)",
+    "reason": "injected hidden links: off-screen (left:-24566px, -123546px) links: mostbetw.in, glorycasinogames.com, pinup-bd.biz",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/buonaristorante.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "asianhousetitusville.com",
+    "match": "domain",
+    "place": "Asian House (Titusville)",
+    "reason": "domain taken over: whole site is a Chinese lottery-results page (幸运168飞艇, 体彩)",
+    "severity": "P0",
+    "evidence": "$SP/work/link-scan/evidence/fl/asianhousetitusville.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "url": "http://Chick-fil-a.com/atlanticandkernan",
+    "match": "url",
+    "place": "Chick-fil-A (Alachua); Chick-fil-A (Gainesville); Chick-fil-A (Callaway); Chick-fil-A (Panama City); Chick-fil-A (Melbourne); Chick-fil-A (Merritt Island) (+107 more)",
+    "reason": "domain does not resolve: DNS lookup fails (NOERROR) (checked with dig @1.1.1.1)",
+    "severity": "P2",
+    "evidence": null,
+    "found": "2026-10-12",
+    "domain": "http://Chick-fil-a.com/atlanticandkernan"
+  },
+  {
+    "url": "http://chick-fil-a.com/",
+    "match": "url",
+    "place": "Chick-fil-A (Alachua); Chick-fil-A (Gainesville); Chick-fil-A (Callaway); Chick-fil-A (Panama City); Chick-fil-A (Melbourne); Chick-fil-A (Merritt Island) (+107 more)",
+    "reason": "domain does not resolve: DNS lookup fails (NOERROR) (checked with dig @1.1.1.1)",
+    "severity": "P2",
+    "evidence": null,
+    "found": "2026-10-12",
+    "domain": "http://chick-fil-a.com/"
+  },
+  {
+    "url": "http://chick-fil-a.com/lakecity",
+    "match": "url",
+    "place": "Chick-fil-A (Alachua); Chick-fil-A (Gainesville); Chick-fil-A (Callaway); Chick-fil-A (Panama City); Chick-fil-A (Melbourne); Chick-fil-A (Merritt Island) (+107 more)",
+    "reason": "domain does not resolve: DNS lookup fails (NOERROR) (checked with dig @1.1.1.1)",
+    "severity": "P2",
+    "evidence": null,
+    "found": "2026-10-12",
+    "domain": "http://chick-fil-a.com/lakecity"
+  },
+  {
+    "url": "http://grill.ionaeats.com",
+    "match": "url",
+    "place": "McGregor Grill (Fort Myers)",
+    "reason": "domain does not resolve: host name does not exist (NXDOMAIN) though the domain does (checked with dig @1.1.1.1)",
+    "severity": "P2",
+    "evidence": null,
+    "found": "2026-10-12",
+    "domain": "http://grill.ionaeats.com"
+  },
+  {
+    "domain": "redfarmnyc.com",
+    "match": "domain",
+    "place": "RedFarm (Coconut Grove)",
+    "reason": "another business (auto, not hand-checked): the site's addresses are in NY and it names neither the city nor the state of RedFarm (Coconut Grove)",
+    "severity": "P2",
+    "evidence": "$SP/work/link-scan/evidence/fl/redfarmnyc.com.html",
+    "found": "2026-10-12"
+  },
+  {
+    "url": "http://FL12.TropicalSmoothieCafe.com/",
+    "match": "url",
+    "place": "Tropical Smoothie Cafe (Gainesville); Tropical Smoothie Cafe (Panama City Beach); Tropical Smoothie Cafe (Indian Harbour); Tropical Smoothie Cafe (Melbourne); Tropical Smoothie Cafe (Merritt Island); Tropical Smoothie Cafe (Palm Bay) (+105 more)",
+    "reason": "domain does not resolve: host name does not exist (NXDOMAIN) though the domain does (checked with dig @1.1.1.1)",
+    "severity": "P2",
+    "evidence": "$SP/work/link-scan/evidence/fl/tropicalsmoothiecafe.com.html",
+    "found": "2026-10-12",
+    "domain": "http://FL12.TropicalSmoothieCafe.com/"
+  },
+  {
+    "domain": "gastro-america.com",
+    "match": "domain",
+    "place": "Chan's Chinese Food (Gainesville); El Taquito (Immokalee); Gou Lou Cheong BBQ Restaurant (Lauderdale Lakes)",
+    "reason": "listing farm or directory, not the place's own site: auto-generated restaurant listing pages ('<name> - <city> - Full Menu, Reviews, Photos'), not the place's own site",
+    "severity": "P3",
+    "evidence": null,
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "four-food.com",
+    "match": "domain",
+    "place": "Cristof's on McGregor (Fort Myers); Grannie's Country Cookin' Restaurant (Crystal River); Moschello's Pizza (Homosassa Springs); Old Time Soda Fountain (Apalachicola); Sandbar Bill's Bar and Grille (St. Pete Beach)",
+    "reason": "listing farm or directory, not the place's own site: listing pages (<place>.four-food.com: menu/photos/business info), not the place's own site",
+    "severity": "P3",
+    "evidence": null,
+    "found": "2026-10-12"
+  },
+  {
+    "domain": "visitstaugustine.com",
+    "match": "domain",
+    "place": "Anastasia Kitchen (St. Augustine); Barefoot Bill's Island Grill (St. Augustine); Beachcomber St. Augustine (St. Augustine Beach); Burrito Works Taco Shop (St. Augustine); Cold Cow (St. Augustine); Crucial Coffee Cafe (St. Augustine) (+6 more)",
+    "reason": "listing farm or directory, not the place's own site: tourism directory listing, not the place's own site",
+    "severity": "P3",
+    "evidence": null,
+    "found": "2026-10-12"
+  }
+]

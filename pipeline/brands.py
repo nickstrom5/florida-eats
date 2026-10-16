@@ -68,7 +68,7 @@ BRANDS = [
     ("Taco Bus", r"^TACO BUS"), ("Big Cheese Pizza", r"^BIG CHEESE PIZZA"), ("Ci Ci's Pizza", r"^CICIS"), ("Jeremiah's Italian Ice", r"^JEREMIAHS (?:ITALIAN|ICE)"),
     ("Rita's Italian Ice", r"^RITAS (?:ITALIAN|ICE)"), ("Bagel Boss", r"^BAGEL BOSS"), ("Le Macaron", r"^LE MACARON"),
     ("Joe's Crab Shack", r"^JOES CRAB SHACK"), ("Hurricane Grill", r"^HURRICANE GRILL"), ("Whataburger", r"^WHATABURGER"),
-    ("Buc-ee's", r"^BUC EES"), ("Wawa", r"^WAWA"), ("RaceTrac", r"^RACE ?TRAC"), ("Circle K", r"^CIRCLE K"), ("Sheetz", r"^SHEETZ"),
+    ("Buc-ee's", r"^BUC EES"), ("Wawa", r"^WAWA"), ("RaceTrac", r"^RACE ?TRAC\b"), ("Circle K", r"^CIRCLE K"), ("Sheetz", r"^SHEETZ"),
     ("Publix", r"^PUBLIX"), ("Winn-Dixie", r"^WINN ?DIXIE"), ("Sedano's", r"^SEDANOS"), ("Walmart", r"^WALMART|^WAL MART"), ("Target", r"^TARGET"),
     ("Kwik Stop", r"^KWIK STOP"), ("Love's", r"^LOVES TRAVEL"), ("Pilot", r"^PILOT TRAVEL|^PILOT FLYING"),
 ]

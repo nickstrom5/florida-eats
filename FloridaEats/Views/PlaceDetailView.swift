@@ -79,7 +79,7 @@ struct PlaceDetailView: View {
         VStack(alignment: .leading, spacing: 8) {
             // "MIAMI · MIAMI-DADE COUNTY"
             Text((place.city ?? "Florida").uppercased() + (place.county.map { " · " + $0.uppercased() + " COUNTY" } ?? ""))
-                .font(.caption.weight(.bold)).tracking(1.2).foregroundStyle(Theme.green2)
+                .monoFont(12).tracking(0.4).foregroundStyle(Theme.green2)
             Text(place.name.uppercased())
                 .displayFont(38).foregroundStyle(Theme.green)
                 .fixedSize(horizontal: false, vertical: true)
@@ -184,6 +184,9 @@ struct PlaceDetailView: View {
                     if let g = i.g { ResultBadge(result: g, large: true) }
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Latest visit \(DayFormat.text(i.d) ?? i.d)").font(.headline).foregroundStyle(Theme.ink)
+                        if let ro = i.reopened {
+                            Text("Reopened \(DayFormat.text(ro) ?? ro), per DBPR's closure report").font(.caption.weight(.semibold)).foregroundStyle(Theme.ink2)
+                        }
                         if let x = detail?.inspection {
                             Text("“\(model.disposition(x.dp))” · \(model.visitType(x.t))").font(.caption).foregroundStyle(Theme.ink2)
                         }

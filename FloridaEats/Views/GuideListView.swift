@@ -125,12 +125,12 @@ struct GuideListView: View {
 
     private func metricText(_ p: Place) -> PlaceRow.Metric? {
         // an inspection row always shows its result, whatever the order (the distance goes in the detail line)
-        if guide == .inspections, let i = p.inspection { return .result(i.g, i.hp) }
+        if guide == .inspections, let i = p.inspection { return .result(i.g, i.hp, i.reopened) }
         switch order {
         case .nearest: if let here, let l = p.location { return .text(here.milesText(to: l), "away") }
         case .oldest: if let f = p.founded { return .text("\(f)", "since") }
         case .iconic: return nil   // the chips say the honor; no points that could read like a rating
-        case .recent, .fewestHighPriority, .mostHighPriority: if let i = p.inspection { return .result(i.g, i.hp) }
+        case .recent, .fewestHighPriority, .mostHighPriority: if let i = p.inspection { return .result(i.g, i.hp, i.reopened) }
         default: break
         }
         if let f = p.founded, guide != .all { return .text("\(f)", "since") }
@@ -164,7 +164,7 @@ struct GuideListView: View {
 }
 
 struct PlaceRow: View {
-    enum Metric { case text(String, String), result(InspectionResult?, Int?) }
+    enum Metric { case text(String, String), result(InspectionResult?, Int?, String?) }
     let place: Place
     var rank: Int?
     /// what VoiceOver says for the rank ("1st oldest")
@@ -179,7 +179,7 @@ struct PlaceRow: View {
         HStack(alignment: .center, spacing: 12) {
             if let rank {
                 Text("\(rank)")
-                    .displayFont(rank < 100 ? 26 : 20).monospacedDigit()
+                    .monoFont(rank < 100 ? 24 : 18)
                     .foregroundStyle(Theme.green)
                     .frame(minWidth: 38, minHeight: 38)
                     .background(RoundedRectangle(cornerRadius: 8).fill(rank <= 3 && highlightTop ? Theme.gold : .clear))
@@ -195,12 +195,15 @@ struct PlaceRow: View {
             switch metric {
             case .text(let big, let small):
                 VStack(alignment: .trailing, spacing: 0) {
-                    Text(big).displayFont(22).foregroundStyle(Theme.green).monospacedDigit()
+                    Text(big).monoFont(20).foregroundStyle(Theme.green)
                     Text(small).font(.caption2).foregroundStyle(Theme.muted)
                 }
-            case .result(let r, let hp):
+            case .result(let r, let hp, let reopened):
                 VStack(alignment: .trailing, spacing: 3) {
                     if let r { ResultBadge(result: r) }
+                    if let reopened {   // DBPR's closure report shows the reopening the latest visit doesn't yet
+                        Text("Reopened \(DayFormat.text(reopened) ?? reopened)").font(.caption2.weight(.semibold)).foregroundStyle(Theme.ink2)
+                    }
                     if let hp {
                         Text("\(hp) high-priority").font(.caption2).foregroundStyle(Theme.muted).monospacedDigit()
                             .accessibilityLabel("\(hp) high-priority violation\(hp == 1 ? "" : "s") at the latest routine inspection")
