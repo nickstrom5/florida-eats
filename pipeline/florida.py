@@ -19,6 +19,7 @@ from rapidfuzz import fuzz
 from common import (real_share, kind_conflict, town_words, norm_name, nice, name_sim, cuisine, FOOD_COST, MARGIN, MARGIN_CUISINE, SPEND, GENERIC, _stems, DATA, FL, ROOT,
                     canon_city, town_key, CUISINE_RULES)
 from brands import brand_of
+import link_blocklist
 import official
 from official import REGION_OF
 from listings_util import official_match, _close_words
@@ -1341,6 +1342,10 @@ if APP:
         if dt_:
             details[REGIONS[rg] if rg is not None else "Other"][p["id"]] = dt_
     print("website links dropped:", sum(link_drops.values()), link_drops.most_common(8))
+    # pipeline/website_blocklist.json: no hacked, taken-over or wrong-business link in any field of the app data (link_blocklist.py)
+    bl_drops = link_blocklist.scrub(places)
+    link_blocklist.scrub(details, bl_drops)
+    print("blocklisted links dropped from the app data:", sum(bl_drops.values()), dict(bl_drops))
     json.dump(link_cands, open(f"{FL}/website_candidates.json", "w"), indent=0, ensure_ascii=False)
     calib_app = json.load(open(f"{FL}/calibration_app.json"))
     out = {"v": 2, **meta_common, "cities": CITIES, "cuisines": CUIS, "brands": BRANDS, "count": len(places), "count_restaurants": int(len(nv)),
