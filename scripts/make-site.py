@@ -593,6 +593,7 @@ def page(path, title, desc, body, lds=(), robots="index,follow,max-image-preview
     </nav>
     <p>{SOURCES_LINE}</p>
     <p>© 2026 {BRAND}. Part of <a href="{HUB['url']}" rel="noopener">Eats Ranked</a>, restaurant apps state by state.</p>
+    <p>Created by <a href="https://work-with-nick.com/" rel="author">Nick Soderstrom</a>.</p>
   </footer>
 </div>
 <script>
