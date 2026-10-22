@@ -69,7 +69,7 @@ for lic, a, c, z in zip(L.lic, L.addr, L.city_raw, L.zip):
 todo = list(dict.fromkeys(todo))
 print("to ask the Census geocoder:", len(todo))
 URL = "https://geocoding.geo.census.gov/geocoder/locations/addressbatch"
-UA = {"User-Agent": "FloridaEatsResearch/1.0 (work-with-nick@gmail.com)"}
+UA = {"User-Agent": "FloridaEatsResearch/1.0 (nick@eatsranked.com)"}
 for start in range(0, len(todo), 2500):
     chunk = todo[start:start + 2500]
     buf = io.StringIO()

@@ -949,6 +949,39 @@ def webapp_search_scope_and_placeholder(browser, base, problems):
     ctx.close()
 
 
+def expected_bib():
+    """Bib Gourmand places (MICHELIN level 2) the web app's box should list (core.json holds restaurants only)."""
+    core = json.load(open(os.path.join(DOCS, "data", "core.json")))
+    return sum(1 for _, v in core["sparse"]["mi"] if v == 2)     # a mostly-empty column: [[row, value], ...]
+
+
+def bib_problems(page, ex, width):
+    """The Bib Gourmand box keeps every Bib Gourmand and nothing else: the count is core.json's, every row says Bib Gourmand,
+    and unticking it brings the whole guide back."""
+    want, out = expected_bib(), []
+    if not want:
+        return [f"explore @{width}: core.json has no Bib Gourmand (mi 2) places"]
+    page.goto(ex + "#g=all&bib=1", wait_until="networkidle")
+    page.reload(wait_until="networkidle")
+    page.wait_for_function("document.querySelectorAll('.ex-row').length > 0", timeout=20000)
+    box = page.locator("#ex-bibwrap")
+    if not box.is_visible() or box.inner_text().strip() != f"Bib Gourmand ({want:,})" or not page.locator("#ex-bib").is_checked():
+        out.append(f"explore @{width}: the Bib Gourmand box isn't shown ticked as 'Bib Gourmand ({want:,})' ({box.inner_text().strip()!r})")
+    count = page.locator("#ex-count").inner_text()
+    if not count.startswith(f"{want:,} place"):
+        out.append(f"explore @{width}: Bib Gourmand lists {count!r}, expected the {want} in core.json")
+    tags = page.evaluate("[...document.querySelectorAll('.ex-row')].map(r => [...r.querySelectorAll('.tag-mi')].map(t => t.textContent).join('|'))")
+    if len(tags) != min(want, 100):
+        out.append(f"explore @{width}: Bib Gourmand shows {len(tags)} rows, expected {min(want, 100)}")
+    wrong = [t for t in tags if t != "Bib Gourmand"]
+    if wrong:
+        out.append(f"explore @{width}: Bib Gourmand lists places that aren't Bib Gourmands: {wrong[:3]}")
+    page.locator("#ex-bib").uncheck()
+    page.wait_for_timeout(300)
+    if page.locator("#ex-count").inner_text().startswith(f"{want:,} place"):
+        out.append(f"explore @{width}: unticking Bib Gourmand didn't bring the whole guide back")
+    return out
+
 def browser_checks(problems):
     from playwright.sync_api import sync_playwright
     base = serve()
@@ -1006,6 +1039,7 @@ def browser_checks(problems):
                 want, got = expected_hits(rows, 1, word), page.locator(".ex-row").count()
                 if got != want or not want:
                     problems.append(f"explore @{width}: '{word}' listed {got} Cuban places, expected the {want} that serve it")
+            problems += bib_problems(page, ex, width)
             # Miami's quadrant words: "southwest 8th street" finds SW 8th St addresses
             page.goto(ex + "#g=all", wait_until="networkidle")
             page.wait_for_function("document.querySelectorAll('.ex-row').length > 0", timeout=30000)

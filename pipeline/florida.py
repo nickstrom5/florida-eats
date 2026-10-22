@@ -20,6 +20,7 @@ from common import (real_share, kind_conflict, town_words, norm_name, nice, name
                     canon_city, town_key, CUISINE_RULES)
 from brands import brand_of
 import link_blocklist
+import tracking_params
 import official
 from official import REGION_OF
 from listings_util import official_match, _close_words
@@ -1346,6 +1347,10 @@ if APP:
     bl_drops = link_blocklist.scrub(places)
     link_blocklist.scrub(details, bl_drops)
     print("blocklisted links dropped from the app data:", sum(bl_drops.values()), dict(bl_drops))
+    # tracking tags (ref=google, utm_*, cn_channel …) off every outbound link; the store's own parameters stay (tracking_params.py)
+    tp_changes = tracking_params.scrub(places)
+    tracking_params.scrub(details, tp_changes)
+    print("tracking parameters stripped from links:", sum(tp_changes.values()), dict(tp_changes))
     json.dump(link_cands, open(f"{FL}/website_candidates.json", "w"), indent=0, ensure_ascii=False)
     calib_app = json.load(open(f"{FL}/calibration_app.json"))
     out = {"v": 2, **meta_common, "cities": CITIES, "cuisines": CUIS, "brands": BRANDS, "count": len(places), "count_restaurants": int(len(nv)),

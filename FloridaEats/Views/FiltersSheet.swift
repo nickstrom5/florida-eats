@@ -32,6 +32,13 @@ struct FiltersSheet: View {
                 } footer: {
                     Text("Confirmed = on a current Florida DBPR food service license, a high-confidence map listing, or hand-checked by us. Non-restaurants are gas-station and grocery counters, stadium and airport stands, theme-park carts, caterers, corporate cafeterias and delivery-only brands.")
                 }
+                // a fact from the MICHELIN Guide, not a rating; shown only when the data has Bib Gourmand places (below the
+                // Show switches, so the half-height sheet keeps those in view)
+                if model.bibCount > 0 {
+                    Section("MICHELIN Guide") {
+                        Toggle("Bib Gourmand (\(model.bibCount.formatted()))", isOn: $model.filters.bibGourmand)
+                    }
+                }
                 if model.filters.activeCount > 0 {
                     Section { Button("Clear all filters", role: .destructive) { model.filters = Filters() } }
                 }

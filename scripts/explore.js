@@ -131,7 +131,8 @@
   let here = null, shown = 100, current = [], view = "list";
   const savedRaw = store.get("saved", []);
   const saved = new Set(Array.isArray(savedRaw) ? savedRaw.filter((x) => typeof x === "string" && x.length < 64) : []);
-  const st = { g: "cuban", q: "", sort: "", town: "", cuisine: "", chains: false, p: "" };
+  const st = { g: "cuban", q: "", sort: "", town: "", cuisine: "", chains: false, bib: false, p: "" };
+  let bibCount = 0;   // Bib Gourmand places: the box shows only when there are some
 
   const miles = (a, b) => {
     const r = Math.PI / 180, dLa = (b.la - a.la) * r, dLo = (b.lo - a.lo) * r;
@@ -151,6 +152,7 @@
     if (st.town && p.c !== st.town) return false;
     if (st.cuisine && p.cu !== st.cuisine) return false;
     if (st.chains && p.ch >= 5) return false;
+    if (st.bib && p.mi !== 2) return false;      // MICHELIN Bib Gourmand only, as the app's Filters switch
     return true;
   }
 
@@ -215,7 +217,7 @@
     const sortSel = $("#ex-sort");
     sortSel.innerHTML = g.sorts.map((s) => `<option value="${esc(s)}"${s === o ? " selected" : ""}>${esc(SORT_LABEL[s])}</option>`).join("");
     sortSel.disabled = g.sorts.length < 2;
-    const filters = [st.town && `in ${st.town}`, st.cuisine && st.cuisine, st.chains && "no chains"].filter(Boolean);
+    const filters = [st.town && `in ${st.town}`, st.cuisine && st.cuisine, st.chains && "no chains", st.bib && "Bib Gourmand"].filter(Boolean);
     $("#ex-count").textContent = `${current.length.toLocaleString()} ${current.length === 1 ? "place" : "places"} · ${SORT_LABEL[o]}` + (filters.length ? ` · ${filters.join(", ")}` : "");
     $("#ex-clear").hidden = !filters.length;
     // Near me stays: each tap asks for a fresh fix (people move), and it's how to retry after a timeout
@@ -641,6 +643,10 @@
     const cuis = new Map();
     for (const p of P) cuis.set(p.cu, (cuis.get(p.cu) || 0) + 1);
     $("#ex-cuisine").innerHTML = '<option value="">All kinds</option>' + [...cuis.entries()].sort((a, b) => b[1] - a[1]).map(([c, k]) => `<option value="${esc(c)}">${esc(c)} (${esc(k.toLocaleString())})</option>`).join("");
+    bibCount = P.filter((p) => p.mi === 2).length;
+    $("#ex-bibwrap").hidden = !bibCount;
+    $("#ex-bibn").textContent = `(${bibCount.toLocaleString()})`;
+    if (!bibCount) st.bib = false;
   }
 
   const guideOk = (g) => own(GUIDES, g);
@@ -649,14 +655,14 @@
     const last = store.get("guide", "cuban");
     // a returning visitor gets the guide they used last, unless it's an empty Saved list
     st.g = guideOk(h.get("g")) ? h.get("g") : guideOk(last) && !(last === "saved" && !saved.size) ? last : "cuban";
-    st.q = h.get("q") || ""; st.town = h.get("town") || ""; st.cuisine = h.get("kind") || ""; st.chains = h.get("chains") === "1";
+    st.q = h.get("q") || ""; st.town = h.get("town") || ""; st.cuisine = h.get("kind") || ""; st.chains = h.get("chains") === "1"; st.bib = h.get("bib") === "1";
     st.sort = h.get("sort") || ""; st.p = h.get("p") || "";
   }
   function hashOf(withPlace) {
     const h = new URLSearchParams();
     h.set("g", st.g);
     if (st.q) h.set("q", st.q); if (st.town) h.set("town", st.town); if (st.cuisine) h.set("kind", st.cuisine);
-    if (st.chains) h.set("chains", "1"); if (st.sort) h.set("sort", st.sort); if (withPlace && st.p) h.set("p", st.p);
+    if (st.chains) h.set("chains", "1"); if (st.bib) h.set("bib", "1"); if (st.sort) h.set("sort", st.sort); if (withPlace && st.p) h.set("p", st.p);
     return "#" + h.toString();
   }
   const listHash = () => hashOf(false);
@@ -728,7 +734,8 @@
     $("#ex-town").onchange = (e) => { st.town = e.target.value; shown = 100; render(); };
     $("#ex-cuisine").onchange = (e) => { st.cuisine = e.target.value; shown = 100; render(); };
     $("#ex-chains").onchange = (e) => { st.chains = e.target.checked; shown = 100; render(); };
-    $("#ex-clear").onclick = () => { st.town = st.cuisine = ""; st.chains = false; syncInputs(); shown = 100; render(); };
+    $("#ex-bib").onchange = (e) => { st.bib = e.target.checked; shown = 100; render(); };
+    $("#ex-clear").onclick = () => { st.town = st.cuisine = ""; st.chains = st.bib = false; syncInputs(); shown = 100; render(); };
     $("#ex-locate").onclick = locate;
     $("#ex-more").onclick = () => { shown += 200; renderList(order()); };
     document.querySelectorAll(".ex-view button").forEach((b) => b.onclick = () => setView(b.dataset.v));
@@ -746,7 +753,7 @@
     mapEvents();
   }
   function syncInputs() {
-    $("#ex-q").value = st.q; $("#ex-town").value = st.town; $("#ex-cuisine").value = st.cuisine; $("#ex-chains").checked = st.chains;
+    $("#ex-q").value = st.q; $("#ex-town").value = st.town; $("#ex-cuisine").value = st.cuisine; $("#ex-chains").checked = st.chains; $("#ex-bib").checked = st.bib;
   }
 
   (async () => {

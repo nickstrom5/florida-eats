@@ -21,7 +21,7 @@ for i, (q, a, c, z) in enumerate(rows):
 got = 0
 if rows:
     r = requests.post("https://geocoding.geo.census.gov/geocoder/locations/addressbatch", files={"addressFile": ("a.csv", buf.getvalue(), "text/csv")},
-                      data={"benchmark": "Public_AR_Current"}, headers={"User-Agent": "FloridaEatsResearch/1.0 (work-with-nick@gmail.com)"}, timeout=600)
+                      data={"benchmark": "Public_AR_Current"}, headers={"User-Agent": "FloridaEatsResearch/1.0 (nick@eatsranked.com)"}, timeout=600)
     r.raise_for_status()
     for row in csv.reader(io.StringIO(r.text)):
         if len(row) < 3 or not row[0].isdigit():

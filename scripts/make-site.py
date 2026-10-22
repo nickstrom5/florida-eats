@@ -1494,6 +1494,7 @@ body = f"""{nav}
         <select id="ex-town" aria-label="Town"></select>
         <select id="ex-cuisine" aria-label="Kind of place"></select>
         <label><input type="checkbox" id="ex-chains"> Hide chains</label>
+        <label id="ex-bibwrap" hidden><input type="checkbox" id="ex-bib"> Bib Gourmand <span id="ex-bibn"></span></label>
         <button type="button" id="ex-clear" class="ex-small" hidden>Clear filters</button>
         <div class="ex-view" role="group" aria-label="View"><button type="button" data-v="list" aria-pressed="true">List</button><button type="button" data-v="map" aria-pressed="false">Map</button></div>
       </div>

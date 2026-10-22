@@ -67,7 +67,7 @@ Every place in the Florida guides was checked by hand in fall 2026 against a 202
 PRIVATE BY DESIGN
 No account, no tracking, no ads. Your location, if you share it, only sorts lists on your device. Saved places stay on your device.
 
-Places open and close, and some close for part of the summer or after a storm, so check before you go. Spot a mistake? Email work-with-nick@gmail.com.
+Places open and close, and some close for part of the summer or after a storm, so check before you go. Spot a mistake? Email nick@eatsranked.com.
 
 An independent app, not affiliated with any restaurant, chain or government agency, the MICHELIN Guide or the James Beard Foundation. MICHELIN and the MICHELIN Guide are trademarks of Michelin. James Beard Foundation and James Beard Award are trademarks of the James Beard Foundation. Place data from Florida DBPR public records and Overture Maps Foundation (CDLA Permissive 2.0) and others; sources and licenses are on the About tab.
 ```

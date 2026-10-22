@@ -42,7 +42,7 @@ if os.path.exists(LOCAL):
         proc = subprocess.Popen(f"gzip -dc '{LOCAL}' | LC_ALL=C grep -i -E '{GREP}'", shell=True, stdout=subprocess.PIPE, text=True, bufsize=1 << 20)
     src = proc.stdout
 else:
-    src = gzip.open(urllib.request.urlopen(urllib.request.Request(URL, headers={"User-Agent": "fl-eats data pipeline (work-with-nick@gmail.com)"}), timeout=300), "rt")
+    src = gzip.open(urllib.request.urlopen(urllib.request.Request(URL, headers={"User-Agent": "fl-eats data pipeline (nick@eatsranked.com)"}), timeout=300), "rt")
 with src as f:
     for line in f:
         n += 1

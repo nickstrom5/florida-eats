@@ -11,7 +11,7 @@ enum Links {
     /// DBPR's inspection search: a form, so no per-license link exists; the place shows its license number to search for
     static let dbprSearch = URL(string: "https://www.myfloridalicense.com/portalsearches/VerifyLicensee?Mode=0&BoardType=H")!
     static let dbprRecords = URL(string: "https://www2.myfloridalicense.com/hotels-restaurants/public-records/")!
-    static let supportEmail = "work-with-nick@gmail.com"
+    static let supportEmail = "nick@eatsranked.com"
 
     static var correctionEmail: URL {
         URL(string: "mailto:\(supportEmail)?subject=Florida%20Eats%20correction")!

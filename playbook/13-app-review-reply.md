@@ -49,7 +49,7 @@ A screen recording from an iPhone running the latest iOS is attached. It starts 
 
 6. Regulated or protected material: the app is not in a regulated industry and includes no protected third-party material. The data is open-licensed or public record, with attribution and licenses on the About tab. Ratings, hours and photos are shown only inside Apple's own place card through MapKit, under Apple's terms; the app stores no ratings or reviews. Inspection results are shown exactly as the State of Florida records them (its disposition, its own result group and its violation counts, with dates); Florida doesn't grade restaurants and the app computes no grade. Every website link was checked before release, and adult venues are excluded. The app is independent and not affiliated with any restaurant, agency, the MICHELIN Guide or the James Beard Foundation.
 
-Support: work-with-nick@gmail.com
+Support: nick@eatsranked.com
 ```
 
 Before pasting: if the site has moved to https://florida.eatsranked.com (Cloudflare record live, `FL_DOMAIN` set), change the website line.

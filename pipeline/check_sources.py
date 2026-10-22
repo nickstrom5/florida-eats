@@ -12,7 +12,7 @@ import requests
 R = os.path.join(os.path.dirname(__file__), "..", "data", "research")
 CACHE = os.path.join(R, "source_hosts.json")
 AGENTS = ("ClaudeBot", "Claude-User", "anthropic-ai")
-UA = "FloridaEatsSourceCheck/1.0 (+work-with-nick@gmail.com)"
+UA = "FloridaEatsSourceCheck/1.0 (+nick@eatsranked.com)"
 # official data portals we read through their APIs: their robots.txt governs crawling the HTML site, not the documented API
 API_HOSTS = set()   # Florida reads no portal API through a research citation
 
