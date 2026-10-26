@@ -1,0 +1,69 @@
+{
+ "schema": 1,
+ "version": "2026-10-22.1",
+ "records_through": "2026-10-22",
+ "published": "2026-10-26T14:19:47Z",
+ "min_app_build": 1,
+ "files": {
+  "detail-central": {
+   "path": "detail-central-d42f49d18605.json",
+   "sha256": "d42f49d186056ee5dd312ab3b235064037d939c16a5c03e73a5fa91b1201f60f",
+   "bytes": 3184544,
+   "rows": 12285
+  },
+  "detail-keys": {
+   "path": "detail-keys-7a637b23f733.json",
+   "sha256": "7a637b23f73394de5d46ac8c78019d42a3168b8333cf1699ff438f0f35fd0d6e",
+   "bytes": 179130,
+   "rows": 716
+  },
+  "detail-northeast": {
+   "path": "detail-northeast-5ecec9cead60.json",
+   "sha256": "5ecec9cead603e81fd90d02de2a02305b13f2486623ba306be64f71b83cb9be7",
+   "bytes": 1527353,
+   "rows": 5648
+  },
+  "detail-panhandle": {
+   "path": "detail-panhandle-f03e62dbb08f.json",
+   "sha256": "f03e62dbb08f28d0c9f252887c36cb0e1330517917bb940c87180c72ed1f0656",
+   "bytes": 1073003,
+   "rows": 4178
+  },
+  "detail-south-florida": {
+   "path": "detail-south-florida-56c496e940f5.json",
+   "sha256": "56c496e940f599204cd308557235bf084490ca4d67a9acd8d93050385520b630",
+   "bytes": 4419814,
+   "rows": 16537
+  },
+  "detail-southwest": {
+   "path": "detail-southwest-8167e721992a.json",
+   "sha256": "8167e721992abdaf915df0809952248fe58b2b9d4432094eaca10d82da614d5f",
+   "bytes": 1407506,
+   "rows": 5282
+  },
+  "detail-space-treasure-coast": {
+   "path": "detail-space-treasure-coast-e475f656ac66.json",
+   "sha256": "e475f656ac6695834ca183635d2ec6be0ae318d1ace0d1d2d9ad3e607766efaf",
+   "bytes": 879091,
+   "rows": 3249
+  },
+  "detail-tampa-bay": {
+   "path": "detail-tampa-bay-f5c95971344b.json",
+   "sha256": "f5c95971344b5d5bf535d38bf7442af78ad7a0c463e70f469446baeb018b23bf",
+   "bytes": 2465247,
+   "rows": 9420
+  },
+  "places": {
+   "path": "places-2db0f4ed1379.json",
+   "sha256": "2db0f4ed1379aeac426395c9a284e10674cdc3e5ac272a0fb65f85a3ddb07f40",
+   "bytes": 10781087,
+   "rows": 57572
+  }
+ },
+ "counts": {
+  "places": 57572,
+  "files": 9,
+  "bytes": 25916775,
+  "restaurants": 52573
+ }
+}

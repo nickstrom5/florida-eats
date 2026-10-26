@@ -36,7 +36,7 @@ struct PlaceDetailView: View {
                     Label(model.isSaved(place) ? "Saved" : "Save", systemImage: model.isSaved(place) ? "heart.fill" : "heart")
                 }
                 .accessibilityIdentifier("saveHeart")   // the Saved tab is also a "Saved" button
-                ShareLink(item: shareText) { Label("Share", systemImage: "square.and.arrow.up") }
+                ShareLink(item: Links.share(place), subject: Text(place.name), message: Text(Links.shareMessage(place))) { Label("Share", systemImage: "square.and.arrow.up") }
             }
         }
         .task(id: place.id) {
@@ -280,10 +280,6 @@ struct PlaceDetailView: View {
     }
 
     // MARK: helpers
-
-    private var shareText: String {
-        [place.name, place.fullAddress, "via Florida Eats", Links.site.absoluteString].filter { !$0.isEmpty }.joined(separator: "\n")
-    }
 
     private func lines(_ s: String?, prefix: String) -> [String] {
         (s ?? "").components(separatedBy: "; ").filter { !$0.isEmpty }.map { prefix + $0 }
