@@ -1,11 +1,11 @@
 {
- "generated": "2026-10-22",
+ "generated": "2026-11-03",
  "domain": "https://nickstrom5.github.io/florida-eats",
- "restaurants": 52573,
+ "restaurants": 52570,
  "places_incl_hidden": 57572,
  "towns": 596,
  "counties": 67,
- "dbpr_licensed": 48846,
+ "dbpr_licensed": 48843,
  "hand_checked_on_a_guide": 252,
  "guide_cuban": 56,
  "guide_stonecrab": 27,
@@ -25,15 +25,15 @@
  "michelin_green_star": 5,
  "james_beard": 39,
  "americas_classics": 2,
- "dbpr_results": 48584,
+ "dbpr_results": 48581,
  "dbpr_latest_group": {
-  "Met Inspection Standards": 43882,
+  "Met Inspection Standards": 43879,
   "Follow-Up Inspection Required": 4685,
   "Facility Temporarily Closed": 16,
   "not grouped by DBPR": 1
  },
  "dbpr_latest_disposition": {
-  "Inspection Completed - No Further Action": 36713,
+  "Inspection Completed - No Further Action": 36710,
   "Call Back - Complied": 6914,
   "Administrative complaint recommended": 1946,
   "Warning Issued": 1452,
@@ -56,7 +56,7 @@
  ],
  "city_pages": {
   "Miami": {
-   "restaurants": 3595,
+   "restaurants": 3594,
    "listed": 68,
    "cuban": 15,
    "stonecrab": 3,
@@ -67,9 +67,9 @@
    "latin": 9,
    "hon": 43,
    "oldest": 0,
-   "dbpr_results": 3381,
+   "dbpr_results": 3380,
    "dbpr_by_group": {
-    "Met Inspection Standards": 3091,
+    "Met Inspection Standards": 3090,
     "Follow-Up Inspection Required": 289,
     "Facility Temporarily Closed": 1
    }
@@ -413,12 +413,12 @@
  "noindex_pages": [],
  "web_app_data_bytes": {
   "data/core.json": {
-   "raw": 4730878,
-   "gzip": 969592
+   "raw": 4730618,
+   "gzip": 969515
   },
   "data/detail-alachua.json": {
    "raw": 194214,
-   "gzip": 35679
+   "gzip": 35663
   },
   "data/detail-baker.json": {
    "raw": 10484,
@@ -426,19 +426,19 @@
   },
   "data/detail-bay.json": {
    "raw": 190211,
-   "gzip": 34021
+   "gzip": 34006
   },
   "data/detail-bradford.json": {
    "raw": 11021,
-   "gzip": 2505
+   "gzip": 2503
   },
   "data/detail-brevard.json": {
    "raw": 454919,
-   "gzip": 82002
+   "gzip": 82027
   },
   "data/detail-broward.json": {
    "raw": 1449385,
-   "gzip": 260586
+   "gzip": 260587
   },
   "data/detail-calhoun.json": {
    "raw": 4643,
@@ -446,27 +446,27 @@
   },
   "data/detail-charlotte.json": {
    "raw": 135239,
-   "gzip": 23734
+   "gzip": 23739
   },
   "data/detail-citrus.json": {
-   "raw": 90089,
-   "gzip": 16217
+   "raw": 89731,
+   "gzip": 16155
   },
   "data/detail-clay.json": {
    "raw": 111014,
-   "gzip": 21254
+   "gzip": 21243
   },
   "data/detail-collier.json": {
    "raw": 325601,
-   "gzip": 58028
+   "gzip": 58050
   },
   "data/detail-columbia.json": {
    "raw": 40974,
-   "gzip": 7880
+   "gzip": 7883
   },
   "data/detail-desoto.json": {
    "raw": 14882,
-   "gzip": 3116
+   "gzip": 3117
   },
   "data/detail-dixie.json": {
    "raw": 6434,
@@ -474,23 +474,23 @@
   },
   "data/detail-duval.json": {
    "raw": 754167,
-   "gzip": 139715
+   "gzip": 139712
   },
   "data/detail-escambia.json": {
    "raw": 221540,
-   "gzip": 35538
+   "gzip": 35559
   },
   "data/detail-flagler.json": {
    "raw": 76131,
-   "gzip": 14371
+   "gzip": 14369
   },
   "data/detail-franklin.json": {
    "raw": 15019,
-   "gzip": 3744
+   "gzip": 3741
   },
   "data/detail-gadsden.json": {
    "raw": 15997,
-   "gzip": 2968
+   "gzip": 2969
   },
   "data/detail-gilchrist.json": {
    "raw": 5240,
@@ -498,15 +498,15 @@
   },
   "data/detail-glades.json": {
    "raw": 2422,
-   "gzip": 639
+   "gzip": 641
   },
   "data/detail-gulf.json": {
    "raw": 14715,
-   "gzip": 3023
+   "gzip": 3028
   },
   "data/detail-hamilton.json": {
    "raw": 2506,
-   "gzip": 703
+   "gzip": 706
   },
   "data/detail-hardee.json": {
    "raw": 11236,
@@ -514,19 +514,19 @@
   },
   "data/detail-hendry.json": {
    "raw": 20185,
-   "gzip": 3922
+   "gzip": 3920
   },
   "data/detail-hernando.json": {
    "raw": 111774,
-   "gzip": 19591
+   "gzip": 19587
   },
   "data/detail-highlands.json": {
    "raw": 62323,
-   "gzip": 11446
+   "gzip": 11454
   },
   "data/detail-hillsborough.json": {
    "raw": 970290,
-   "gzip": 176229
+   "gzip": 176256
   },
   "data/detail-holmes.json": {
    "raw": 5720,
@@ -534,43 +534,43 @@
   },
   "data/detail-indian-river.json": {
    "raw": 116581,
-   "gzip": 21619
+   "gzip": 21617
   },
   "data/detail-jackson.json": {
    "raw": 23946,
-   "gzip": 4348
+   "gzip": 4346
   },
   "data/detail-jefferson.json": {
    "raw": 5427,
-   "gzip": 1283
+   "gzip": 1280
   },
   "data/detail-lafayette.json": {
    "raw": 1650,
-   "gzip": 550
+   "gzip": 552
   },
   "data/detail-lake.json": {
    "raw": 234782,
-   "gzip": 43691
+   "gzip": 43680
   },
   "data/detail-lee.json": {
    "raw": 566143,
-   "gzip": 99616
+   "gzip": 99598
   },
   "data/detail-leon.json": {
    "raw": 206299,
-   "gzip": 36036
+   "gzip": 36041
   },
   "data/detail-levy.json": {
    "raw": 24186,
-   "gzip": 5012
+   "gzip": 5011
   },
   "data/detail-liberty.json": {
    "raw": 479,
-   "gzip": 223
+   "gzip": 221
   },
   "data/detail-madison.json": {
    "raw": 5137,
-   "gzip": 1135
+   "gzip": 1134
   },
   "data/detail-manatee.json": {
    "raw": 279408,
@@ -578,27 +578,27 @@
   },
   "data/detail-marion.json": {
    "raw": 195353,
-   "gzip": 36608
+   "gzip": 36610
   },
   "data/detail-martin.json": {
    "raw": 140539,
-   "gzip": 25390
+   "gzip": 25389
   },
   "data/detail-miami-dade.json": {
-   "raw": 2058119,
-   "gzip": 372295
+   "raw": 2057884,
+   "gzip": 372313
   },
   "data/detail-monroe.json": {
    "raw": 194052,
-   "gzip": 36430
+   "gzip": 36412
   },
   "data/detail-nassau.json": {
    "raw": 72340,
-   "gzip": 13993
+   "gzip": 13998
   },
   "data/detail-okaloosa.json": {
    "raw": 192430,
-   "gzip": 30720
+   "gzip": 30731
   },
   "data/detail-okeechobee.json": {
    "raw": 25682,
@@ -606,63 +606,63 @@
   },
   "data/detail-orange.json": {
    "raw": 1360193,
-   "gzip": 237736
+   "gzip": 237778
   },
   "data/detail-osceola.json": {
    "raw": 282148,
-   "gzip": 50039
+   "gzip": 50032
   },
   "data/detail-palm-beach.json": {
    "raw": 1097215,
-   "gzip": 197327
+   "gzip": 197337
   },
   "data/detail-pasco.json": {
-   "raw": 321703,
-   "gzip": 57099
+   "raw": 321345,
+   "gzip": 57037
   },
   "data/detail-pinellas.json": {
    "raw": 829175,
-   "gzip": 155102
+   "gzip": 155124
   },
   "data/detail-polk.json": {
    "raw": 370393,
-   "gzip": 61810
+   "gzip": 61800
   },
   "data/detail-putnam.json": {
    "raw": 34595,
-   "gzip": 6943
+   "gzip": 6939
   },
   "data/detail-santa-rosa.json": {
    "raw": 85720,
-   "gzip": 13865
+   "gzip": 13855
   },
   "data/detail-sarasota.json": {
    "raw": 363413,
-   "gzip": 65958
+   "gzip": 65997
   },
   "data/detail-seminole.json": {
    "raw": 319424,
-   "gzip": 58637
+   "gzip": 58632
   },
   "data/detail-st-johns.json": {
    "raw": 249633,
-   "gzip": 46757
+   "gzip": 46737
   },
   "data/detail-st-lucie.json": {
    "raw": 184623,
-   "gzip": 33319
+   "gzip": 33306
   },
   "data/detail-sumter.json": {
    "raw": 69834,
-   "gzip": 13077
+   "gzip": 13079
   },
   "data/detail-suwannee.json": {
    "raw": 19680,
-   "gzip": 3973
+   "gzip": 3970
   },
   "data/detail-taylor.json": {
    "raw": 9065,
-   "gzip": 1923
+   "gzip": 1922
   },
   "data/detail-union.json": {
    "raw": 2729,
@@ -670,27 +670,27 @@
   },
   "data/detail-volusia.json": {
    "raw": 437223,
-   "gzip": 82815
+   "gzip": 82812
   },
   "data/detail-wakulla.json": {
    "raw": 16559,
-   "gzip": 4044
+   "gzip": 4041
   },
   "data/detail-walton.json": {
    "raw": 118794,
-   "gzip": 19536
+   "gzip": 19535
   },
   "data/detail-washington.json": {
    "raw": 11815,
-   "gzip": 2200
+   "gzip": 2203
   },
   "data/fl_shapes.json": {
    "raw": 293505,
    "gzip": 67943
   },
   "data/ids.json": {
-   "raw": 683477,
-   "gzip": 395666
+   "raw": 683438,
+   "gzip": 395645
   }
  }
 }
