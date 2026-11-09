@@ -38,10 +38,10 @@ from collections import Counter, defaultdict
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DOCS = f"{ROOT}/docs"
-# Where the site lives. Until Nick's Cloudflare record (CNAME florida -> nickstrom5.github.io, DNS only) resolves, GitHub Pages serves
-# the project address. When `dig florida.eatsranked.com` shows the CNAME, run with FL_DOMAIN=florida.eatsranked.com and push: this
-# writes docs/CNAME, and GitHub then forwards the old github.io links (the ones inside shipped app builds).
-CUSTOM_DOMAIN = os.environ.get("FL_DOMAIN", "").strip().lower().removeprefix("https://").removeprefix("http://").strip("/")
+# Where the site lives: florida.eatsranked.com (Cloudflare CNAME florida -> nickstrom5.github.io, DNS only), since 2026-11-09
+# (Nick: "Yes, move them"; the record had pointed at GitHub with no site claiming it). This writes docs/CNAME, and GitHub
+# forwards the old github.io links (the ones inside shipped app builds) here. FL_DOMAIN= (empty) builds the github.io address.
+CUSTOM_DOMAIN = os.environ.get("FL_DOMAIN", "florida.eatsranked.com").strip().lower().removeprefix("https://").removeprefix("http://").strip("/")
 REPO = "florida-eats"
 DOMAIN = f"https://{CUSTOM_DOMAIN}" if CUSTOM_DOMAIN else f"https://nickstrom5.github.io/{REPO}"
 BASE = "" if CUSTOM_DOMAIN else f"/{REPO}"     # path prefix for root-relative links

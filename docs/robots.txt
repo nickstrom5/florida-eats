@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://nickstrom5.github.io/florida-eats/sitemap.xml
+Sitemap: https://florida.eatsranked.com/sitemap.xml
