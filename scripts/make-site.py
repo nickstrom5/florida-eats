@@ -344,7 +344,7 @@ CSS = """
     --accent: #006d77; --accent2: #0b7f89; --on-accent: #fff; --orange: #f28c28; --lime: #b5d46a; --soft: #fde3c8; --limesoft: #e3efc4;
     --focus: #006d77;
     --radius: 16px;
-    --display: "Archivo", "Avenir Next Condensed", "Arial Narrow", system-ui, sans-serif;
+    --display: "Archivo", "Avenir Next Condensed", "Arial Narrow", system-ui, sans-serif; --head-font: "Shrikhand", "Archivo", "Avenir Next Condensed", "Arial Narrow", system-ui, sans-serif;
     --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   }
   @media (prefers-color-scheme: dark) {
@@ -365,16 +365,16 @@ CSS = """
   .stripes i { display: block; height: 6px; border-radius: 3px; background: var(--accent); }
   .stripes i:nth-child(2) { background: var(--orange); }
   .stripes i:nth-child(3) { background: var(--lime); }
-  .logo { display: flex; align-items: center; gap: 10px; font: 850 24px/1 var(--display); font-stretch: 68%; text-transform: uppercase; letter-spacing: .01em; color: var(--accent); text-decoration: none; }
+  .logo { display: flex; align-items: center; gap: 10px; font: 400 22px/1 var(--head-font); letter-spacing: .01em; color: var(--accent); text-decoration: none; }
   .logo svg { flex: 0 0 auto; border-radius: 7px; }
   header.site nav { display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: flex-end; }
   header.site nav a { color: var(--ink2); text-decoration: none; font-size: 15px; }
   header.site nav a:hover { color: var(--accent); text-decoration: underline; }
-  h1, h2 { font-family: var(--display); font-weight: 850; font-stretch: 68%; color: var(--accent); letter-spacing: -.005em; }
-  h1 { font-size: clamp(40px, 8.5vw, 64px); line-height: .95; margin: 0 0 18px; text-transform: uppercase; overflow-wrap: break-word; text-shadow: 3px 3px 0 var(--orange); }
+  h1, h2 { font-family: var(--head-font); font-weight: 400; color: var(--accent); letter-spacing: -.005em; }
+  h1 { font-size: clamp(39px, 12.19vw, 64px); line-height: 1.08; margin: 0 0 18px; overflow-wrap: break-word; text-wrap: balance; }
   .kicker { font: 600 13px/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
   .kicker::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--orange); margin: 0 8px 1px 0; }
-  h2 { font-size: 34px; line-height: 1.02; margin: 0 0 10px; text-transform: uppercase; }
+  h2 { font-size: 31px; line-height: 1.02; margin: 0 0 10px; }
   h3 { font-size: 18px; margin: 0; line-height: 1.3; }
   .lede { font-size: 19px; color: var(--ink2); margin: 0 0 26px; }
   .hero { padding: 44px 0 28px; }
@@ -399,7 +399,7 @@ CSS = """
   .shots p { font-size: 14px; color: var(--muted); margin: 8px 2px 0; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .card { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px; }
-  .card h3 { font: 800 21px/1.1 var(--display); font-stretch: 75%; text-transform: uppercase; letter-spacing: .01em; }
+  .card h3 { font: 400 19px/1.1 var(--head-font); letter-spacing: .01em; }
   a.card.gc { display: flex; flex-direction: column; gap: 6px; border: 0; border-radius: 18px; min-height: 150px; }
   a.card.gc b { font: 600 32px/1 var(--mono); margin-bottom: auto; }
   a.card.gc p, a.card.gc h3 { color: inherit; }
@@ -475,6 +475,15 @@ CSS = """
     nav.crumbs ol { align-items: center; }
   }
 """
+
+# The headline face: Shrikhand (SIL Open Font License, in docs/fonts/OFL-Shrikhand.txt). It is the site's one web font and it is served from this
+# site, so pages still load nothing from anyone else. The big headline, the section headings, card titles and the site name use it
+# (--head-font); numbers and badges keep the condensed system faces (--display).
+CSS = "".join(f'  @font-face {{ font-family: "Shrikhand"; src: url("{BASE}/fonts/{_f}") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; unicode-range: {_r}; }}\n'
+              for _f, _r in (
+                  ("shrikhand-latin-ext.woff2", "U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF"),
+                  ("shrikhand-latin.woff2", "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD"),
+              )) + CSS
 
 
 def jsonld(obj):
@@ -566,6 +575,7 @@ def page(path, title, desc, body, lds=(), robots="index,follow,max-image-preview
 <link rel="icon" type="image/svg+xml" href="{FAVICON}">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="preload" href="/fonts/shrikhand-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="manifest" href="/site.webmanifest">
 <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>{CSS}{extra_css}</style>
@@ -1387,7 +1397,7 @@ SIZES = {os.path.relpath(f, DOCS): sizes(f) for f in sorted(glob.glob(f"{DOCS}/d
 EXPLORE_CSS = """
   [hidden] { display: none !important; }
   .ex-hero { padding: 28px 0 8px; }
-  .ex-hero h1 { font-size: clamp(30px, 6vw, 44px); }
+  .ex-hero h1 { font-size: clamp(30px, 9.38vw, 41px); }
   .ex-controls { background: var(--bg); padding: 10px 0 8px; border-bottom: 1px solid var(--rule); }
   .ex-guides { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
   @media (min-width: 601px) { .ex-guides { flex-wrap: wrap; overflow: visible; } }
@@ -1427,7 +1437,7 @@ EXPLORE_CSS = """
   @media (max-width: 600px) { .ex-panel { top: auto; height: 86vh; border-left: 0; border-top: 4px solid var(--orange); border-radius: 18px 18px 0 0; } }
   .ex-close { position: sticky; top: 0; float: right; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--rule); background: var(--surface); font-size: 24px; line-height: 1; cursor: pointer; color: var(--ink); }
   .ex-kicker { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: .1em; color: var(--accent2); }
-  .ex-panel h2 { font-size: 34px; margin: 4px 0 6px; text-transform: uppercase; overflow-wrap: anywhere; }
+  .ex-panel h2 { font-size: 32px; margin: 4px 0 6px; overflow-wrap: anywhere; }
   .ex-addr, .ex-dist { margin: 0 0 4px; color: var(--ink2); font-size: 15px; }
   .ex-actions { margin: 14px 0 8px; display: grid; gap: 8px; }
   .ex-apple { justify-content: center; }
