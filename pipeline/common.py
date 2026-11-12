@@ -193,7 +193,9 @@ def town_words():
         cities = pd.read_parquet(f"{FL}/licenses.parquet", columns=["city_raw"]).city_raw.dropna().unique()
         words = {w for c in cities for w in norm_name(canon_city(c) or c).split() if len(w) >= 4}
         words |= set("""AMELIA SIESTA CAPTIVA LONGBOAT BRICKELL WYNWOOD YBOR KENDALL COCONUT DOWNTOWN MIDTOWN UPTOWN SOBE OLAS ANNA MARIA
-                        HUTCHINSON PERDIDO OKALOOSA SANTA ROSA DESTIN WALTON BAYSHORE WPB JAX KERNAN BEACHES FTL TERMINAL CONCOURSE GATE AIRPORT""".split())
+                        HUTCHINSON PERDIDO OKALOOSA SANTA ROSA DESTIN WALTON BAYSHORE WPB JAX KERNAN BEACHES FTL TERMINAL CONCOURSE GATE AIRPORT
+                        TYRONE ST""".split())   # TYRONE, ST: a listing named "Le Macaron Tyrone St Petersburg" (Tyrone Square) took the license of
+        #                                       "88 TYRONE SQ INC" (Stir Fry 88) on TYRONE, then of "ST GEORGE GM LLC" (Sbarro) on the ST of its own town
         _TOWN_WORDS = (words | {w[:-1] for w in words if len(w) > 3 and w.endswith("S")}) - GENERIC
     return _TOWN_WORDS
 

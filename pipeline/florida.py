@@ -1108,16 +1108,31 @@ for i in o.index[o.hc & ~o.official & ~o.index.isin(drop)]:
     if la == la:
         near = _lic[(abs(_lic.lat - la) < 0.0015) & (abs(_lic.lon - lo) < 0.0016)]
         cands += [j for j in near.index if math.hypot((o.at[j, "lat"] - la) * 111000, (o.at[j, "lon"] - lo) * 99000) <= 150]
+    best_j, best_s = None, -1
     for j in dict.fromkeys(cands):
         if j in drop or (o.at[j, "county"] != o.at[i, "county"] and isinstance(o.at[i, "county"], str)):
             continue
+        # two numbers far apart on one street are two places, whatever their names share: Bánh Mì Boy (1110 E Colonial Dr, a food
+        # hall stall with no license of its own) took over Paris Banh Mi's licensed bakery at 1021 on the word "banh". Next-door
+        # numbers on one street are still the same place (the rule pipeline/qa_curated.py checks).
+        na_, sa_ = street_key(o.at[i, "street"] or "")
+        nb_, sb_ = street_key(o.at[j, "street"] or "")
+        if na_ and nb_ and sa_ and sb_ and street_compat(sa_, sb_) and abs(int(na_) - int(nb_)) > 40:
+            continue
         keys_ = [o.at[j, "name_out"]] + list(F.at[int(o.at[j, "off"]), "keys"] or []) if o.at[j, "off"] >= 0 else [o.at[j, "name_out"]]
         if any(official.same_business(nm, k) for k in keys_):
-            if norm_name(o.at[j, "name_out"]) != norm_name(nm):
-                o.at[j, "aka"] = o.at[j, "name_out"]
-            o.at[j, "name_out"] = nm
-            drop.add(i); merged.append((j, i)); twins += 1
-            break
+            # several licensed places at one address can pass (a hotel and its restaurants): the twin is the one whose name is
+            # closest. The Surf Club Restaurant belongs on the license "SURF CLUB RESTAURANT", not on "FOUR SEASONS HOTEL AT THE
+            # SURF CLUB", which used to lose only by its place in the list.
+            s_ = max(fuzz.ratio(norm_name(nm), norm_name(k)) for k in keys_ if isinstance(k, str))
+            if s_ > best_s:
+                best_j, best_s = j, s_
+    if best_j is not None:
+        j = best_j
+        if norm_name(o.at[j, "name_out"]) != norm_name(nm):
+            o.at[j, "aka"] = o.at[j, "name_out"]
+        o.at[j, "name_out"] = nm
+        drop.add(i); merged.append((j, i)); twins += 1
 print("hand-checked copies merged into their licensed twin:", twins)
 for keep_, lose in merged:
     for col in [c for c in o.columns if c.startswith("t_")] + ["hc", "honored"]:

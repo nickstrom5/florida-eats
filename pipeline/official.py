@@ -2,7 +2,7 @@
 
 load() returns one row per license: jur ("dbpr"), lic ("SEA2300159"), num ("2300159"), rank, kind, name (the license's Business Name,
 cleaned), keys (name keys for matching: business name, inspection DBA names, and the licensee name, which is never shown), addr, city,
-zip, street (address key), lat, lon (geocode.py), county, active (status 20 Current), seats, risk, last_insp, expires.
+zip, street (address key), lat, lon (geocode.py), county, active (status 20 Current, or 45 Delinquent within GRACE_DAYS of its expiry date), seats, risk, last_insp, expires.
 
 Ranks kept: SEAT (seating), NOST (non-seating), CATR (catering), PARK (theme park food carts). Mobile units, hot dog carts, vending and
 temporary events are left out: their address is a commissary or the owner's, not a place to eat.
@@ -92,8 +92,37 @@ def current_era(g, name):
     return g.iloc[start:]
 
 
+# A whole district's licenses expire on one day (Miami-Dade and Monroe on October 1), and many are renewed late: six weeks after
+# October 1, 2026, 1,913 of the 10,270 licenses there were still Delinquent (status 45), Macchialina and Puerto Sagua among them;
+# of June's renewals 671 still were, of April's 412. So a delinquent license counts as current until GRACE_DAYS after its expiry
+# date, measured on the day the extract was fetched. Later than that the place is treated as closed, as before.
+GRACE_DAYS = 90
+
+
+def in_grace(status, expires, fetched):
+    """A Delinquent license whose expiry date is at most GRACE_DAYS before the day the extract was fetched."""
+    import datetime
+    if status != "45" or not isinstance(expires, str):
+        return False
+    try:
+        d = datetime.datetime.strptime(expires.strip(), "%m/%d/%Y").date()
+    except ValueError:
+        return False
+    return 0 <= (fetched - d).days <= GRACE_DAYS
+
+
+def fetched_day():
+    """The day the DBPR extract was downloaded (dbpr.py writes it), else today."""
+    import datetime, json
+    try:
+        return datetime.date.fromisoformat(json.load(open(f"{FL}/dbpr_meta.json"))["fetched"])
+    except (OSError, KeyError, ValueError):
+        return datetime.date.today()
+
+
 def load(with_inactive=True):
     L = pd.read_parquet(f"{FL}/licenses.parquet")
+    fetched = fetched_day()
     L = L[L["rank"].isin(list(KIND)) & L.status.isin(["20", "45"] if with_inactive else ["20"])].copy()
     geo = pd.read_parquet(f"{FL}/lic_geo.parquet") if os.path.exists(f"{FL}/lic_geo.parquet") else pd.DataFrame(columns=["lic", "lat", "lon", "geo"])
     L = L.merge(geo, on="lic", how="left")
@@ -114,7 +143,7 @@ def load(with_inactive=True):
         rows.append({"jur": "dbpr", "lic": r.lic, "num": r.num, "ltype": r.ltype, "rank": r.rank, "kind": KIND[r.rank], "name": r.bname or None,
                      "dbas": other, "keys": _names(r.bname, *other, r.legal), "addr": r.addr, "city": canon_city(r.city_raw), "zip": r.zip,
                      "street": street_key(r.addr)[1], "lat": r.lat, "lon": r.lon, "geo": r.geo, "county": county_name(r.county),
-                     "active": r.status == "20", "status": r.status, "seats": r.seats, "risk": r.risk, "last_insp": r.last_insp,
+                     "active": r.status == "20" or in_grace(r.status, r.expires, fetched), "status": r.status, "seats": r.seats, "risk": r.risk, "last_insp": r.last_insp,
                      "expires": r.expires, "phone": r.phone or None, "legal": r.legal})
     F = pd.DataFrame(rows)
     F["region"] = F.county.map(REGION_OF)

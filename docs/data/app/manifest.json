@@ -1,73 +1,73 @@
 {
  "schema": 1,
- "version": "2026-11-03.1",
- "records_through": "2026-11-03",
- "published": "2026-11-03T18:00:02Z",
+ "version": "2026-11-12.1",
+ "records_through": "2026-11-12",
+ "published": "2026-11-12T23:25:01Z",
  "min_app_build": 1,
  "files": {
   "detail-central": {
-   "path": "detail-central-d42f49d18605.json",
-   "sha256": "d42f49d186056ee5dd312ab3b235064037d939c16a5c03e73a5fa91b1201f60f",
-   "bytes": 3184544,
-   "rows": 12285
+   "path": "detail-central-d0b6776625ef.json",
+   "sha256": "d0b6776625efd2466ed6cfb2a5f5155717c8c4c4ad79fe579f1871a5a8b361ca",
+   "bytes": 3219581,
+   "rows": 12356
   },
   "detail-keys": {
-   "path": "detail-keys-7a637b23f733.json",
-   "sha256": "7a637b23f73394de5d46ac8c78019d42a3168b8333cf1699ff438f0f35fd0d6e",
-   "bytes": 179130,
-   "rows": 716
+   "path": "detail-keys-f687284b0c94.json",
+   "sha256": "f687284b0c94d410f70c23a22139bc0d4734d52683a1246c42e1b8027f152469",
+   "bytes": 181106,
+   "rows": 720
   },
   "detail-northeast": {
-   "path": "detail-northeast-5ecec9cead60.json",
-   "sha256": "5ecec9cead603e81fd90d02de2a02305b13f2486623ba306be64f71b83cb9be7",
-   "bytes": 1527353,
-   "rows": 5648
+   "path": "detail-northeast-bd019976d422.json",
+   "sha256": "bd019976d42263b3516570addf79bce48530f93c0c028ffc144ce7adef9c71ca",
+   "bytes": 1552738,
+   "rows": 5726
   },
   "detail-panhandle": {
-   "path": "detail-panhandle-f03e62dbb08f.json",
-   "sha256": "f03e62dbb08f28d0c9f252887c36cb0e1330517917bb940c87180c72ed1f0656",
-   "bytes": 1073003,
-   "rows": 4178
+   "path": "detail-panhandle-f4943c67b1bb.json",
+   "sha256": "f4943c67b1bb235d01577bab7054674ff85eaeb2556a04edecc30d556192e94b",
+   "bytes": 1083928,
+   "rows": 4218
   },
   "detail-south-florida": {
-   "path": "detail-south-florida-56c496e940f5.json",
-   "sha256": "56c496e940f599204cd308557235bf084490ca4d67a9acd8d93050385520b630",
-   "bytes": 4419814,
-   "rows": 16537
+   "path": "detail-south-florida-eb29f93754aa.json",
+   "sha256": "eb29f93754aa10abc7a147baa6c2bf9a7bcd03df3cb2084c6d045175ecd85f74",
+   "bytes": 4474587,
+   "rows": 16593
   },
   "detail-southwest": {
-   "path": "detail-southwest-8167e721992a.json",
-   "sha256": "8167e721992abdaf915df0809952248fe58b2b9d4432094eaca10d82da614d5f",
-   "bytes": 1407506,
-   "rows": 5282
+   "path": "detail-southwest-10cf71749c91.json",
+   "sha256": "10cf71749c911d4a2a88392b2a26759399db735af1a49565b07558eec26f3842",
+   "bytes": 1419523,
+   "rows": 5309
   },
   "detail-space-treasure-coast": {
-   "path": "detail-space-treasure-coast-e475f656ac66.json",
-   "sha256": "e475f656ac6695834ca183635d2ec6be0ae318d1ace0d1d2d9ad3e607766efaf",
-   "bytes": 879091,
-   "rows": 3249
+   "path": "detail-space-treasure-coast-aa1c240102ca.json",
+   "sha256": "aa1c240102ca7fff1da127012824ac1910665b26538828cfdad48d3fa2016382",
+   "bytes": 888532,
+   "rows": 3259
   },
   "detail-tampa-bay": {
-   "path": "detail-tampa-bay-f5c95971344b.json",
-   "sha256": "f5c95971344b5d5bf535d38bf7442af78ad7a0c463e70f469446baeb018b23bf",
-   "bytes": 2465247,
-   "rows": 9420
+   "path": "detail-tampa-bay-9501a91fd289.json",
+   "sha256": "9501a91fd2890f0bf9597d1d71699bff840c265ab86babf3ffded3872e2884f9",
+   "bytes": 2486479,
+   "rows": 9460
   },
   "places": {
-   "path": "places-487ef55111c0.json",
-   "sha256": "487ef55111c0d1281137024406bad1101ef0aa2f5b7cdb1806fce0f09941ba63",
-   "bytes": 10781105,
-   "rows": 57572
+   "path": "places-5382ab5b4e11.json",
+   "sha256": "5382ab5b4e1140013b730710fb68785e8208660ccd63c5d47a3052e44d21e1f9",
+   "bytes": 10839794,
+   "rows": 57901
   }
  },
  "counts": {
-  "places": 57572,
+  "places": 57901,
   "files": 9,
-  "bytes": 25916793,
-  "restaurants": 52570
+  "bytes": 26146268,
+  "restaurants": 52853
  },
  "previous": {
-  "version": "2026-10-22.1",
+  "version": "2026-11-03.1",
   "files": {
    "detail-central": "detail-central-d42f49d18605.json",
    "detail-keys": "detail-keys-7a637b23f733.json",
@@ -77,7 +77,7 @@
    "detail-southwest": "detail-southwest-8167e721992a.json",
    "detail-space-treasure-coast": "detail-space-treasure-coast-e475f656ac66.json",
    "detail-tampa-bay": "detail-tampa-bay-f5c95971344b.json",
-   "places": "places-2db0f4ed1379.json"
+   "places": "places-487ef55111c0.json"
   }
  }
 }
