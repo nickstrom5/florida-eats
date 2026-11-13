@@ -1,20 +1,20 @@
 {
  "schema": 1,
- "version": "2026-11-12.1",
- "records_through": "2026-11-12",
- "published": "2026-11-12T23:25:01Z",
+ "version": "2026-11-13.1",
+ "records_through": "2026-11-13",
+ "published": "2026-11-13T11:59:07Z",
  "min_app_build": 1,
  "files": {
   "detail-central": {
-   "path": "detail-central-d0b6776625ef.json",
-   "sha256": "d0b6776625efd2466ed6cfb2a5f5155717c8c4c4ad79fe579f1871a5a8b361ca",
-   "bytes": 3219581,
+   "path": "detail-central-61d36778c365.json",
+   "sha256": "61d36778c36592fe00c0d4adcd310b673de75f59dafc4a73f2318d92447a922b",
+   "bytes": 3219582,
    "rows": 12356
   },
   "detail-keys": {
-   "path": "detail-keys-f687284b0c94.json",
-   "sha256": "f687284b0c94d410f70c23a22139bc0d4734d52683a1246c42e1b8027f152469",
-   "bytes": 181106,
+   "path": "detail-keys-b6ef497fadb3.json",
+   "sha256": "b6ef497fadb35395aef314d21d95af704ac812e8f582015de78db290d7337962",
+   "bytes": 181142,
    "rows": 720
   },
   "detail-northeast": {
@@ -54,30 +54,30 @@
    "rows": 9460
   },
   "places": {
-   "path": "places-5382ab5b4e11.json",
-   "sha256": "5382ab5b4e1140013b730710fb68785e8208660ccd63c5d47a3052e44d21e1f9",
-   "bytes": 10839794,
+   "path": "places-58c8dc3700ff.json",
+   "sha256": "58c8dc3700ff1f4e6c7533e87f8aa3cef3e920cc0ec91f9d88c8d518879dc8d0",
+   "bytes": 10840731,
    "rows": 57901
   }
  },
  "counts": {
   "places": 57901,
   "files": 9,
-  "bytes": 26146268,
+  "bytes": 26147242,
   "restaurants": 52853
  },
  "previous": {
-  "version": "2026-11-03.1",
+  "version": "2026-11-12.1",
   "files": {
-   "detail-central": "detail-central-d42f49d18605.json",
-   "detail-keys": "detail-keys-7a637b23f733.json",
-   "detail-northeast": "detail-northeast-5ecec9cead60.json",
-   "detail-panhandle": "detail-panhandle-f03e62dbb08f.json",
-   "detail-south-florida": "detail-south-florida-56c496e940f5.json",
-   "detail-southwest": "detail-southwest-8167e721992a.json",
-   "detail-space-treasure-coast": "detail-space-treasure-coast-e475f656ac66.json",
-   "detail-tampa-bay": "detail-tampa-bay-f5c95971344b.json",
-   "places": "places-487ef55111c0.json"
+   "detail-central": "detail-central-d0b6776625ef.json",
+   "detail-keys": "detail-keys-f687284b0c94.json",
+   "detail-northeast": "detail-northeast-bd019976d422.json",
+   "detail-panhandle": "detail-panhandle-f4943c67b1bb.json",
+   "detail-south-florida": "detail-south-florida-eb29f93754aa.json",
+   "detail-southwest": "detail-southwest-10cf71749c91.json",
+   "detail-space-treasure-coast": "detail-space-treasure-coast-aa1c240102ca.json",
+   "detail-tampa-bay": "detail-tampa-bay-9501a91fd289.json",
+   "places": "places-5382ab5b4e11.json"
   }
  }
 }
